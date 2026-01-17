@@ -12,13 +12,45 @@ A specialized skill for implementing and configuring animation-style shaders (To
 
 ## Workflow
 1.  Analyze the user's visual goal (e.g., "I want a glowing outline").
-2.  **Determine the Approach:**
-    *   **Vague Request:** If the user has a general idea but no specifics (e.g., "Make it look like a manga"), consult the **Presents** section to recommend a style combination.
-    *   **Specific Request:** If the user lists specific needs, or after selecting a Present, consult the **Feature List** to identify the exact features required.
-3.  Consult the `Technique Decision Tree` to find relevant techniques and documentation for the identified features.
-4.  Read the specific reference files identified.
+2.  **Determine the Approach (Mandatory):**
+    *   **Step 2a: Select Base Present:** You **MUST** first identify the overall style. If the user uses general terms like "anime", "toon", "animation shader", or "character shader", map this to a **Present** (e.g., **Basic Anime**) to establish the foundation. **Do not skip this step.**
+    *   **Step 2b: Identify Specific Features:** Extract specific requirements (e.g., "Shadow Texture", "Rim Light") and map them to the **Feature List**.
+    *   **Step 2c: Merge Requirements:** The final feature list is the combination of **ALL features from the selected Present** PLUS the **Specific Features** identified.
+        *   *Example:* User asks for "Animation shader with Shadow Texture".
+        *   *Action:* Select **Basic Anime** (Base) + **Shadow Texture** (Specific).
+        *   *Result:* [3-Tone Shading, Outline, Base Color] (from Basic Anime) + [Shadow Texture].
+3.  Consult the **Feature List** to find relevant techniques and documentation for the identified features. **You must address EVERY item in the final feature list from Step 2 (including both Base Present features and Specific Features).** If a feature is not found in the **Feature List**, check the **Details Features Document** for corresponding details. If it is still not found, implement it based on your own knowledge.
+4.  Read the specific reference files identified. **You MUST read ALL reference files listed under each identified feature in the Feature List. Do not select just one file; read them all to gain a complete understanding.**
 5.  Propose a solution or shader configuration based on the documentation.
 6.  (Optional) If code/shader graph editing is needed, guide the user or generate the code.
+
+### **Example Workflow Execution:**
+*   **Scenario:** User wants "Animation shader with Shadow Texture".
+*   **Determine the Approach (Step 2):**
+    *   **Base Present:** **Basic Anime**
+    *   **Specific Features:** **Shadow Texture**
+    *   **Final Feature List:** [3-Tone Shading, Outline, Base Color] (from Basic Anime) + [Shadow Texture].
+*   **Identified Features:**
+    Read ALL files in the final feature list.
+    1.  **Base Color** (from Basic Anime Preset) -> File:
+        *   `Reference/lilToon/Details/01_Base_Main.md`
+        *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+        *   `Reference/ToonShadingCollection/Details/03_Diffuse.md`
+    2.  **3-Tone Shading** (from Basic Anime Preset) -> File:
+        *   `Reference/lilToon/Details/02_Lighting_Shadows.md`
+        *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+        *   `Reference/UnityChanToonShaderVer2/Details/01_DoubleShade.md`
+        *   `Reference/ToonShadingCollection/Details/09_Lighting_Shadows.md`
+    3.  **Outline** (from Basic Anime Preset) -> File:
+        *   `Reference/lilToon/Details/08_Outline.md`
+        *   `Reference/PoiyomiShaders/Details/05_Outline.md`
+        *   `Reference/RToon/Details/03_Outline.md`
+        *   `Reference/UnityChanToonShaderVer2/Details/03_Outline.md`
+        *   `Reference/ToonShadingCollection/Details/02_Outline.md`
+    4.  **Shadow Texture** (Specific Request) -> File: 
+        *   `Reference/RToon/Details/02_ShadowT.md`
+*   **Action:** You must call `read_file` for **ALL** of these files before writing any code. 
+*   **Propose a solution or shader configuration based on the documentation.**
 
 ## Presents
 
@@ -26,258 +58,215 @@ Use these presets when the user is unsure about specific features or wants a qui
 
 ### 1. Basic Anime
 *   **Description**: The standard, clean anime look. Efficient, readable, and widely used.
-*   **Features**: Base Color, 2-Tone Shading (Double Shade), Outline (Inverted Hull).
+*   **Features**: Base Color / Main Texture, 3-Tone Shading (Double Shade), Outline (Inverted Hull).
 *   **Use Case**: General avatars, NPCs, standard anime characters, performance-critical scenes.
 
 ### 2. Advanced Illustration
 *   **Description**: A high-quality, detailed look with rich lighting, material definition, and depth.
-*   **Features**: Basic Anime + Rim Light, MatCap (for Hair/Metal), Specular (HighColor), Shadow Ramp (Soft Shadows).
+*   **Features**: Base Color / Main Texture, Layered Textures, 3-Tone Shading (Double Shade), Alpha Mask,Outline (Inverted Hull), Rim Light, MatCap (Material Capture), Specular / HighColor, Shadow Ramp.
 *   **Use Case**: Main characters, close-ups, high-fidelity VRChat avatars, cinematic cutscenes.
 
 ### 3. Stylized Sketch
 *   **Description**: Mimics hand-drawn art, manga, or pencil sketches with a rougher, artistic feel.
-*   **Features**: Desaturated Base Color, Sketchy Outline (Noise/Dynamic), Hatching or Halftone Overlay, Paper Texture.
+*   **Features**: Color Adjustments (Desaturated), Sketchy Outline, Hatching, Halftone Overlay, Sketch / Paper Overlay.
 *   **Use Case**: Flashbacks, artistic indie games, unique aesthetic styles, manga adaptations.
 
 ### 4. Cyber / VFX
 *   **Description**: High-tech, glowing, and dynamic style with motion and reactivity.
-*   **Features**: Dark Base Color, Emission (Scrolling/Blinking), AudioLink (Music Reactivity), Glitch or Dissolve Effects, Strong Rim Light.
+*   **Features**: Base Color / Main Texture (Dark), Emission / Glow, AudioLink, Dissolve, Vertex Manipulation (Glitch), Rim Light.
 *   **Use Case**: Sci-fi characters, powered-up states, music visualizers, holographic effects.
 
 ### 5. Semi-Realistic Toon
 *   **Description**: Blends anime aesthetics with realistic material properties for a modern, high-fidelity look.
-*   **Features**: PBR (Metallic/Smoothness), Normal Maps, Soft Shadow Ramp, Subsurface Scattering (SSS), Subtle Outline.
+*   **Features**: PBR (Metallic/Smoothness), Normal Map, Shadow Ramp, Subsurface Scattering (SSS), Outline (Inverted Hull).
 *   **Use Case**: Modern action RPGs, high-end cinematic characters, "Genshin-like" but more detailed.
 
 ### 6. Retro 90s Anime
 *   **Description**: Recreates the look of classic cel animation from the 90s.
-*   **Features**: High Saturation, Hard Shadows (No Feather), Simple/Thick Outline, Posterization, Film Grain (Post-Process).
+*   **Features**: Color Adjustments (High Saturation, Posterization), 3-Tone Shading (Double Shade), Outline (Inverted Hull), Film Grain.
 *   **Use Case**: Nostalgic projects, retro-style games, lo-fi aesthetics.
 
 ### 7. Oil Painting / Artistic
 *   **Description**: Simulates traditional media like oil painting or watercolor.
-*   **Features**: Brush Stroke Textures, Distorted UVs (Turbulence), Paper Overlay, Smudged Shadows, No Outline (or Sketchy).
+*   **Features**: Brush Stroke Textures, Distorted UVs, Sketch / Paper Overlay, Smudged Shadows, Sketchy Outline.
 *   **Use Case**: Storybook visuals, artistic showcases, dream sequences.
 
 ### 8. Flat Pop Art
 *   **Description**: A bold, graphic style with minimal shading and vibrant colors.
-*   **Features**: Unlit or Single Shade, Colored Outlines, Halftone Overlay, Stencil Patterns.
+*   **Features**: Base Color / Main Texture (Unlit), Outline (Inverted Hull), Halftone Overlay, Stencil Patterns.
 *   **Use Case**: UI characters, music videos, stylized indie games.
 
 ## Feature List
 
-A comprehensive list of features available across the supported shaders.
-
-*   **Base Color / Main Texture**: The primary color and texture of the model. (All)
-*   **2-Tone Shading (Double Shade)**: Defines shadows using two distinct shades (1st and 2nd) for a traditional anime look. (lilToon, UTS2, Poiyomi)
-*   **Shadow Ramp**: Uses a gradient texture to control the falloff and color of shadows, allowing for soft or stylized transitions. (SToon, Poiyomi, RToon)
-*   **Outline (Inverted Hull)**: Creates outlines by extruding back-facing vertices; widely used for character outlines. (All)
-*   **Rim Light**: Adds a highlight to the edges of the model based on the viewing angle (Fresnel effect). (All)
-*   **MatCap (Material Capture)**: Simulates complex lighting and reflections (like metal or hair sheen) using a sphere texture. (All)
-*   **Specular / HighColor**: Adds stylized highlights to the surface, often with masking or cartoon shapes. (All)
-*   **Normal Map**: Adds surface detail and depth without changing geometry. (All)
-*   **Emission / Glow**: Makes specific parts of the model glow, often with animation support. (lilToon, Poiyomi, UTS2)
-*   **Dissolve**: Gradually makes the model transparent using a noise pattern, often with a glowing edge. (lilToon, Poiyomi)
-*   **Shadow Texture (ShadowT)**: Applies a pattern (like hatching or halftone) specifically within the shadowed areas. (RToon, SToon)
-*   **Halftone Overlay**: Applies a comic-book style dot pattern over the model. (SToon)
-*   **Glitter**: Adds procedural sparkling effects to the surface. (lilToon)
-*   **Tessellation**: Dynamically subdivides geometry for smoother curves. (lilToon)
-*   **Fur**: Simulates fur using multi-layer rendering. (lilToon)
-*   **Angel Ring**: Creates a fixed highlight halo on hair. (UTS2)
-*   **Triplanar Mapping**: Applies textures based on world space, useful for models without proper UVs. (RToon)
-*   **Parallax Occlusion**: Simulates depth in textures by offsetting UVs based on view angle. (lilToon)
-*   **Distance Fade**: Fades the object or outline based on camera distance. (lilToon, RToon, UTS2)
-
-## Technique Decision Tree
-
-This section guides you to the relevant documentation based on the specific technique or feature you want to implement.
+A comprehensive list of features available across the supported shaders, organized by category.
 
 ### 1. Core Shading & Coloring
-*Fundamental settings for defining the character's base look and reaction to light.*
-
-*   **Base Color & Texture**
-    *   *Main Color, Alpha Cutoff, Diffuse*:
-        *   `Reference/lilToon/Details/01_Base_Main.md`
-        *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
-        *   `Reference/ToonShadingCollection/Details/03_Diffuse.md`
-*   **Shadow Configuration**
-    *   *Shadow Generation, Shadow Maps, 3-Tone Shading (Double Shade)*:
-        *   `Reference/lilToon/Details/02_Lighting_Shadows.md`
-        *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
-        *   `Reference/UnityChanToonShaderVer2/Details/01_DoubleShade.md`
-        *   `Reference/ToonShadingCollection/Details/09_Lighting_Shadows.md`
-    *   *Shadow Ramp (Gradient Shading)*:
-        *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
-        *   `Reference/RToon/Details/02_ShadowT.md`
-    *   *Shadow Texture (Hatching, Pattern in Shadow)*:
-        *   `Reference/RToon/Details/02_ShadowT.md`
-*   **Advanced Shading Models**
-    *   *Shading Grade Map (Threshold Control)*:
-        *   `Reference/UnityChanToonShaderVer2/Details/02_ShadingGradeMap.md`
-    *   *Cell Shading / Hard Shading*:
-        *   `Reference/RToon/Details/01_Core_Shading.md`
-        *   `Reference/SToon/Details/01_Core_Shading.md`
+*   **Base Color / Main Texture**: The primary color and texture of the model. (All)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+    *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+    *   `Reference/ToonShadingCollection/Details/03_Diffuse.md`
+*   **Color Adjustments**: Adjusts Hue, Saturation, Brightness, or applies Posterization to the final color. (Poiyomi, SToon, lilToon)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+    *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+*   **3-Tone Shading (Double Shade)**: Defines shadows using two distinct shades (1st and 2nd) for a traditional anime look. (lilToon, Poiyomi, UTS2)
+    *   `Reference/lilToon/Details/02_Lighting_Shadows.md`
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+    *   `Reference/UnityChanToonShaderVer2/Details/01_DoubleShade.md`
+    *   `Reference/ToonShadingCollection/Details/09_Lighting_Shadows.md`
+*   **Shadow Ramp**: Uses a gradient texture to control the falloff and color of shadows, allowing for soft or stylized transitions. (SToon, Poiyomi, RToon)
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+*   **Shadow Texture (ShadowT)**: Applies a pattern (like hatching or halftone) specifically within the shadowed areas. (RToon, SToon)
+    *   `Reference/RToon/Details/02_ShadowT.md`
+*   **Shading Grade Map**: Controls the shadow threshold per-pixel using a grayscale map, allowing for organic shadow shapes. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/02_ShadingGradeMap.md`
+*   **Position Maps**: Fixes shadows to specific areas (e.g., under the chin) regardless of lighting direction. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/01_DoubleShade.md`
+*   **Ambient Occlusion (AO)**: Adds soft shadows in crevices and corners to increase depth. (Poiyomi, SToon, lilToon)
+    *   `Reference/lilToon/Details/02_Lighting_Shadows.md`
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+*   **Cell Shading / Hard Shading**: Uses hard cutoffs for shadows to create a cel-shaded look. (RToon, SToon)
+    *   `Reference/RToon/Details/01_Core_Shading.md`
+    *   `Reference/SToon/Details/01_Core_Shading.md`
+*   **Diffuse Warp**: Distorts the shading terminator for irregular, hand-drawn shadow edges. (SToon)
+    *   `Reference/SToon/Details/05_Artistic_Controls.md`
+*   **Normal Map**: Adds surface detail and depth without changing geometry. (All)
+    *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+*   **Detail Maps**: Adds high-frequency surface details using secondary textures. (Poiyomi, lilToon)
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+*   **Layered Textures**: Allows stacking multiple texture layers with blending modes for complex surface details. (lilToon, Poiyomi)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+*   **Decals**: Applies sticker-like textures on top of the main surface with independent transforms. (Poiyomi, lilToon)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+*   **Alpha Mask**: Controls transparency or restricts features to specific areas using a mask texture. (lilToon, Poiyomi)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+*   **RGB Masking**: Re-colors specific parts of the mesh using RGBA masks. (Poiyomi)
+    *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+*   **Triplanar Mapping**: Applies textures based on world space, useful for models without proper UVs. (RToon, SToon)
+    *   `Reference/RToon/Details/06_Advanced_Features.md`
 
 ### 2. Surface & Reflections
-*Adding polish, shine, and material properties to the surface.*
-
-*   **Specular & Gloss**
-    *   *Highlights, Smoothness, Metallic, Anisotropy*:
-        *   `Reference/lilToon/Details/03_Surface_Reflections.md`
-        *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
-        *   `Reference/ToonShadingCollection/Details/04_Specular.md`
-        *   `Reference/SToon/Details/04_Specular_Rim.md`
-        *   `Reference/RToon/Details/05_Gloss_Rim.md`
-*   **MatCap & Environment**
-    *   *Sphere Maps (MatCap), Reflection Probes*:
-        *   `Reference/RToon/Details/04_MatCap_Reflection.md`
-        *   `Reference/ToonShadingCollection/Details/05_Environment.md`
-        *   `Reference/lilToon/Details/03_Surface_Reflections.md`
-*   **Rim Lighting**
-    *   *Fresnel Effects, Backlight, Antipodean Rim*:
-        *   `Reference/RToon/Details/05_Gloss_Rim.md`
-        *   `Reference/SToon/Details/04_Specular_Rim.md`
-        *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Specular / HighColor**: Adds stylized highlights to the surface, often with masking or cartoon shapes. (All)
+    *   `Reference/lilToon/Details/03_Surface_Reflections.md`
+    *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
+    *   `Reference/ToonShadingCollection/Details/04_Specular.md`
+    *   `Reference/SToon/Details/04_Specular_Rim.md`
+    *   `Reference/RToon/Details/05_Gloss_Rim.md`
+*   **MatCap (Material Capture)**: Simulates complex lighting and reflections (like metal or hair sheen) using a sphere texture. (All)
+    *   `Reference/RToon/Details/04_MatCap_Reflection.md`
+    *   `Reference/lilToon/Details/03_Surface_Reflections.md`
+    *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Camera Rolling Stabilizer**: Keeps MatCap reflections upright even when the camera tilts. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Rim Light**: Adds a highlight to the edges of the model based on the viewing angle (Fresnel effect). (All)
+    *   `Reference/RToon/Details/05_Gloss_Rim.md`
+    *   `Reference/SToon/Details/04_Specular_Rim.md`
+    *   `Reference/lilToon/Details/03_Surface_Reflections.md`
+    *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
+*   **Backlight**: Simulates light coming from behind the object, enhancing the silhouette or adding a rim on the shadowed side. (lilToon, SToon, UTS2)
+    *   `Reference/lilToon/Details/02_Lighting_Shadows.md`
+    *   `Reference/SToon/Details/04_Specular_Rim.md`
+*   **Shadow Rim / Antipodean Rim**: Adds a rim light specifically to the shadowed side of the object. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Side Shine**: Adds a specific highlight on the side of the object to increase volume. (SToon)
+    *   `Reference/SToon/Details/04_Specular_Rim.md`
+*   **Anisotropy**: Specialized highlights for hair or brushed metal surfaces. (lilToon, Poiyomi, SToon)
+    *   `Reference/lilToon/Details/03_Surface_Reflections.md`
+    *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
+    *   `Reference/ToonShadingCollection/Details/04_Specular.md`
+*   **Clear Coat**: Adds an extra glossy layer on top of the material for a varnished look. (Poiyomi)
+    *   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
+*   **Faked Reflection**: Uses a static texture for reflections instead of a probe for stylized control. (RToon)
+    *   `Reference/RToon/Details/04_MatCap_Reflection.md`
+*   **Environment / Reflections**: Configures environment reflections using Cubemaps or Reflection Probes. (All)
+    *   `Reference/ToonShadingCollection/Details/05_Environment.md`
+*   **Iridescence / Color Shift**: Changes color based on viewing angle or time. (UTS2, Poiyomi)
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Subsurface Scattering (SSS)**: Simulates light penetrating translucent surfaces like skin. (Poiyomi)
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
 
 ### 3. Outline & Edge Detection
-*Techniques for creating character silhouettes and line art styles.*
-
-*   **Standard Outline Techniques**
-    *   *Inverted Hull, Masking, Distance Scaling*:
-        *   `Reference/lilToon/Details/08_Outline.md`
-        *   `Reference/PoiyomiShaders/Details/05_Outline.md`
-        *   `Reference/RToon/Details/03_Outline.md`
-        *   `Reference/UnityChanToonShaderVer2/Details/03_Outline.md`
-        *   `Reference/ToonShadingCollection/Details/02_Outline.md`
-*   **Stylized Outline**
-    *   *Noise, Sketchy, Hand-drawn look*:
-        *   `Reference/SToon/Details/02_Outline.md`
-        *   `Reference/RToon/Details/03_Outline.md`
+*   **Outline (Inverted Hull)**: Creates outlines by extruding back-facing vertices; widely used for character outlines. (All)
+    *   `Reference/lilToon/Details/08_Outline.md`
+    *   `Reference/PoiyomiShaders/Details/05_Outline.md`
+    *   `Reference/RToon/Details/03_Outline.md`
+    *   `Reference/UnityChanToonShaderVer2/Details/03_Outline.md`
+    *   `Reference/ToonShadingCollection/Details/02_Outline.md`
+*   **Stylized Outline**: Noise, Sketchy, Hand-drawn look.
+    *   `Reference/SToon/Details/02_Outline.md`
+    *   `Reference/RToon/Details/03_Outline.md`
+*   **Baked Normal Outline**: Uses a smooth normal map for outlines to prevent breaks on hard edges. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/03_Outline.md`
 
 ### 4. Special Effects & VFX
-*Visual flair, dynamic effects, and artistic post-processing.*
-
-*   **Emission & Glow**
-    *   *Self-illumination, Blinking, Scrolling*:
-        *   `Reference/lilToon/Details/04_Special_Effects.md`
-        *   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
-        *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
-*   **Transparency & Dissolve**
-    *   *Alpha Erosion, Ghost Effects, Burn*:
-        *   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
-        *   `Reference/lilToon/Details/04_Special_Effects.md`
-*   **Artistic Overlays**
-    *   *Halftone, Hatching, Sketch, Glitch*:
-        *   `Reference/SToon/Details/03_Overlays.md`
-        *   `Reference/ToonShadingCollection/Details/08_PostProcessing.md`
-*   **Animation & Motion**
-    *   *UV Animation, Vertex Animation, Smear Frames*:
-        *   `Reference/ToonShadingCollection/Details/10_Animation_VFX.md`
+*   **Emission / Glow**: Makes specific parts of the model glow, often with animation support. (lilToon, Poiyomi, UTS2)
+    *   `Reference/lilToon/Details/04_Special_Effects.md`
+    *   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Dissolve**: Gradually makes the model transparent using a noise pattern, often with a glowing edge. (lilToon, Poiyomi)
+    *   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
+    *   `Reference/lilToon/Details/04_Special_Effects.md`
+*   **Halftone Overlay**: Applies a comic-book style dot pattern over the model. (SToon)
+    *   `Reference/SToon/Details/03_Overlays.md`
+    *   `Reference/ToonShadingCollection/Details/08_PostProcessing.md`
+*   **Hatching**: Uses line patterns for shading instead of solid colors, often with multiple layers. (SToon, RToon)
+    *   `Reference/SToon/Details/03_Overlays.md`
+*   **Sketch / Paper Overlay**: Applies paper textures or sketch lines for a hand-drawn look. (SToon)
+    *   `Reference/SToon/Details/03_Overlays.md`
+*   **Glitter**: Adds procedural sparkling effects to the surface. (lilToon)
+    *   `Reference/lilToon/Details/04_Special_Effects.md`
+*   **AudioLink**: Reacts to music/audio for dynamic effects like pulsing emission, color shifts, or vertex glitching. (lilToon, Poiyomi)
+    *   `Reference/lilToon/Details/05_Advanced.md`
+    *   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
+*   **Parallax Occlusion**: Simulates depth in textures by offsetting UVs based on view angle. (lilToon)
+    *   `Reference/lilToon/Details/04_Special_Effects.md`
+*   **Vertex Manipulation**: Deforms the mesh geometry (e.g., glitching, rounding, scaling). (Poiyomi, SToon)
+    *   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
+*   **Animation & Motion**: Techniques for UV animation, vertex animation, and smear frames. (ToonShadingCollection)
+    *   `Reference/ToonShadingCollection/Details/10_Animation_VFX.md`
+*   **Refraction / Gem**: Simulates light bending through transparent materials like gems or eyes. (lilToon)
+    *   `Reference/lilToon/Details/07_Variant_Features.md`
+*   **UV Animation**: Scrolls or rotates textures for effects like flowing water or tech interfaces. (SToon, lilToon, UTS2)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+    *   `Reference/SToon/Details/05_Artistic_Controls.md`
 
 ### 5. Advanced & Pipeline
-*Deep customization, optimization, and workflow integration.*
-
-*   **Advanced Rendering**
-    *   *Culling, Stencil, Encryption*:
-        *   `Reference/lilToon/Details/05_Advanced.md`
-        *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
-*   **Variants & Optimization**
-    *   *Shader Variants (Lite, Multi), Modeling Guidelines*:
-        *   `Reference/lilToon/Details/06_Variants.md`
-        *   `Reference/ToonShadingCollection/Details/11_Modeling_Pipeline.md`
-*   **Art Styles & Theory**
-    *   *Style Analysis, PBR Stylization*:
-        *   `Reference/ToonShadingCollection/Details/01_ArtStyles.md`
-        *   `Reference/ToonShadingCollection/Details/06_PBR_Stylization.md`
+*   **Culling / Stencil / Clipping**: Controls face culling and stencil buffer operations for advanced rendering effects. (lilToon, UTS2)
+    *   `Reference/lilToon/Details/05_Advanced.md`
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Stencil Masking**: Uses the stencil buffer for effects like "eyebrows visible through hair". (lilToon, UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Back Face Rendering**: Dedicated settings for rendering the back side of polygons. (Poiyomi)
+    *   `Reference/lilToon/Details/01_Base_Main.md`
+*   **Distance Fade / Near Fade**: Fades the object or outline based on camera distance to prevent view blocking. (lilToon, RToon, UTS2)
+    *   `Reference/RToon/Details/06_Advanced_Features.md`
+*   **Tessellation**: Dynamically subdivides geometry for smoother curves. (lilToon)
+    *   `Reference/lilToon/Details/07_Variant_Features.md`
+*   **Variants & Optimization**: Guidelines for using shader variants (Lite, Multi) and optimizing models. (lilToon, ToonShadingCollection)
+    *   `Reference/lilToon/Details/06_Variants.md`
+    *   `Reference/ToonShadingCollection/Details/11_Modeling_Pipeline.md`
+*   **Art Styles & Theory**: Analysis of different art styles and PBR stylization techniques. (ToonShadingCollection)
+    *   `Reference/ToonShadingCollection/Details/01_ArtStyles.md`
+    *   `Reference/ToonShadingCollection/Details/06_PBR_Stylization.md`
 
 ### 6. Special Objects (Material Specific)
-*Techniques tailored for specific materials or body parts.*
+*   **Hair (Angel Ring)**: Creates a fixed highlight halo on hair. (UTS2)
+    *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+    *   `Reference/ToonShadingCollection/Details/04_Specular.md`
+*   **Eyes**: Specialized rendering for eyes including parallax, refraction, and stencil masking. (lilToon, UTS2)
+    *   `Reference/lilToon/Details/07_Variant_Features.md`
+    *   `Reference/ToonShadingCollection/Details/07_Stylized_Features.md`
+*   **Skin**: Simulates subsurface scattering and soft shading for skin. (Poiyomi, UTS2)
+    *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+    *   `Reference/ToonShadingCollection/Details/07_Stylized_Features.md`
+*   **Fur**: Simulates fur using multi-layer rendering. (lilToon)
+    *   `Reference/lilToon/Details/07_Variant_Features.md`
 
-*   **Hair**
-    *   *Angel Ring (Halo), Anisotropy*:
-        *   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
-        *   `Reference/lilToon/Details/03_Surface_Reflections.md`
-        *   `Reference/ToonShadingCollection/Details/04_Specular.md`
-*   **Eyes**
-    *   *Parallax, Refraction, Stencil*:
-        *   `Reference/lilToon/Details/04_Special_Effects.md`
-        *   `Reference/lilToon/Details/07_Variant_Features.md`
-*   **Skin**
-    *   *Subsurface Scattering (SSS), Skin Shading*:
-        *   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
-        *   `Reference/ToonShadingCollection/Details/07_Stylized_Features.md`
-*   **Fur**
-    *   *Fur Rendering Shells*:
-        *   `Reference/lilToon/Details/07_Variant_Features.md`
+## Details Features Document
 
-### 7. Unclassified / General Search
-*If the specific feature is not listed above, consult these comprehensive feature lists.*
-
-*   **Full Feature Lists**:
-    *   `Reference/lilToon/Features.md`
-    *   `Reference/PoiyomiShaders/Features.md`
-    *   `Reference/RToon/Features.md`
-    *   `Reference/SToon/Features.md`
-    *   `Reference/ToonShadingCollection/Features.md`
-    *   `Reference/UnityChanToonShaderVer2/Features.md`
-
-## References
-
-The following is a complete list of all reference files available in this skill.
-
-### lilToon
 *   `Reference/lilToon/Features.md`
-*   `Reference/lilToon/Details/01_Base_Main.md`
-*   `Reference/lilToon/Details/02_Lighting_Shadows.md`
-*   `Reference/lilToon/Details/03_Surface_Reflections.md`
-*   `Reference/lilToon/Details/04_Special_Effects.md`
-*   `Reference/lilToon/Details/05_Advanced.md`
-*   `Reference/lilToon/Details/06_Variants.md`
-*   `Reference/lilToon/Details/07_Variant_Features.md`
-*   `Reference/lilToon/Details/08_Outline.md`
-
-### PoiyomiShaders
 *   `Reference/PoiyomiShaders/Features.md`
-*   `Reference/PoiyomiShaders/Details/01_Base_Main.md`
-*   `Reference/PoiyomiShaders/Details/02_Lighting_Shadows.md`
-*   `Reference/PoiyomiShaders/Details/03_Surface_Reflections.md`
-*   `Reference/PoiyomiShaders/Details/04_Special_Effects.md`
-*   `Reference/PoiyomiShaders/Details/05_Outline.md`
-
-### RToon
-*   `Reference/RToon/Features.md`
-*   `Reference/RToon/Details/01_Core_Shading.md`
-*   `Reference/RToon/Details/02_ShadowT.md`
-*   `Reference/RToon/Details/03_Outline.md`
-*   `Reference/RToon/Details/04_MatCap_Reflection.md`
-*   `Reference/RToon/Details/05_Gloss_Rim.md`
-*   `Reference/RToon/Details/06_Advanced_Features.md`
-
-### SToon
 *   `Reference/SToon/Features.md`
-*   `Reference/SToon/Details/01_Core_Shading.md`
-*   `Reference/SToon/Details/02_Outline.md`
-*   `Reference/SToon/Details/03_Overlays.md`
-*   `Reference/SToon/Details/04_Specular_Rim.md`
-*   `Reference/SToon/Details/05_Artistic_Controls.md`
-
-### ToonShadingCollection
-*   `Reference/ToonShadingCollection/Features.md`
-*   `Reference/ToonShadingCollection/Details/01_ArtStyles.md`
-*   `Reference/ToonShadingCollection/Details/02_Outline.md`
-*   `Reference/ToonShadingCollection/Details/03_Diffuse.md`
-*   `Reference/ToonShadingCollection/Details/04_Specular.md`
-*   `Reference/ToonShadingCollection/Details/05_Environment.md`
-*   `Reference/ToonShadingCollection/Details/06_PBR_Stylization.md`
-*   `Reference/ToonShadingCollection/Details/07_Stylized_Features.md`
-*   `Reference/ToonShadingCollection/Details/08_PostProcessing.md`
-*   `Reference/ToonShadingCollection/Details/09_Lighting_Shadows.md`
-*   `Reference/ToonShadingCollection/Details/10_Animation_VFX.md`
-*   `Reference/ToonShadingCollection/Details/11_Modeling_Pipeline.md`
-
-### UnityChanToonShaderVer2
+*   `Reference/RToon/Features.md`
 *   `Reference/UnityChanToonShaderVer2/Features.md`
-*   `Reference/UnityChanToonShaderVer2/Details/01_DoubleShade.md`
-*   `Reference/UnityChanToonShaderVer2/Details/02_ShadingGradeMap.md`
-*   `Reference/UnityChanToonShaderVer2/Details/03_Outline.md`
-*   `Reference/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   `Reference/ToonShadingCollection/Features.md`
