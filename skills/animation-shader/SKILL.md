@@ -22,9 +22,12 @@ A specialized skill for implementing and configuring animation-style shaders (To
 3.  Consult the **Feature List** to find relevant techniques and documentation for the identified features. **You must address EVERY item in the final feature list from Step 2 (including both Base Present features and Specific Features).** If a feature is not found in the **Feature List**, check the **Details Features Document** for corresponding details. If it is still not found, implement it based on your own knowledge.
 4.  Read the specific reference files identified. **You MUST read ALL reference files listed under each identified feature in the Feature List. Do not select just one file; read them all to gain a complete understanding.**
 5.  Propose a solution or shader configuration based on the documentation.
-6.  (Optional) If code/shader graph editing is needed, guide the user or generate the code.
+6.  (Optional) If shader variants are needed, read the **Variants & Optimization** reference documents and generate the variant shaders.
+7.  (Optional) If code/shader graph editing is needed, guide the user or generate the code.
 
 ### **Example Workflow Execution:**
+
+#### **Example 1: Basic Anime (Standard)**
 *   **Scenario:** User wants "Animation shader with Shadow Texture".
 *   **Determine the Approach (Step 2):**
     *   **Base Present:** **Basic Anime**
@@ -51,6 +54,49 @@ A specialized skill for implementing and configuring animation-style shaders (To
         *   `references/RToon/Details/02_ShadowT.md`
 *   **Action:** You must call `read_file` for **ALL** of these files before writing any code. 
 *   **Propose a solution or shader configuration based on the documentation.**
+
+#### **Example 2: Stylized Sketch (Artistic)**
+*   **Scenario:** User wants "Monochrome manga style with hatching shadows".
+*   **Determine the Approach (Step 2):**
+    *   **Base Present:** **Stylized Sketch**
+    *   **Specific Features:** None (The request maps entirely to the preset).
+    *   **Final Feature List:** [Color Adjustments, Sketchy Outline, Hatching, Halftone Overlay, Sketch / Paper Overlay] (from Stylized Sketch).
+*   **Identified Features:**
+    Read ALL files in the final feature list.
+    1.  **Color Adjustments** (Desaturated/Monochrome) -> File:
+        *   `references/lilToon/Details/01_Base_Main.md`
+        *   `references/PoiyomiShaders/Details/01_Base_Main.md`
+    2.  **Sketchy Outline** -> File:
+        *   `references/SToon/Details/02_Outline.md`
+        *   `references/RToon/Details/03_Outline.md`
+    3.  **Hatching** -> File:
+        *   `references/SToon/Details/03_Overlays.md`
+    4.  **Sketch / Paper Overlay** -> File:
+        *   `references/SToon/Details/03_Overlays.md`
+*   **Action:** You must call `read_file` for **ALL** of these files before writing any code.
+
+#### **Example 3: Semi-Realistic Toon (High Fidelity)**
+*   **Scenario:** User wants "Toon & PBR mixed character with shiny gold armor".
+*   **Determine the Approach (Step 2):**
+    *   **Base Present:** **Semi-Realistic Toon**
+    *   **Specific Features:** **MatCap** (for shiny gold armor)
+    *   **Final Feature List:** [PBR, Normal Map, Shadow Ramp, Subsurface Scattering, Outline] (from Semi-Realistic Toon) + [MatCap].
+*   **Identified Features:**
+    Read ALL files in the final feature list.
+    1.  **PBR / Normal Map** -> File:
+        *   `references/PoiyomiShaders/Details/01_Base_Main.md` (Normal Map)
+        *   `references/ToonShadingCollection/Details/06_PBR_Stylization.md` (PBR Theory)
+    2.  **Shadow Ramp** -> File:
+        *   `references/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+    3.  **Subsurface Scattering (SSS)** (for skin) -> File:
+        *   `references/PoiyomiShaders/Details/02_Lighting_Shadows.md`
+        *   `references/ToonShadingCollection/Details/07_Stylized_Features.md`
+    4.  **MatCap** (Specific Request) -> File:
+        *   `references/RToon/Details/04_MatCap_Reflection.md`
+        *   `references/lilToon/Details/03_Surface_Reflections.md`
+        *   `references/PoiyomiShaders/Details/03_Surface_Reflections.md`
+        *   `references/UnityChanToonShaderVer2/Details/04_SpecialFeatures.md`
+*   **Action:** You must call `read_file` for **ALL** of these files before writing any code.
 
 ## Presents
 
