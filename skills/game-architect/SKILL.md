@@ -55,9 +55,10 @@ requirement.md  --->  technical_design.md  --->  plan.md
   - Read `references/principles.md` for core principles
 
 **Key Tasks**:
-1. Define Multi-Application structure (Client/Server)
-2. Select Technology Stack (Engine, Languages)
-3. Choose architectural paradigms for each module:
+1. If existing project: Analyze the exist project code to understand the current architecture
+2. Define Multi-Application structure (Client/Server)
+3. Select Technology Stack (Engine, Languages)
+4. Choose architectural paradigms for each module:
 
 #### Paradigm Selection Guide
 
@@ -161,6 +162,7 @@ The final `architect/plan.md` is used for actual code implementation.
         - Focus on **Use Cases & User Flow** for inventory interactions.
         - Output: `architect/requirement.md`.
     2.  **Technical Design**:
+        - Analyze the exist project code to understand the current architecture.
         - Read `references/principles.md`.
         - Select **Data-Driven Design**.
         - Read `references/data-driven-design.md`.
@@ -205,6 +207,7 @@ The final `architect/plan.md` is used for actual code implementation.
         - Focus on **Domain Model Analysis** to define entities like `Skill`, `Effect`, and `Requirement`.
         - Output: `architect/requirement.md`.
     2.  **Technical Design**:
+        - Analyze the exist project code to understand the current architecture.
         - Read `references/principles.md`.
         - Apply **Domain-Driven Design (DDD)** for the core logic (e.g., `SkillExecutionService`). Read `references/domain-driven-design.md`.
         - Apply **Data-Driven Design** for skill configurations (XML/JSON/Excel). Read `references/data-driven-design.md`.
