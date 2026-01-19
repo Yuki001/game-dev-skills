@@ -67,7 +67,7 @@ If the user asks for detailed architecture of specific subsystems, read the corr
     - Covers: Update Loops, Async/Coroutines, State Machines (FSM), Command Queues, Global Flow & Controllers.
 - **Combat & Scene**: Read `references/system-scene.md`.
     - Covers: Scene Graphs, Spatial Partitioning (Grid/QuadTree), ECS vs EC, Loading Strategies.
-- **UI & Modules (MV*)**: Read `references/system-ui.md`.
+- **UI & Modules (MV\* Patterns)**: Read `references/system-ui.md`.
     - Covers: MV* Patterns (MVC/MVP/MVVM), UI Management, Data Binding, Reactive Programming.
 
 #### Mixing Paradigms
