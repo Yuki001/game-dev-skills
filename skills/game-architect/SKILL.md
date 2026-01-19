@@ -1,145 +1,238 @@
 ---
 name: game-architect
-description: Comprehensive guide for game project architecture, requirement analysis, and logic design. Use this skill when setting up a new game project, analyzing game requirements, or designing specific game systems. It provides guidance on choosing and mixing architectural patterns like Domain-Driven Design (DDD) and Data-Driven Design.
+description: A documentation-focused skill for game architecture design. Produces technical selection, design, and planning documents through a structured pipeline. Use this skill to generate requirement analysis, technical design, and implementation planning documents for new game projects or major feature development.
 ---
 
 # Game Architect Skill
 
-This skill assists in the architectural design and structural setup of game projects. It covers the entire flow from requirement analysis to detailed logic design, offering different paradigms based on the project's nature.
+This skill assists in the **documentation phase** of game project development. It produces a series of technical documents that guide subsequent implementation work.
+
+> [!IMPORTANT]
+> This skill focuses on **documentation output only**. The actual code implementation phase is **outside the scope** of this skill.
+
+## Output Documents
+
+All documents are placed in an `architect/` directory (create if needed). The pipeline produces:
+
+```
+requirement.md  --->  technical_design.md  --->  plan.md
+```
+
+| Document | Purpose | Description |
+|----------|---------|-------------|
+| `requirement.md` | Requirements Analysis | Analyzes and formalizes user requirements |
+| `technical_design.md` | Technical Solution Design | **Core document** - designs system approaches and patterns |
+| `plan.md` | Implementation Plan | Details data structures, algorithms, class designs, and key code |
+
+---
 
 ## Workflow
 
-### 1. Understand the Project Goal
+### Phase 1: Requirement Analysis
 
-First, determine the nature of the task:
-- **Formal Project**: Requires robust architecture, scalability, and maintenance. (Proceed to Step 2)
-- **Rapid Prototype**: Needs speed and immediate feedback. (Jump to Step 4 - Prototype Design)
+**Goal**: Analyze user requirements and produce structured documentation.
 
-### 2. Requirement Analysis
+- **Input**: User request + LLM knowledge
+- **Output**: `architect/requirement.md`
+- **Reference**: Read `references/requirements.md`
 
-Analyze the requirements to build a solid foundation.
+**Key Tasks**:
+1. Extract and clarify user requirements
+2. Build Feature List (technological scope)
+3. Define Domain Models (for core gameplay)
+4. Document Use Cases & User Flows
 
-- **Action**: Read `references/requirements.md`.
-- **Key Outputs**:
-  - Feature List (Technological scope)
-  - Domain Models (For core gameplay)
-  - Use Cases & User Flows (For interactions)
+---
 
-### 3. Macro Architecture Design
+### Phase 2: Technical Design
 
-Establish the high-level structure, application division, and technology stack.
+**Goal**: Design technical solutions for each system. This is the **most critical phase**.
 
-- **Action**: Read `references/macro-design.md`.
-- **Tasks**:
-  - Define Multi-Application structure (Client/Server).
-  - Select Technology Stack (Engine, Languages).
-  - Perform Initial Logic Decomposition (Layers, Modules).
+- **Input**: `architect/requirement.md`
+- **Output**: `architect/technical_design.md`
+- **References**:
+  - Read `references/macro-design.md` for high-level structure
+  - Read `references/principles.md` for core principles
 
-### 4. Detailed Logic Design (Selection & Mixing)
+**Key Tasks**:
+1. Define Multi-Application structure (Client/Server)
+2. Select Technology Stack (Engine, Languages)
+3. Choose architectural paradigms for each module:
 
-Choose the appropriate design paradigm for each module. A game project often **mixes** these paradigms.
+#### Paradigm Selection Guide
 
-- **Action**: Read `references/principles.md` for core principles.
-
-#### A. Complex Core Gameplay & Systems
-For complex logic, heavy state management, and clear domain concepts (e.g., Combat, Physics, AI).
-- **Paradigm**: **Domain-Driven Design (DDD)**
-- **Action**: Read `references/domain-driven-design.md`.
-- **Focus**: Entities, Services, Aggregates.
-
-#### B. UI, Data Management & Simple Systems
-For systems focused on data display, inventory, shops, or simple CRUD operations.
-- **Paradigm**: **Data-Driven Design**
-- **Action**: Read `references/data-driven-design.md`.
-- **Focus**: Data Structures, Configs, Model-View separation.
-
-#### C. Rapid Prototyping
-For validating ideas quickly without heavy architecture.
-- **Paradigm**: **Use-Case Driven Prototype Design**
-- **Action**: Read `references/prototype-design.md`.
-- **Focus**: Speed, Use-Case realization, subsequent refactoring.
-
-#### D. Specific System Architecture
-If the user asks for detailed architecture of specific subsystems, read the corresponding reference:
-- **Foundation & Core**: Read `references/system-foundation.md`.
-    - Covers: Logs, Timers, Modules, Events, Resources, Audio, Input.
-- **Time & Logic Flow**: Read `references/system-time.md`.
-    - Covers: Update Loops, Async/Coroutines, State Machines (FSM), Command Queues, Global Flow & Controllers.
-- **Combat & Scene**: Read `references/system-scene.md`.
-    - Covers: Scene Graphs, Spatial Partitioning (Grid/QuadTree), ECS vs EC, Loading Strategies.
-- **UI & Modules (MV\* Patterns)**: Read `references/system-ui.md`.
-    - Covers: MV* Patterns (MVC/MVP/MVVM), UI Management, Data Binding, Reactive Programming.
+| System Type | Recommended Paradigm | Reference |
+|-------------|---------------------|-----------|
+| Complex Core Gameplay (Combat, Physics, AI) | **Domain-Driven Design (DDD)** | `references/domain-driven-design.md` |
+| UI, Data Management, Simple CRUD | **Data-Driven Design** | `references/data-driven-design.md` |
+| Rapid Prototyping | **Use-Case Driven Prototype** | `references/prototype-design.md` |
 
 #### Mixing Paradigms
-**How to mix them in one project:**
-1.  **Macro Consistency**: Ensure all modules follow the same Module Management Framework (Lifecycle, Event System) regardless of their internal design.
-2.  **Domain for Core**: Design the Battle/Core module using DDD to handle complexity.
-3.  **Data for Shell**: Design the UI/Meta-game modules (Inventory, Social) using Data-Driven Design for efficiency and ease of binding to UI.
-4.  **Integration**: Use the Application Layer (from DDD) or Controllers (from Data-Driven) to bridge the two. For example, a UI button (Data-Driven) sends a Command that triggers a Service in the Core Domain (DDD).
 
-### 5. Handling Changes & Evolution
+Most projects mix paradigms:
+1. **Macro Consistency**: All modules follow the same Module Management Framework
+2. **Domain for Core**: Use DDD for Battle/Core modules
+3. **Data for Shell**: Use Data-Driven for UI/Meta-game modules
+4. **Integration**: Application Layer bridges different paradigms
 
-Architecture is not static. Plan for changes.
+---
 
-- **Action**: Read `references/evolution.md`.
-- **Strategies**: Isolation, Abstraction, Composition, and Refining.
+### Phase 3: Implementation Planning
 
-## Example Workflow Execution
+**Goal**: Create detailed implementation specifications.
+
+- **Input**: `architect/technical_design.md`
+- **Output**: `architect/plan.md`
+- **References**: Use Specific System Architecture documents from `references/`
+
+**Key Tasks**:
+1. **Data Structures**: Define all core data types and structures
+2. **Algorithms**: Specify key algorithms with pseudocode
+3. **Class Design**: Document class hierarchies and relationships
+4. **Object Relationships**: Define associations, dependencies, and lifecycles
+5. **Key Code Snippets**: Provide critical implementation examples
+
+#### System-Specific References
+
+| System Category | Reference |
+|----------------|-----------|
+| Foundation & Core (Logs, Timers, Modules, Events, Resources, Audio, Input) | `references/system-foundation.md` |
+| Time & Logic Flow (Update Loops, Async, FSM, Command Queues, Controllers) | `references/system-time.md` |
+| Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
+| UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
+
+---
+
+### Phase 4: Plan Refactoring
+
+**Goal**: Review and refine the implementation plan for better extensibility and maintainability.
+
+- **Input & Output**: `architect/plan.md` (in-place update)
+- **Reference**: Read `references/evolution.md`
+
+**Refactoring Focus**:
+1. **Isolation**: Ensure proper separation of concerns
+2. **Abstraction**: Apply appropriate interface abstractions
+3. **Composition**: Prefer composition over inheritance where applicable
+4. **Future Changes**: Anticipate and plan for likely evolution
+
+---
+
+### Phase 5: Implementation (Out of Scope)
+
+The final `architect/plan.md` is used for actual code implementation.
+
+> [!NOTE]
+> Code implementation is **not part of this skill**. Hand off `plan.md` to the implementation phase.
+
+---
+
+## Example Workflows
 
 ### Example 1: New Formal Project (Core Gameplay Focus)
+
 - **User Input**: "I want to start a new ARPG project. The core combat is very complex with many states and interactions. How should I begin?"
 - **Execution Path**:
-    1.  **Goal**: Identify as a **Formal Project**.
-    2.  **Analysis**: Read `references/requirements.md`. Focus on **Domain Model Analysis** to capture complex combat concepts.
-    3.  **Macro Design**: Read `references/macro-design.md`. Choose Unity/Unreal and define the layer structure.
-    4.  **Logic Design**: Select **Domain-Driven Design (DDD)**. Read `references/domain-driven-design.md`. Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
-    5.  **Specific System Design**:
+    1.  **Requirement Analysis**:
+        - Read `references/requirements.md`.
+        - Focus on **Domain Model Analysis** to capture complex combat concepts.
+        - Output: `architect/requirement.md`.
+    2.  **Technical Design**:
+        - Read `references/macro-design.md`. Choose Unity/Unreal and define the layer structure.
+        - Read `references/principles.md`.
+        - Select **Domain-Driven Design (DDD)**. Read `references/domain-driven-design.md`.
+        - Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
         - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
         - For Player State Machine (HFSM), read `references/system-time.md`.
+        - Output: `architect/plan.md`.
+    4.  **Plan Refactoring**:
+        - Read `references/evolution.md`.
+        - Apply Composition and Abstraction patterns.
+        - Update: `architect/plan.md`.
 
 ### Example 2: Adding a UI Module (Data-heavy Focus)
+
 - **User Input**: "I need to add a complex Inventory and Shop system to my existing game. How should I design the logic?"
 - **Execution Path**:
-    1.  **Goal**: Identify as a module for a **Formal Project**.
-    2.  **Analysis**: Read `references/requirements.md`. Focus on **Use Cases & User Flow** for inventory interactions.
-    3.  **Logic Design**: Select **Data-Driven Design (MV*)**. Read `references/data-driven-design.md`. Design Item structures, Config tables, and the Global Container for the inventory state.
-    4.  **Specific System Design**:
+    1.  **Requirement Analysis**:
+        - Read `references/requirements.md`.
+        - Focus on **Use Cases & User Flow** for inventory interactions.
+        - Output: `architect/requirement.md`.
+    2.  **Technical Design**:
+        - Read `references/principles.md`.
+        - Select **Data-Driven Design**.
+        - Read `references/data-driven-design.md`.
+        - Design Item structures, Config tables, and the Global Container for the inventory state.
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
         - For MVVM and UI Management implementation, read `references/system-ui.md`.
         - For Resource Caching (Icons/Models), read `references/system-foundation.md`.
+        - Output: `architect/plan.md`.
+    4.  **Plan Refactoring**:
+        - Read `references/evolution.md`.
+        - Update: `architect/plan.md`.
 
 ### Example 3: Rapid Prototype
+
 - **User Input**: "I have an idea for a unique puzzle mechanic. I want to build a quick demo this weekend to see if it's fun."
 - **Execution Path**:
-    1.  **Goal**: Identify as a **Rapid Prototype**.
-    2.  **Logic Design**: Jump to **Use-Case Driven Prototype Design**. Read `references/prototype-design.md`.
-    3.  **Implementation**: Focus on rapid implementation of the core puzzle use case. Refactor into a cleaner structure (e.g., extracting a PuzzleController) only after the core mechanic is proven fun.
-    4.  **Specific System Design**:
+    1.  **Requirement Analysis**:
+        - Minimal analysis, focus on core puzzle mechanic.
+        - Output: `architect/requirement.md` (lightweight).
+    2.  **Technical Design**:
+        - Read `references/principles.md`.
+        - Jump to **Use-Case Driven Prototype Design**.
+        - Read `references/prototype-design.md`.
+        - Output: `architect/technical_design.md` (lightweight).
+    3.  **Implementation Planning**:
         - For quick FSM or Update logic, read `references/system-time.md`.
         - For quick UI (IMGUI), read `references/system-ui.md`.
+        - Focus on rapid implementation of the core puzzle use case.
+        - Output: `architect/plan.md`.
+    4.  **Plan Refactoring**:
+        - Read `references/evolution.md`.
+        - Plan to extract PuzzleController after core mechanic is proven fun.
+        - Update: `architect/plan.md`.
 
 ### Example 4: Designing a New System in an Existing Project
+
 - **User Input**: "I want to add a Skill System to my current combat engine. It needs to support various effects, cooldowns, and resources. How should I architect it?"
 - **Execution Path**:
-    1.  **Goal**: Identify as a new system for a **Formal Project**.
-    2.  **Analysis**: Read `references/requirements.md`. Focus on **Domain Model Analysis** to define entities like `Skill`, `Effect`, and `Requirement`.
-    3.  **Logic Design**:
+    1.  **Requirement Analysis**:
+        - Read `references/requirements.md`.
+        - Focus on **Domain Model Analysis** to define entities like `Skill`, `Effect`, and `Requirement`.
+        - Output: `architect/requirement.md`.
+    2.  **Technical Design**:
+        - Read `references/principles.md`.
         - Apply **Domain-Driven Design (DDD)** for the core logic (e.g., `SkillExecutionService`). Read `references/domain-driven-design.md`.
         - Apply **Data-Driven Design** for skill configurations (XML/JSON/Excel). Read `references/data-driven-design.md`.
-    4.  **Evolution**: Read `references/evolution.md`. Use **Composition** (Component pattern) to build complex skills from reusable effects, and **Abstraction** (Interfaces) to handle different targeting systems (e.g., Point vs. Target).
-    5.  **Specific System Design**:
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
         - For Scene and Actions, read `references/system-scene.md` and `references/system-time.md`.
         - For Event triggering (e.g., OnSkillCast), read `references/system-foundation.md`.
+        - Output: `architect/plan.md`.
+    4.  **Plan Refactoring**:
+        - Read `references/evolution.md`.
+        - Use **Composition** (Component pattern) to build complex skills from reusable effects.
+        - Use **Abstraction** (Interfaces) to handle different targeting systems (e.g., Point vs. Target).
+        - Update: `architect/plan.md`.
+
+---
 
 ## Reference Map
 
-- `references/principles.md`: Core architectural principles.
-- `references/requirements.md`: Methods for analyzing requirements.
-- `references/macro-design.md`: High-level system design.
-- `references/domain-driven-design.md`: OOP/DDD patterns.
-- `references/data-driven-design.md`: Data-oriented patterns.
-- `references/prototype-design.md`: Rapid prototyping guide.
-- `references/evolution.md`: Managing architectural changes.
-- `references/system-foundation.md`: Core infrastructure (Log, Event, Resource).
-- `references/system-time.md`: Time logic (FSM, Coroutine).
-- `references/system-scene.md`: Scene & Spatial logic.
-- `references/system-ui.md`: UI & Module architecture / MV* patterns.
+| Reference | Purpose |
+|-----------|---------|
+| `references/requirements.md` | Requirement analysis methods |
+| `references/macro-design.md` | High-level system design |
+| `references/principles.md` | Core architectural principles |
+| `references/domain-driven-design.md` | DDD/OOP patterns |
+| `references/data-driven-design.md` | Data-oriented patterns |
+| `references/prototype-design.md` | Rapid prototyping guide |
+| `references/evolution.md` | Managing architectural changes |
+| `references/system-foundation.md` | Core infrastructure |
+| `references/system-time.md` | Time & logic flow |
+| `references/system-scene.md` | Scene & spatial logic |
+| `references/system-ui.md` | UI architecture & MV* patterns |
