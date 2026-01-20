@@ -28,6 +28,20 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 
 ## Workflow
 
+### Phase 0: Ask user if need review
+
+- **Question**: "Do you want to review the output document after every phase?"
+- **Answer**: "Yes" or "No"
+- **Default**: "Yes"
+- **Output**: User Review Flag
+
+**User Review Workflow**:
+- **Trigger**: User explicitly requests "User Review" mode (via Phase 0).
+- **Process**: 
+    - After **each Phase**, pause and present the output to the user.
+    - Request user feedback.
+    - If feedback is received, **iterate** on the current phase's output before proceeding to the next phase.
+
 ### Phase 1: Requirement Analysis
 
 **Goal**: Analyze user requirements and produce structured documentation.
@@ -137,15 +151,7 @@ The final `architect/implementation.md` is used for actual code implementation.
 
 ### Extensions
 
-#### 1. User Review Workflow
-
-- **Trigger**: User explicitly requests "User Review" mode or sets a flag (e.g. via User Request).
-- **Process**: 
-    - After **each Phase**, pause and present the output to the user.
-    - Request user feedback.
-    - If feedback is received, **iterate** on the current phase's output before proceeding to the next phase.
-
-#### 2. Refactor Phase (On-Demand)
+#### 1. Refactor Phase (On-Demand)
 
 - **Trigger**: 
     - "User Review" flag is active.
