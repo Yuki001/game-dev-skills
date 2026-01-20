@@ -56,6 +56,9 @@ Used for spatial queries (collision, visibility) alongside the logic structure.
 - **Grid**:
     - Divides space into uniform cells.
     - Good for: Fast coarse culling, Tilemaps, 2D games.
+- **Spatial Hash**:
+    - Hash map of grid cells.
+    - Good for: Sparse scenes with infinite bounds.
 - **Partition Trees (QuadTree / Octree)**:
     - Recursively divides space.
     - Good for: Variable object sizes, general 3D scenes.
@@ -63,9 +66,6 @@ Used for spatial queries (collision, visibility) alongside the logic structure.
 - **Graph / Node**:
     - Connected nodes representing areas (e.g., Rooms, Provinces).
     - Good for: Strategy games, non-euclidean maps.
-- **Spatial Hash**:
-    - Hash map of grid cells.
-    - Good for: Sparse scenes with infinite bounds.
 
 ## 4. Scene Loading Strategies
 

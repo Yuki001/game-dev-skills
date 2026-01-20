@@ -76,6 +76,10 @@ Most projects mix paradigms:
 3. **Data for Shell**: Use Data-Driven for UI/Meta-game modules
 4. **Integration**: Application Layer bridges different paradigms
 
+#### Note
+
+**DO NOT** contain any Code Snippets in the Technical Design documents. 
+
 ---
 
 ### Phase 3: Implementation Planning
@@ -101,6 +105,8 @@ Most projects mix paradigms:
 | Time & Logic Flow (Update Loops, Async, FSM, Command Queues, Controllers) | `references/system-time.md` |
 | Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
 | UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
+| Performance & Optimization (Profiling, Caching, Pooling, Threading, Batching) | `references/performance-optimization.md` |
+| Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 ---
 
@@ -109,7 +115,9 @@ Most projects mix paradigms:
 **Goal**: Review and refine the implementation plan for better extensibility and maintainability.
 
 - **Input & Output**: `architect/plan.md` (in-place update)
-- **Reference**: Read `references/evolution.md`
+- **Reference**: 
+    - Read `references/evolution.md`
+    - Read `references/performance-optimization.md` (Only if user requires performance optimization)
 
 **Refactoring Focus**:
 1. **Isolation**: Ensure proper separation of concerns
@@ -147,6 +155,7 @@ The final `architect/plan.md` is used for actual code implementation.
     3.  **Implementation Planning**:
         - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
         - For Player State Machine (HFSM), read `references/system-time.md`.
+        - For AI pathfinding or spatial queries, read `references/algorithm.md`.
         - Output: `architect/plan.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
@@ -191,6 +200,7 @@ The final `architect/plan.md` is used for actual code implementation.
     3.  **Implementation Planning**:
         - For quick FSM or Update logic, read `references/system-time.md`.
         - For quick UI (IMGUI), read `references/system-ui.md`.
+        - For core puzzle algorithms (Search/Graph), read `references/algorithm.md`.
         - Focus on rapid implementation of the core puzzle use case.
         - Output: `architect/plan.md`.
     4.  **Plan Refactoring**:
@@ -222,6 +232,20 @@ The final `architect/plan.md` is used for actual code implementation.
         - Use **Abstraction** (Interfaces) to handle different targeting systems (e.g., Point vs. Target).
         - Update: `architect/plan.md`.
 
+### Example 5: Architecture and Performance Refactoring
+
+- **User Input**: "I've drafted the plan for the new system. Can you review and refactor it? I want to make sure the architecture is clean and scalable, and that it runs efficiently."
+- **Execution Path**:
+    1.  **Analyze Existing Plan**: Review `architect/plan.md` to identify coupling issues and potential hotspots.
+    2.  **Read References**:
+        - Read `references/evolution.md` to guide architectural separation and extensibility.
+        - Read `references/performance-optimization.md` to find opportunities for caching, pooling, or algorithmic improvements.
+    3.  **Plan Refactoring**:
+        - Apply **Composition** to decouple monolithic classes (from `evolution.md`).
+        - Introduce **Object Pooling** for frequently created entities (from `performance-optimization.md`).
+        - Implement **Throttling/Time-Slicing** for heavy update loops.
+        - Update: `architect/plan.md`.
+
 ---
 
 ## Reference Map
@@ -239,3 +263,5 @@ The final `architect/plan.md` is used for actual code implementation.
 | `references/system-time.md` | Time & logic flow |
 | `references/system-scene.md` | Scene & spatial logic |
 | `references/system-ui.md` | UI architecture & MV* patterns |
+| `references/performance-optimization.md` | Logic performance optimization strategies |
+| `references/algorithm.md` | Algorithms and Data Structures reference |
