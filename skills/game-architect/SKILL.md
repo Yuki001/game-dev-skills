@@ -42,6 +42,8 @@ requirement.md  --->  technical_design.md  --->  implementation.md
     - Request user feedback.
     - If feedback is received, **iterate** on the current phase's output before proceeding to the next phase.
 
+---
+
 ### Phase 1: Requirement Analysis
 
 **Goal**: Analyze user requirements and produce structured documentation.
@@ -72,7 +74,8 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 1. If existing project: Analyze the exist project code to understand the current architecture
 2. Define Multi-Application structure (Client/Server)
 3. Select Technology Stack (Engine, Languages)
-4. Choose architectural paradigms for each module:
+4. Choose architectural paradigms using the **Paradigm Selection Guide** for each module
+5. Use the **System-Specific References** to design each module
 
 #### Paradigm Selection Guide
 
@@ -81,6 +84,16 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | Complex Core Gameplay (Combat, Physics, AI) | **Domain-Driven Design (DDD)** | `references/domain-driven-design.md` |
 | UI, Data Management, Simple CRUD | **Data-Driven Design** | `references/data-driven-design.md` |
 | Rapid Prototyping | **Use-Case Driven Prototype** | `references/prototype-design.md` |
+
+#### System-Specific References
+
+| System Category | Reference |
+|----------------|-----------|
+| Foundation & Core (Logs, Timers, Modules, Events, Resources, Audio, Input) | `references/system-foundation.md` |
+| Time & Logic Flow (Update Loops, Async, FSM, Command Queues, Controllers) | `references/system-time.md` |
+| Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
+| UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
+| Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 #### Mixing Paradigms
 
@@ -105,21 +118,12 @@ Most projects mix paradigms:
 - **References**: Use Specific System Architecture documents from `references/`
 
 **Key Tasks**:
-1. **Data Structures**: Define all core data types and structures
-2. **Algorithms**: Specify key algorithms with pseudocode
-3. **Class Design**: Document class hierarchies and relationships
-4. **Object Relationships**: Define associations, dependencies, and lifecycles
-5. **Key Code Snippets**: Provide critical implementation examples
-
-#### System-Specific References
-
-| System Category | Reference |
-|----------------|-----------|
-| Foundation & Core (Logs, Timers, Modules, Events, Resources, Audio, Input) | `references/system-foundation.md` |
-| Time & Logic Flow (Update Loops, Async, FSM, Command Queues, Controllers) | `references/system-time.md` |
-| Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
-| UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
-| Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
+1. **Directory Structure**: Define the directory structure for the project
+2. **Data Structures**: Define all core data types and structures
+3. **Algorithms**: Specify key algorithms with pseudocode
+4. **Class Design**: Document class hierarchies and relationships
+5. **Object Relationships**: Define associations, dependencies, and lifecycles
+6. **Key Code Snippets**: Provide critical implementation examples
 
 ---
 
@@ -179,12 +183,12 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/macro-design.md`. Choose Unity/Unreal and define the layer structure.
         - Read `references/principles.md`.
         - Select **Domain-Driven Design (DDD)**. Read `references/domain-driven-design.md`.
-        - Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
-        - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
         - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
         - For Player State Machine (HFSM), read `references/system-time.md`.
         - For AI pathfinding or spatial queries, read `references/algorithm.md`.
+        - Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
         - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
@@ -204,11 +208,11 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/principles.md`.
         - Select **Data-Driven Design**.
         - Read `references/data-driven-design.md`.
+        - For MVVM and UI Management implementation, read `references/system-ui.md`.
+        - For Resource Caching (Icons/Models), read `references/system-foundation.md`.
         - Design Item structures, Config tables, and the Global Container for the inventory state.
         - Output: `architect/technical_design.md`.
     3.  **Implementation Planning**:
-        - For MVVM and UI Management implementation, read `references/system-ui.md`.
-        - For Resource Caching (Icons/Models), read `references/system-foundation.md`.
         - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
@@ -225,11 +229,11 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/principles.md`.
         - Jump to **Use-Case Driven Prototype Design**.
         - Read `references/prototype-design.md`.
-        - Output: `architect/technical_design.md` (lightweight).
-    3.  **Implementation Planning**:
         - For quick FSM or Update logic, read `references/system-time.md`.
         - For quick UI (IMGUI), read `references/system-ui.md`.
         - For core puzzle algorithms (Search/Graph), read `references/algorithm.md`.
+        - Output: `architect/technical_design.md` (lightweight).
+    3.  **Implementation Planning**:
         - Focus on rapid implementation of the core puzzle use case.
         - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
@@ -250,10 +254,10 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/principles.md`.
         - Apply **Domain-Driven Design (DDD)** for the core logic (e.g., `SkillExecutionService`). Read `references/domain-driven-design.md`.
         - Apply **Data-Driven Design** for skill configurations (XML/JSON/Excel). Read `references/data-driven-design.md`.
-        - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
         - For Scene and Actions, read `references/system-scene.md` and `references/system-time.md`.
         - For Event triggering (e.g., OnSkillCast), read `references/system-foundation.md`.
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
         - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
