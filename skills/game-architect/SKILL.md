@@ -15,14 +15,14 @@ This skill assists in the **documentation phase** of game project development. I
 All documents are placed in an `architect/` directory (create if needed). The pipeline produces:
 
 ```
-requirement.md  --->  technical_design.md  --->  plan.md
+requirement.md  --->  technical_design.md  --->  implementation.md
 ```
 
 | Document | Purpose | Description |
 |----------|---------|-------------|
 | `requirement.md` | Requirements Analysis | Analyzes and formalizes user requirements |
 | `technical_design.md` | Technical Solution Design | **Core document** - designs system approaches and patterns |
-| `plan.md` | Implementation Plan | Details data structures, algorithms, class designs, and key code |
+| `implementation.md` | Implementation Plan | Details data structures, algorithms, class designs, and key code |
 
 ---
 
@@ -87,7 +87,7 @@ Most projects mix paradigms:
 **Goal**: Create detailed implementation specifications.
 
 - **Input**: `architect/technical_design.md`
-- **Output**: `architect/plan.md`
+- **Output**: `architect/implementation.md`
 - **References**: Use Specific System Architecture documents from `references/`
 
 **Key Tasks**:
@@ -105,7 +105,6 @@ Most projects mix paradigms:
 | Time & Logic Flow (Update Loops, Async, FSM, Command Queues, Controllers) | `references/system-time.md` |
 | Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
 | UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
-| Performance & Optimization (Profiling, Caching, Pooling, Threading, Batching) | `references/performance-optimization.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 ---
@@ -114,7 +113,7 @@ Most projects mix paradigms:
 
 **Goal**: Review and refine the implementation plan for better extensibility and maintainability.
 
-- **Input & Output**: `architect/plan.md` (in-place update)
+- **Input & Output**: `architect/implementation.md` (in-place update)
 - **Reference**: 
     - Read `references/evolution.md`
     - Read `references/performance-optimization.md` (Only if user requires performance optimization)
@@ -129,10 +128,34 @@ Most projects mix paradigms:
 
 ### Phase 5: Implementation (Out of Scope)
 
-The final `architect/plan.md` is used for actual code implementation.
+The final `architect/implementation.md` is used for actual code implementation.
 
 > [!NOTE]
-> Code implementation is **not part of this skill**. Hand off `plan.md` to the implementation phase.
+> Code implementation is **not part of this skill**. Hand off `implementation.md` to the implementation phase.
+
+---
+
+### Extensions
+
+#### 1. User Review Workflow
+
+- **Trigger**: User explicitly requests "User Review" mode or sets a flag (e.g. via User Request).
+- **Process**: 
+    - After **each Phase**, pause and present the output to the user.
+    - Request user feedback.
+    - If feedback is received, **iterate** on the current phase's output before proceeding to the next phase.
+
+#### 2. Refactor Phase (On-Demand)
+
+- **Trigger**: 
+    - "User Review" flag is active.
+    - OR User requests a refactor/update for a specific document after the fact.
+- **Process**:
+    - Can target any specific **Phase 1 - 5** individually.
+    - **Input**: The **existing Output file** of that phase (e.g., `architect/technical_design.md` if refactoring Phase 2). *Crucial: Read the file first as the user may have modified it.*
+    - **Goal**: Optimize, correct, or expand the document based on specific user feedback or new insights.
+    - **Output**: Update the target file in-place.
+    - **Note**: Phase 4 is a specialized version of this, but the Refactor Phase extension applies generally to any step.
 
 ---
 
@@ -156,11 +179,11 @@ The final `architect/plan.md` is used for actual code implementation.
         - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
         - For Player State Machine (HFSM), read `references/system-time.md`.
         - For AI pathfinding or spatial queries, read `references/algorithm.md`.
-        - Output: `architect/plan.md`.
+        - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
         - Apply Composition and Abstraction patterns.
-        - Update: `architect/plan.md`.
+        - Update: `architect/implementation.md`.
 
 ### Example 2: Adding a UI Module (Data-heavy Focus)
 
@@ -180,10 +203,10 @@ The final `architect/plan.md` is used for actual code implementation.
     3.  **Implementation Planning**:
         - For MVVM and UI Management implementation, read `references/system-ui.md`.
         - For Resource Caching (Icons/Models), read `references/system-foundation.md`.
-        - Output: `architect/plan.md`.
+        - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
-        - Update: `architect/plan.md`.
+        - Update: `architect/implementation.md`.
 
 ### Example 3: Rapid Prototype
 
@@ -202,11 +225,11 @@ The final `architect/plan.md` is used for actual code implementation.
         - For quick UI (IMGUI), read `references/system-ui.md`.
         - For core puzzle algorithms (Search/Graph), read `references/algorithm.md`.
         - Focus on rapid implementation of the core puzzle use case.
-        - Output: `architect/plan.md`.
+        - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
         - Plan to extract PuzzleController after core mechanic is proven fun.
-        - Update: `architect/plan.md`.
+        - Update: `architect/implementation.md`.
 
 ### Example 4: Designing a New System in an Existing Project
 
@@ -225,18 +248,18 @@ The final `architect/plan.md` is used for actual code implementation.
     3.  **Implementation Planning**:
         - For Scene and Actions, read `references/system-scene.md` and `references/system-time.md`.
         - For Event triggering (e.g., OnSkillCast), read `references/system-foundation.md`.
-        - Output: `architect/plan.md`.
+        - Output: `architect/implementation.md`.
     4.  **Plan Refactoring**:
         - Read `references/evolution.md`.
         - Use **Composition** (Component pattern) to build complex skills from reusable effects.
         - Use **Abstraction** (Interfaces) to handle different targeting systems (e.g., Point vs. Target).
-        - Update: `architect/plan.md`.
+        - Update: `architect/implementation.md`.
 
 ### Example 5: Architecture and Performance Refactoring
 
 - **User Input**: "I've drafted the plan for the new system. Can you review and refactor it? I want to make sure the architecture is clean and scalable, and that it runs efficiently."
 - **Execution Path**:
-    1.  **Analyze Existing Plan**: Review `architect/plan.md` to identify coupling issues and potential hotspots.
+    1.  **Analyze Existing Plan**: Review `architect/implementation.md` to identify coupling issues and potential hotspots.
     2.  **Read References**:
         - Read `references/evolution.md` to guide architectural separation and extensibility.
         - Read `references/performance-optimization.md` to find opportunities for caching, pooling, or algorithmic improvements.
@@ -244,24 +267,6 @@ The final `architect/plan.md` is used for actual code implementation.
         - Apply **Composition** to decouple monolithic classes (from `evolution.md`).
         - Introduce **Object Pooling** for frequently created entities (from `performance-optimization.md`).
         - Implement **Throttling/Time-Slicing** for heavy update loops.
-        - Update: `architect/plan.md`.
+        - Update: `architect/implementation.md`.
 
 ---
-
-## Reference Map
-
-| Reference | Purpose |
-|-----------|---------|
-| `references/requirements.md` | Requirement analysis methods |
-| `references/macro-design.md` | High-level system design |
-| `references/principles.md` | Core architectural principles |
-| `references/domain-driven-design.md` | DDD/OOP patterns |
-| `references/data-driven-design.md` | Data-oriented patterns |
-| `references/prototype-design.md` | Rapid prototyping guide |
-| `references/evolution.md` | Managing architectural changes |
-| `references/system-foundation.md` | Core infrastructure |
-| `references/system-time.md` | Time & logic flow |
-| `references/system-scene.md` | Scene & spatial logic |
-| `references/system-ui.md` | UI architecture & MV* patterns |
-| `references/performance-optimization.md` | Logic performance optimization strategies |
-| `references/algorithm.md` | Algorithms and Data Structures reference |
