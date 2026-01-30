@@ -94,6 +94,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | Combat & Scene (Scene Graphs, Spatial Partitioning, ECS/EC, Loading) | `references/system-scene.md` |
 | UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
 | Skill System | `references/system-skill.md` |
+| Action Combat System | `references/system-action-combat.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 #### Mixing Paradigms
@@ -185,6 +186,8 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/principles.md`.
         - Select **Domain-Driven Design (DDD)**. Read `references/domain-driven-design.md`.
         - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
+        - For Skill System details, read `references/system-skill.md`.
+        - For Action Combat details (Hitboxes, Hurtboxes, Animations), read `references/system-action-combat.md`.
         - For Player State Machine (HFSM), read `references/system-time.md`.
         - For AI pathfinding or spatial queries, read `references/algorithm.md`.
         - Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
@@ -255,6 +258,7 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Read `references/principles.md`.
         - Apply **Domain-Driven Design (DDD)** for the core logic (e.g., `SkillExecutionService`). Read `references/domain-driven-design.md`.
         - Apply **Data-Driven Design** for skill configurations (XML/JSON/Excel). Read `references/data-driven-design.md`.
+        - For Skill System details, read `references/system-skill.md`.
         - For Scene and Actions, read `references/system-scene.md` and `references/system-time.md`.
         - For Event triggering (e.g., OnSkillCast), read `references/system-foundation.md`.
         - Output: `architect/technical_design.md`.
