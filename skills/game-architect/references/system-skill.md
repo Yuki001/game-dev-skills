@@ -21,6 +21,7 @@ The foundation of the skill system, representing the state of all relevant entit
 
 ### Primary Data
 -   **Attribute Set**: A collection of numerical properties that define an entity (e.g., Health, Mana, Strength). These are the primary targets for modification by skills.
+    -   **Attribute Field**: An entry in an Attribute Set or Skill Blackboard, defining a numeric attribute with a base value and a list of modifications. The final value is dynamically recalculated and cached for efficiency. Its calculation logic typically handles additive and multiplicative changes, following a formula like `final_value = (base_value + additive_sum) * multiplicative_factor`.
 -   **Tags**: A set of semantic labels used to describe an entity's current state or capabilities (e.g., `Stunned`, `Invulnerable`, `Burning`). Tags are crucial for state checking and logic branching.
 -   **Effects**: Data-driven objects that represent a record of a modification to be applied to an entity. They are the primary mechanism for changing Attributes and Tags.
 
