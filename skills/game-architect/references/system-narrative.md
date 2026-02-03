@@ -55,6 +55,10 @@ The organized flow of commands that make up a story segment.It stores in various
     -   **Timeline**: Track-based arrangement of events, ideal for cutscenes.
 -   **Runtime**: Loaded by a **Sequences Loader** into a runtime instance containing a list of command instances.
 
+## 4. Runtime Execution
+
+The player and engine that execute the command sequences and manage the narrative state.
+
 ### Sequence Player
 The core logic responsible for executing a Command Sequence.
 -   **Functions**: Controls playback (Play, Stop, Pause, Resume) and manages lifecycle events.
@@ -68,11 +72,8 @@ The core logic responsible for executing a Command Sequence.
     -   **Local Blackboard**: Manages variables specific to the current play session.
     -   **Preloading**: Collects and preloads resources required by the sequence.
 
-## 4. Runtime Execution (Execution Engine)
-
+### Execution Engine
 The root entry point for the system, managing the overall lifecycle.
-
-### Responsibilities
 -   **Management**: Maintains the "Commands Map" (registry of command templates) and manages multiple running Sequence Players.
 -   **Save / Load**:
     -   **Save**: Serializes the data for:
