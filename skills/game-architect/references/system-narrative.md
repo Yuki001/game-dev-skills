@@ -39,7 +39,9 @@ The atomic units of narrative logic.
     -   **Structural Commands**: Control flow logic (e.g., `If`, `Loop`, `Goto`, `Parallel`, `SubModule`).
     -   **Blackboard Commands**: Operations to manipulate variables (e.g., `Get`, `Set`).
     -   **Custom Calls**: Bindings to external functions or script engine calls.
--   **Implementation**: Typically implemented via Command classes or Async Tasks.
+-   **Implementation**: 
+    -   **Command Templates**: Typically implemented via Command classes or Async Tasks.
+    -   **Command Instances**: Command Template instance initialized with parameters. Contains an unique ID. 
 -   **Helper Classes**:
     -   **Expression Objects**: Handles parameter calculation. Can be pre-calculated (constants) or evaluated at runtime (variables).
 
@@ -73,7 +75,11 @@ The root entry point for the system, managing the overall lifecycle.
 ### Responsibilities
 -   **Management**: Maintains the "Commands Map" (registry of command templates) and manages multiple running Sequence Players.
 -   **Save / Load**:
-    -   **Save**: Serializes the Variable Blackboard, the state of all Sequence Players (Execution Cursors), and the Story Scene object tree.
+    -   **Save**: Serializes the data for:
+        - **Variable Blackboard** : Global Variables
+        - **Sequence Players** : State of all Sequence Players (Execution Cursors + Local Blackboards)
+            - **Version Compatibility** : Store the command ID instead of PC.
+        - **Story Scene object tree** : Data for reconstruct the story scene.
     -   **Load**: Restores the blackboard, reconstructs the scene, recreates players, and restores their cursors.
 -   **Fast Forward**:
     -   A specialized execution mode that rapidly advances Sequence Players to a destination.
