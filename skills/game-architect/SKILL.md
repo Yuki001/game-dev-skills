@@ -95,6 +95,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
 | Skill System | `references/system-skill.md` |
 | Action Combat System | `references/system-action-combat.md` |
+| Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 #### Mixing Paradigms
@@ -282,6 +283,29 @@ The final `architect/implementation.md` is used for actual code implementation.
         - Apply **Composition** to decouple monolithic classes (from `evolution.md`).
         - Introduce **Object Pooling** for frequently created entities (from `performance-optimization.md`).
         - Implement **Throttling/Time-Slicing** for heavy update loops.
+        - Update: `architect/implementation.md`.
+
+### Example 6: Narrative-Driven Game (Visual Novel / RPG)
+
+- **User Input**: "I'm building a story-heavy RPG with complex branching dialogues and cutscenes. How should I structure the narrative system?"
+- **Execution Path**:
+    1.  **Requirement Analysis**:
+        - Read `references/requirements.md`.
+        - Focus on **Use Cases** for dialogue flow and state tracking.
+        - Output: `architect/requirement.md`.
+    2.  **Technical Design**:
+        - Read `references/principles.md`.
+        - Select **Data-Driven Design** for dialogue content.
+        - Read `references/system-narrative.md` for the core architecture (Commands, Sequences, Blackboard).
+        - For UI presentation (Dialogue Box), read `references/system-ui.md`.
+        - For Resource Management (Character Portraits, Audio), read `references/system-foundation.md`.
+        - Design the **Command Sequence** structure and **Variable Blackboard**.
+        - Output: `architect/technical_design.md`.
+    3.  **Implementation Planning**:
+        - Output: `architect/implementation.md`.
+    4.  **Plan Refactoring**:
+        - Read `references/evolution.md`.
+        - Ensure separation between Logic (Flow) and Presentation (UI).
         - Update: `architect/implementation.md`.
 
 ---
