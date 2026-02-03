@@ -53,7 +53,7 @@ The combat flow is event-driven, triggered by the Skill System or Animation Sequ
 
 ### Combat Attack Event
 Attacks are initiated through precise timing events sourced from two main systems:
--   **Skill System**: A timeline-based skill engine triggers attack events at configured timestamps.
+-   **Skill System**: A time-based skill engine triggers attack events at configured actions.(see [system-skill.md](./system-skill.md))
 -   **Animation Sequences**: Embedded "Notifies" in animation clips trigger events when the character reaches specific frames (e.g., the moment a sword swing is fully extended).
 
 ### Melee Flow
@@ -85,12 +85,12 @@ Contains the "context" of a hit.
 ### The "A Hits B" Pipeline
 1.  **Calculate Initial Structure**: Fill `DamageData` with base values from the attacker and move.
 2.  **Pre-Damage Hooks**: Modify the data before application.
-    -   `Attacker.onDamagingBefore(Victim, DamageData)` (e.g., "Life Steal" modifier).
-    -   `Victim.onDamageBefore(Attacker, DamageData)` (e.g., "Shield" or "Damage Reduction" logic).
+    -   `Attacker.onDamagingBefore.trigger(Victim, DamageData)` (e.g., "Life Steal" modifier).
+    -   `Victim.onDamageBefore.trigger(Attacker, DamageData)` (e.g., "Shield" or "Damage Reduction" logic).
 3.  **Apply Damage**: Commit the final `DamageData` to the victim's attributes (e.g., subtract Health).
 4.  **Post-Damage Hooks**: Reactive logic after the hit is successful.
-    -   `Attacker.onDamaging(Victim, DamageData)` (e.g., trigger a "Kill Proc").
-    -   `Victim.onDamage(Attacker, DamageData)` (e.g., play "Hit Reaction" or trigger "Thorns").
+    -   `Attacker.onDamaging.trigger(Victim, DamageData)` (e.g., trigger a "Kill Proc").
+    -   `Victim.onDamage.trigger(Attacker, DamageData)` (e.g., play "Hit Reaction" or trigger "Thorns").
 
 ### Direct & Internal Flows
 
@@ -121,7 +121,7 @@ Used for system-level adjustments (e.g., level-up attribute boosts, developer ch
 ### Projectiles (Bullets)
 -   **Base Movement**:
     -   **Vector-Based**: Defined by explicit `Position`, `Velocity`, and `Acceleration` (linear force).
-    -   **Angular-Based**: Defined by `Angle`, `Speed`, `AngularVelocity`, and `RadialAcceleration` (curving paths).
+    -   **Angular-Based**: Defined by `Angle`, `Speed`, `AngularVelocity`, and `SpeedAcceleration` (curving paths).
 -   **Emitters**: Specialized components responsible for spawning projectiles in complex patterns (e.g., Spirals, Fans, Random Scatters).
 -   **Controllers/Modifiers**: Time-based logic components that can dynamically alter a projectile's trajectory during flight (e.g., Homing, Gravity, Drag, or Variable Speed curves).
 
