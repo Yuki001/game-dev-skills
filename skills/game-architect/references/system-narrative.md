@@ -41,18 +41,22 @@ The atomic units of narrative logic.
     -   **Custom Calls**: Bindings to external functions or script engine calls.
 -   **Implementation**: 
     -   **Command Templates**: Typically implemented via Command classes or Async Tasks.
-    -   **Command Instances**: Command Template instance initialized with parameters. Contains an unique ID. 
+    -   **Command Instances**: Command Template instance initialized with parameters. Contains a unique ID. 
 -   **Helper Classes**:
     -   **Expression Objects**: Handles parameter calculation. Can be pre-calculated (constants) or evaluated at runtime (variables).
 
 ### Command Sequences
-The organized flow of commands that make up a story segment.It stores in various formats and loaded into runtime.
+The organized flow of commands that make up a story segment. It is stored in various formats and loaded into runtime.
 -   **Implementation & Storage Formats**:
     -   **Data Table**: Excel/CSV sheets defining entries (Command Type + Parameters).
     -   **Script File**: Domain Specific Language (DSL) for writing commands.
     -   **Node Graph**: Visual graph with command nodes and execution flow connections.
     -   **Hard Code**: Chained actions or Fluent API directly in code.
     -   **Timeline**: Track-based arrangement of events, ideal for cutscenes.
+-   **Modularization**: 
+    -   **Split Modules**: Multiple command sequence files as different modules.
+    -   **Sub-module**: A command sequence module can be called by another command sequence module.
+    -   **Module Template**: A command sequence module can be used as a template for other command sequence modules.
 -   **Runtime**: Loaded by a **Sequences Loader** into a runtime instance containing a list of command instances.
 
 ## 4. Runtime Execution
@@ -60,13 +64,14 @@ The organized flow of commands that make up a story segment.It stores in various
 The player and engine that execute the command sequences and manage the narrative state.
 
 ### Sequence Player
-The core logic responsible for executing a Command Sequence.
+The core logic responsible for executing a Command Sequence module.
 -   **Functions**: Controls playback (Play, Stop, Pause, Resume) and manages lifecycle events.
 -   **Base Implementation**: 
     -   **Execution Cursor**: The core pointer to execute commands. It contains the following data:
-        -   **Program Counter (PC)**: Points to the current command index.
+        -   **Program Counter (PC)**: Points to the current command. For data table or script file based sequences.
+        -   **Current Time**: Tracks the current playback time. For timeline-based sequences.
         -   **Internal State**: Stores detailed state data (e.g., timers, interpolation states).
-        -   **PC Stack**: Optional stack to support sub-module jumping and calling. 
+        -   **PC Stack**: Optional stack to support jumping and function calling.
 -   **Advanced Features**:
     -   **Multiple Cursors**: Supports parallel execution paths (fork/join).
     -   **Local Blackboard**: Manages variables specific to the current play session.
@@ -74,13 +79,16 @@ The core logic responsible for executing a Command Sequence.
 
 ### Execution Engine
 The root entry point for the system, managing the overall lifecycle.
--   **Management**: Maintains the "Commands Map" (registry of command templates) and manages multiple running Sequence Players.
+-   **Management**:
+    -   **Commands Map**: Maintains the registry of command templates
+    -   **Sequence Players**: Manages multiple running Sequence Players
+-   **Module Calling**: Spawn new sequence players for module calls
 -   **Save / Load**:
     -   **Save**: Serializes the data for:
-        - **Variable Blackboard** : Global Variables
-        - **Sequence Players** : State of all Sequence Players (Execution Cursors + Local Blackboards)
-            - **Version Compatibility** : Store the command ID instead of PC.
-        - **Story Scene object tree** : Data for reconstruct the story scene.
+        -   **Variable Blackboard**: Global Variables
+        -   **Sequence Players**: State of all Sequence Players (Execution Cursors + Local Blackboards)
+            -   **Serialize PC**: Store the Command ID or Command Hash instead of PC for version compatibility.
+        -   **Story Scene object tree**: Data to reconstruct the story scene.
     -   **Load**: Restores the blackboard, reconstructs the scene, recreates players, and restores their cursors.
 -   **Fast Forward**:
     -   A specialized execution mode that rapidly advances Sequence Players to a destination.
