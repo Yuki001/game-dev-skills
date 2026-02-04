@@ -55,8 +55,7 @@ The organized flow of commands that make up a story segment. It is stored in var
     -   **Timeline**: Track-based arrangement of events, ideal for cutscenes.
 -   **Modularization**: 
     -   **Split Modules**: Multiple command sequence files as different modules.
-    -   **Sub-module**: A command sequence module can be called by another command sequence module.
-    -   **Module Template**: A command sequence module can be used as a template for other command sequence modules.
+    -   **Module Calling**: A command sequence module can be called by another command sequence module.
 -   **Runtime**: Loaded by a **Sequences Loader** into a runtime instance containing a list of command instances.
 
 ## 4. Runtime Execution
