@@ -96,6 +96,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | Skill System (Attribute, Skill, Buff) | `references/system-skill.md` |
 | Action Combat System (HitBox, Damage, Melee, Projectiles) | `references/system-action-combat.md` |
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
+| Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 #### Mixing Paradigms
