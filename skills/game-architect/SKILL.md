@@ -79,11 +79,11 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 
 #### Paradigm Selection Guide
 
-| System Type | Recommended Paradigm | Reference |
-|-------------|---------------------|-----------|
-| Complex Core Gameplay (Combat, Physics, AI) | **Domain-Driven Design (DDD)** | `references/domain-driven-design.md` |
-| UI, Data Management, Simple CRUD | **Data-Driven Design** | `references/data-driven-design.md` |
-| Rapid Prototyping | **Use-Case Driven Prototype** | `references/prototype-design.md` |
+| Paradigm | KeyPoint | Applicability Scope | Examples | Reference |
+| :--- | :--- | :--- | :--- | :--- |
+| **Domain-Driven Design (DDD)** | OOP & Entity First | **High Rule Complexity**: Systems with distinct entity types and intricate, fixed interaction rules or physics. Code defines the "Laws of Physics". | Core Combat Logic, Physics Interactions, Server State Sync, Matchmaking. | `references/domain-driven-design.md` |
+| **Data-Driven Design** | Data Layer First | **High Content Complexity**: Systems with generic atomic rules but infinite data composition/combinations (Code is Interpreter, Data is Content).<br>**OR**<br>**Simple Data Management**: Systems focused on CRUD, storage, and UI presentation. | **Content**: Skill System, Narrative, Quests, Level Design.<br>**Mgmt**: Inventory, Shop, Mail, Friends. | `references/data-driven-design.md` |
+| **Use-Case Driven Prototype** | Use-Case Implementation First | **Rapid Validation**: Quick implementation to verify fun factor. | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
 
 #### System-Specific References
 
@@ -102,10 +102,16 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 #### Mixing Paradigms
 
 Most projects mix paradigms:
-1. **Macro Consistency**: All modules follow the same Module Management Framework
-2. **Domain for Core**: Use DDD for Battle/Core modules
-3. **Data for Shell**: Use Data-Driven for UI/Meta-game modules
-4. **Integration**: Application Layer bridges different paradigms
+1.  **Macro Consistency**: All modules follow the same Module Management Framework.
+2.  **Domain for Core Entities & Rules**: Use DDD for the various type of entities and fixed rules of the world (e.g., Character, Damage Formulas, Physics).
+3.  **Data for Content & State**: Use Data-Driven for expandable content systems (Skills, Story) and state management (Inventory).
+4.  **Hybrid Architecture (Data Structure + Domain Behavior)**:
+    -   **For complex systems**: High rules and contents complexity. For example **Node Graphs Simulation** (e.g., **Circuit Simulations**)
+    -   **Macro (Topology/Editor)**: Use **Data-Driven Design** (IDs, pure data structs) for the graph structure. This ensures stability for Serialization, Undo/Redo, and Network Sync.
+    -   **Micro (Runtime/Simulation)**: Use **DDD/OOP** (Polymorphism, Direct References) for the node's internal logic and interaction rules.
+    -   **Bridge (Bake/Compile)**: Implement a build step that transforms **Data** into **Runtime Objects** for maximum performance.
+    -   **Recommendation**: "Define the Map (Data) before the Car (Domain)." Start with the Data Layer to handle the structure, then build the Domain Layer to handle the behavior.
+5.  **Integration**: Application Layer bridges different paradigms.
 
 #### Note
 
