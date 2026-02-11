@@ -105,11 +105,14 @@ Most projects mix paradigms:
 1.  **Macro Consistency**: All modules follow the same Module Management Framework.
 2.  **Domain for Core Entities & Rules**: Use DDD for systems with high rule complexity, rich domain concepts, and many distinct entities (e.g., Combat Actors, Damage Formulas, AI Decision).
 3.  **Data for Content, Flow & State**: Use Data-Driven for expandable content (Quests, Level Design), flow orchestration (Tutorial, Skill Execution, Narrative), and simple data management (Inventory, Shop).
-4.  **Hybrid Systems (Both Rule-Heavy and Content/Flow-Heavy)**:
+4.  **Hybrid Paradigms**:
     - 4.1 **Entities as Data**: Domain Entities naturally hold both data (fields) and behavior (methods). Design entities to be serialization-friendly (use IDs, keep state as plain fields) so they serve both roles without a separate data layer.
     - 4.2 **Flow + Domain**: Use data-driven flow to orchestrate the sequence/pipeline, domain logic to handle rules at each step. E.g., Skill System: flow drives cast→channel→apply, domain handles damage calc and buff interactions.
     - 4.3 **Separate Data/Domain Layers**: Only when edit-time and runtime representations truly diverge. Use a Bake/Compile step to bridge them. E.g., visual node-graph editors, compiled assets.
-5.  **Integration**: Application Layer bridges different paradigms.
+5.  **Paradigm Interchangeability**: Many systems can be validly implemented with either paradigm. E.g., Actor inheritance hierarchy (Domain) ↔ ECS components + systems (Data-Driven); Buff objects with encapsulated rules (Domain) ↔ Tag + Effect data entries resolved by a generic pipeline (Data-Driven).
+    - **Selection Criteria**: When both paradigms fit, evaluate trade-offs: Domain-Driven favors debuggability, explicit rules, and rich behavior; Data-Driven favors runtime flexibility, cache performance, serialization, and designer-friendly configuration. Networking requirements (state sync, rollback) often favor Data-Driven due to simpler state snapshots.
+6.  **Integration**: Application Layer bridges different paradigms.
+
 
 #### Note
 
