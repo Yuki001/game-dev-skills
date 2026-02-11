@@ -113,11 +113,6 @@ Most projects mix paradigms:
     - **Selection Criteria**: When both paradigms fit, evaluate trade-offs: Domain-Driven favors debuggability, explicit rules, and rich behavior; Data-Driven favors runtime flexibility, cache performance, serialization, and designer-friendly configuration. Networking requirements (state sync, rollback) often favor Data-Driven due to simpler state snapshots.
 6.  **Integration**: Application Layer bridges different paradigms.
 
-
-#### Note
-
-**DO NOT** contain any Code Snippets in the Technical Design documents. 
-
 ---
 
 ### Phase 3: Implementation Planning
@@ -177,6 +172,199 @@ The final `architect/implementation.md` is used for actual code implementation.
     - **Goal**: Optimize, correct, or expand the document based on specific user feedback or new insights.
     - **Output**: Update the target file in-place.
     - **Note**: Phase 4 is a specialized version of this, but the Refactor Phase extension applies generally to any step.
+
+---
+
+## Output Document Structure
+
+### requirement.md
+
+```markdown
+# {Project Name} - Requirement Analysis
+
+## 1. Project Overview
+Brief description of the project vision, target platform, and core goals.
+
+## 2. Feature List
+| Category | Feature | Priority | Notes |
+|----------|---------|----------|-------|
+| Platform | OS / Device targets | - | |
+| Genre | Game type & sub-genre | - | |
+| Network | Single-player / Multiplayer | - | |
+| Scope | Project scale & milestones | - | |
+| Performance | Target FPS, memory budget | - | |
+
+## 3. Domain Models
+For core gameplay and complex logic systems.
+
+### 3.1 Domain Vocabulary
+| Term | Definition |
+|------|-----------|
+
+### 3.2 Domain Model Diagram
+Entity relationships, state diagrams, system diagrams (use text/mermaid).
+
+## 4. Use Cases
+Per core feature, from summary → informal → detailed as needed.
+
+### 4.x {Use Case Name}
+- **Actor(s)**:
+- **Preconditions**:
+- **Main Scenario**: (numbered steps)
+- **Extension Scenarios**: (branch / edge cases)
+- **Business Rules**: (referenced rule IDs)
+
+## 5. User Flows
+Interaction flows for UI, gameplay mechanics, and cutscenes.
+
+### 5.x {Flow Name}
+- **Type**: UI Flow / Gameplay / Cutscene
+- **Flow Description**: (sequential screens/states with transitions)
+
+## 6. Iteration Milestones
+Plan incremental delivery milestones. Each milestone forms a playable/testable Minimum Viable Product (MVP) or meaningful increment.
+
+### Milestone {N}: {Name}
+- **Goal**: What this milestone validates or delivers.
+- **Included Features**: (reference Feature List items)
+- **Included Use Cases**: (reference Use Case IDs from §4)
+- **Deliverable**: What the user can see / play / test at this point.
+- **Acceptance Criteria**: How to verify this milestone is complete.
+- **Dependencies**: Prerequisites from previous milestones.
+```
+
+---
+
+### technical_design.md
+
+```markdown
+# {Project Name} - Technical Design
+
+## 1. Existing Project Analysis
+> Skip this section for new projects.
+
+- **Directory & Module Structure**: Current layout overview.
+- **Architecture Pattern**: Identified paradigms in use.
+- **Integration Points**: Where new systems connect to existing code.
+- **Constraints & Tech Debt**: Known limitations to work around.
+
+## 2. Multi-Application Design
+- **Network Form**: Single-player / Client-Server / P2P.
+- **Application List**:
+  | Application | Role | Description |
+  |-------------|------|-------------|
+- **Interaction Scheme**: Protocol / RPC / API between applications.
+
+## 3. Technology Stack
+| Category | Selection | Alternatives | Reason |
+|----------|-----------|-------------|--------|
+| Engine | | | |
+| Language | | | |
+| Networking | | | |
+| Data Storage | | | |
+| Key Libraries | | | |
+
+## 4. Architecture Overview
+### 4.1 Layer Diagram
+Foundation Layer / Logic Layer / Application Layer separation.
+
+### 4.2 Module Map
+| Module | Layer | Paradigm | Description |
+|--------|-------|----------|-------------|
+
+### 4.3 Module Dependencies
+Inter-module dependency and communication diagram (events, interfaces).
+
+## 5. Module Design
+Per module, repeat this section.
+
+### 5.x {Module Name}
+- **Paradigm**: DDD / Data-Driven / Prototype (with justification)
+- **Responsibilities**: What this module owns.
+- **Key Domain Concepts / Data Structures**: Core abstractions (no code).
+- **External Interfaces**: How other modules interact with this one.
+- **Internal Flow**: Key processes and state transitions.
+- **Design Decisions**: Trade-offs and rationale.
+
+## 6. Milestone System Plan
+Map each milestone (from requirement.md §6) to concrete system implementation scope.
+
+### Milestone {N}: {Name}
+- **Systems to Implement**:
+  | Module | Scope (Full / Partial) | Key Deliverables | Notes |
+  |--------|----------------------|-------------------|-------|
+- **Integration Work**: Cross-module wiring needed for this milestone.
+- **Stub / Mock**: Systems not yet implemented but needed as placeholders.
+
+### Prototype Iteration Breakdown
+> For modules using the **Use-Case Driven Prototype** paradigm, further split each milestone into small iterations (1–3 days each).
+
+#### Milestone {N} - Iteration {M}: {Short Description}
+- **Target Use Case**: (reference Use Case ID)
+- **Implementation Focus**: What to build in this iteration.
+- **Fake / Deferred**: What to stub out (fake data, temp UI, placeholder art).
+- **Validation**: How to verify the use case works (playtest criteria).
+- **Refactor Notes**: Technical debt introduced, to be addressed later.
+```
+
+---
+
+### implementation.md
+
+````markdown
+# {Project Name} - Implementation Plan
+
+## 1. Directory Structure
+```text
+project-root/
+├── src/
+│   ├── foundation/     # Foundation Layer
+│   ├── logic/          # Logic Layer modules
+│   └── app/            # Application Layer
+├── configs/            # Data tables & configurations
+├── assets/             # Art, audio, etc.
+└── tests/
+```
+
+## 2. Data Structures
+Per module, define core types.
+
+### 2.x {Module} Data Structures
+- **Type Name**: Purpose, fields, constraints.
+- **Relationships**: References (by ID), ownership, lifecycle.
+- **Data Classification**: Config (static) / Data (persistent) / Instance (runtime).
+
+## 3. Key Algorithms
+### 3.x {Algorithm Name}
+- **Purpose**:
+- **Input / Output**:
+- **Pseudocode**: (step-by-step)
+- **Complexity**: Time & space.
+
+## 4. Class Design
+Per module, document class hierarchies.
+
+### 4.x {Module} Classes
+- **Class Diagram**: Inheritance & composition relationships (text/mermaid).
+- **Key Classes**:
+  | Class | Role (Entity/Service/VO/Repository/Factory) | Responsibilities |
+  |-------|----------------------------------------------|-----------------|
+- **Interface Definitions**: Abstract contracts between components.
+
+## 5. Object Relationships
+### 5.x {Module or Cross-Module} Relationships
+- **Associations**: Who holds references to whom (and how: direct / ID / event).
+- **Lifecycles**: Creation → active use → disposal flow.
+- **Ownership**: Aggregate boundaries, who manages disposal.
+
+## 6. Key Code Snippets
+Critical implementation examples that clarify design intent.
+
+### 6.x {Snippet Title}
+- **Context**: Which class/module this belongs to.
+- **Code**: (language-appropriate snippet)
+- **Notes**: Why this approach, edge cases to handle.
+````
 
 ---
 
