@@ -54,7 +54,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 
 **Key Tasks**:
 1. Extract and clarify user requirements
-2. Build Feature List (technological scope)
+2. Build Feature List (technological scope, including non-functional requirements)
 3. Define Domain Models (for core gameplay)
 4. Document Use Cases & User Flows
 
@@ -71,7 +71,14 @@ requirement.md  --->  technical_design.md  --->  implementation.md
   - Read `references/principles.md` for core principles
 
 **Key Tasks**:
-1. If existing project: Analyze the exist project code to understand the current architecture
+1. If existing project: Analyze the existing project code to understand the current architecture
+   - Directory & module structure (layers, namespaces, key entry points)
+   - Technology stack & dependencies (engine, language, third-party libraries)
+   - Architectural paradigms in use (DDD, ECS, MVC, etc.)
+   - Module boundaries & inter-module communication (events, interfaces, direct calls)
+   - Data flow (config loading, persistence, runtime state management)
+   - Known constraints & technical debt (coupling issues, performance bottlenecks, deprecated patterns)
+   - Integration points for new systems (where to hook in, what to extend)
 2. Define Multi-Application structure (Client/Server)
 3. Select Technology Stack (Engine, Languages)
 4. Choose architectural paradigms using the **Paradigm Selection Guide** for each module
@@ -84,6 +91,19 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | **Domain-Driven Design (DDD)** | OOP & Entity First | High Rule Complexity. <br> Rich Domain Concepts. <br> Many Distinct Entities. | Core Combat Logic, Physics Interactions, Damage/Buff Rules, Complex AI Decision. | `references/domain-driven-design.md` |
 | **Data-Driven Design** | Data Layer First | High Content Complexity. <br>  Flow Orchestration. <br> Simple Data Management. | **Content**:  Quests, Level Design.<br>**Flow**: Tutorial Flow, Skill Execution, Narrative.<br>**Mgmt**: Inventory, Shop, Mail, Leaderboard. | `references/data-driven-design.md` |
 | **Use-Case Driven Prototype** | Use-Case Implementation First | Rapid Validation | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
+
+**Selection Criteria** — when both DDD and Data-Driven fit, use these signals:
+
+| Signal | Favor DDD | Favor Data-Driven |
+|--------|-----------|-------------------|
+| Entity interactions | Complex multi-entity rules (attacker × defender × buffs × environment) | Mostly CRUD + display, few cross-entity rules |
+| Behavior source | Varies by entity type, hard to express as pure data | Driven by config tables, designer-authored content |
+| Change frequency | Rules change with game balance iterations | Content/flow changes far more often than logic |
+| Performance profile | Acceptable overhead for rich object graphs | Needs batch processing, cache-friendly layouts |
+| Networking | Stateful objects acceptable | Flat state snapshots preferred (sync, rollback) |
+| Team workflow | Programmers own the logic | Designers need to iterate without code changes |
+
+Favor **Prototype** when the core mechanic is unproven and the priority is validation speed over architecture quality.
 
 #### System-Specific References
 
@@ -109,21 +129,23 @@ Most projects mix paradigms:
     - 4.1 **Entities as Data**: Domain Entities naturally hold both data (fields) and behavior (methods). Design entities to be serialization-friendly (use IDs, keep state as plain fields) so they serve both roles without a separate data layer.
     - 4.2 **Flow + Domain**: Use data-driven flow to orchestrate the sequence/pipeline, domain logic to handle rules at each step. E.g., Skill System: flow drives cast→channel→apply, domain handles damage calc and buff interactions.
     - 4.3 **Separate Data/Domain Layers**: Only when edit-time and runtime representations truly diverge. Use a Bake/Compile step to bridge them. E.g., visual node-graph editors, compiled assets.
-5.  **Paradigm Interchangeability**: Many systems can be validly implemented with either paradigm. E.g., Actor inheritance hierarchy (Domain) ↔ ECS components + systems (Data-Driven); Buff objects with encapsulated rules (Domain) ↔ Tag + Effect data entries resolved by a generic pipeline (Data-Driven).
-    - **Selection Criteria**: When both paradigms fit, evaluate trade-offs: Domain-Driven favors debuggability, explicit rules, and rich behavior; Data-Driven favors runtime flexibility, cache performance, serialization, and designer-friendly configuration. Networking requirements (state sync, rollback) often favor Data-Driven due to simpler state snapshots.
+5.  **Paradigm Interchangeability**: Many systems can be validly implemented with either paradigm. E.g., Actor inheritance hierarchy (Domain) ↔ ECS components + systems (Data-Driven); Buff objects with encapsulated rules (Domain) ↔ Tag + Effect data entries resolved by a generic pipeline (Data-Driven). See **Selection Criteria** table above for trade-off signals.
 6.  **Integration**: Application Layer bridges different paradigms.
 
 ---
 
-### Phase 3: Implementation Planning
+### Phase 3: Implementation Planning & Evolution
 
-**Goal**: Create detailed implementation specifications.
+**Goal**: Create detailed implementation specifications, then review and refine for extensibility and maintainability.
 
 - **Input**: `architect/technical_design.md`
 - **Output**: `architect/implementation.md`
-- **References**: Use Specific System Architecture documents from `references/`
+- **References**:
+  - Use Specific System Architecture documents from `references/`
+  - Read `references/evolution.md` for evolution strategies
+  - Read `references/performance-optimization.md` (only if user requires performance optimization)
 
-**Key Tasks**:
+**Step 1 — Implementation Design**:
 1. **Directory Structure**: Define the directory structure for the project
 2. **Data Structures**: Define all core data types and structures
 3. **Algorithms**: Specify key algorithms with pseudocode
@@ -131,26 +153,15 @@ Most projects mix paradigms:
 5. **Object Relationships**: Define associations, dependencies, and lifecycles
 6. **Key Code Snippets**: Provide critical implementation examples
 
----
-
-### Phase 4: Plan Refactoring
-
-**Goal**: Review and refine the implementation plan for better extensibility and maintainability.
-
-- **Input & Output**: `architect/implementation.md` (in-place update)
-- **Reference**: 
-    - Read `references/evolution.md`
-    - Read `references/performance-optimization.md` (Only if user requires performance optimization)
-
-**Refactoring Focus**:
-1. **Isolation**: Ensure proper separation of concerns
-2. **Abstraction**: Apply appropriate interface abstractions
+**Step 2 — Evolution Review** (applied in-place to the output above):
+1. **Isolation**: Ensure proper separation of concerns across modules
+2. **Abstraction**: Apply appropriate interface abstractions at change points
 3. **Composition**: Prefer composition over inheritance where applicable
-4. **Future Changes**: Anticipate and plan for likely evolution
+4. **Future Changes**: Anticipate likely evolution and mark extension points
 
 ---
 
-### Phase 5: Implementation (Out of Scope)
+### Phase 4: Implementation (Out of Scope)
 
 The final `architect/implementation.md` is used for actual code implementation.
 
@@ -167,11 +178,10 @@ The final `architect/implementation.md` is used for actual code implementation.
     - "User Review" flag is active.
     - OR User requests a refactor/update for a specific document after the fact.
 - **Process**:
-    - Can target any specific **Phase 1 - 5** individually.
+    - Can target any specific **Phase 1 - 3** individually.
     - **Input**: The **existing Output file** of that phase (e.g., `architect/technical_design.md` if refactoring Phase 2). *Crucial: Read the file first as the user may have modified it.*
     - **Goal**: Optimize, correct, or expand the document based on specific user feedback or new insights.
     - **Output**: Update the target file in-place.
-    - **Note**: Phase 4 is a specialized version of this, but the Refactor Phase extension applies generally to any step.
 
 ---
 
@@ -192,7 +202,11 @@ Brief description of the project vision, target platform, and core goals.
 | Genre | Game type & sub-genre | - | |
 | Network | Single-player / Multiplayer | - | |
 | Scope | Project scale & milestones | - | |
-| Performance | Target FPS, memory budget | - | |
+| Performance | Target FPS, memory budget, loading time | - | |
+| Testability | Test strategy, debug tools, GM panel | - | |
+| Observability | Logging, monitoring, crash reporting | - | |
+| Deployment | Build pipeline, CI/CD, patching | - | |
+| Security | Anti-cheat, data validation, encryption | - | |
 
 ## 3. Domain Models
 For core gameplay and complex logic systems.
@@ -385,12 +399,11 @@ Critical implementation examples that clarify design intent.
         - Select **DDD** for core combat (high rule complexity, rich domain concepts). Read `references/domain-driven-design.md`.
         - System refs: `system-skill.md`, `system-action-combat.md`, `system-time.md`, `system-scene.md`, `algorithm.md`.
         - Output: `architect/technical_design.md`.
-    4.  **Phase 3 - Implementation Planning**:
-        - Output: `architect/implementation.md`.
-    5.  **Phase 4 - Plan Refactoring**:
+    4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
-        - Apply composition and abstraction patterns.
-        - Update: `architect/implementation.md`.
+        - Step 1: Design data structures, class hierarchies, and key algorithms for combat systems.
+        - Step 2: Apply composition and abstraction patterns; mark extension points for new weapon/enemy types.
+        - Output: `architect/implementation.md`.
 
 ### Example 2: Existing Project (Hybrid Paradigms)
 
@@ -408,12 +421,11 @@ Critical implementation examples that clarify design intent.
         - Select **Data-Driven** for skill configurations (tables, content). Read `references/data-driven-design.md`.
         - System refs: `system-skill.md`, `system-foundation.md`, `system-time.md`.
         - Output: `architect/technical_design.md`.
-    4.  **Phase 3 - Implementation Planning**:
-        - Output: `architect/implementation.md`.
-    5.  **Phase 4 - Plan Refactoring**:
+    4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
-        - Apply composition (component pattern for reusable effects) and abstraction (interfaces for targeting).
-        - Update: `architect/implementation.md`.
+        - Step 1: Design skill data structures, effect class hierarchies, and configuration schemas.
+        - Step 2: Apply composition (component pattern for reusable effects) and abstraction (interfaces for targeting); ensure isolation from existing combat modules.
+        - Output: `architect/implementation.md`.
 
 ### Example 3: Rapid Prototype
 
@@ -429,20 +441,18 @@ Critical implementation examples that clarify design intent.
         - Select **Use-Case Driven Prototype**. Read `references/prototype-design.md`.
         - System refs as needed: `system-time.md`, `algorithm.md`.
         - Output: `architect/technical_design.md`.
-    4.  **Phase 3 - Implementation Planning**:
-        - Focus on rapid implementation of core use case.
-        - Output: `architect/implementation.md`.
-    5.  **Phase 4 - Plan Refactoring**:
+    4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
-        - Plan extraction points for after mechanic is validated.
-        - Update: `architect/implementation.md`.
+        - Step 1: Focus on rapid implementation of core use case; minimal class design.
+        - Step 2: Plan extraction points for after mechanic is validated; mark refactor targets.
+        - Output: `architect/implementation.md`.
 
 ### Example 4: Refactor Extension (On-Demand)
 
 - **User Input**: "I've drafted the implementation plan. Review and refactor it for better architecture and performance."
 - **Execution Path**:
     1.  **Read** existing `architect/implementation.md`.
-    2.  **Phase 4 - Plan Refactoring**:
+    2.  **Refactor Phase (Extension)** targeting Phase 3:
         - Read `references/evolution.md`.
         - Read `references/performance-optimization.md` (user requested performance).
         - Apply isolation, composition, and abstraction patterns.
