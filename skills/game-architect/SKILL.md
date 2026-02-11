@@ -22,7 +22,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 |----------|---------|-------------|
 | `requirement.md` | Requirements Analysis | Analyzes and formalizes user requirements |
 | `technical_design.md` | Technical Solution Design | **Core document** - designs system approaches and patterns |
-| `implementation.md` | Implementation Plan | Details data structures, algorithms, class designs, and key code |
+| `implementation.md` | Implementation Plan | Details data structures, algorithms, class designs, key code, and evolution strategies |
 
 ---
 
@@ -57,6 +57,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 2. Build Feature List (technological scope, including non-functional requirements)
 3. Define Domain Models (for core gameplay)
 4. Document Use Cases & User Flows
+5. Plan Iteration Milestones (incremental MVP delivery)
 
 ---
 
@@ -83,6 +84,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 3. Select Technology Stack (Engine, Languages)
 4. Choose architectural paradigms using the **Paradigm Selection Guide** for each module
 5. Use the **System-Specific References** to design each module
+6. Map Iteration Milestones to system implementation scope (Milestone System Plan)
 
 #### Paradigm Selection Guide
 
@@ -91,19 +93,6 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | **Domain-Driven Design (DDD)** | OOP & Entity First | High Rule Complexity. <br> Rich Domain Concepts. <br> Many Distinct Entities. | Core Combat Logic, Physics Interactions, Damage/Buff Rules, Complex AI Decision. | `references/domain-driven-design.md` |
 | **Data-Driven Design** | Data Layer First | High Content Complexity. <br>  Flow Orchestration. <br> Simple Data Management. | **Content**:  Quests, Level Design.<br>**Flow**: Tutorial Flow, Skill Execution, Narrative.<br>**Mgmt**: Inventory, Shop, Mail, Leaderboard. | `references/data-driven-design.md` |
 | **Use-Case Driven Prototype** | Use-Case Implementation First | Rapid Validation | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
-
-**Selection Criteria** — when both DDD and Data-Driven fit, use these signals:
-
-| Signal | Favor DDD | Favor Data-Driven |
-|--------|-----------|-------------------|
-| Entity interactions | Complex multi-entity rules (attacker × defender × buffs × environment) | Mostly CRUD + display, few cross-entity rules |
-| Behavior source | Varies by entity type, hard to express as pure data | Driven by config tables, designer-authored content |
-| Change frequency | Rules change with game balance iterations | Content/flow changes far more often than logic |
-| Performance profile | Acceptable overhead for rich object graphs | Needs batch processing, cache-friendly layouts |
-| Networking | Stateful objects acceptable | Flat state snapshots preferred (sync, rollback) |
-| Team workflow | Programmers own the logic | Designers need to iterate without code changes |
-
-Favor **Prototype** when the core mechanic is unproven and the priority is validation speed over architecture quality.
 
 #### System-Specific References
 
@@ -131,6 +120,17 @@ Most projects mix paradigms:
     - 4.3 **Separate Data/Domain Layers**: Only when edit-time and runtime representations truly diverge. Use a Bake/Compile step to bridge them. E.g., visual node-graph editors, compiled assets.
 5.  **Paradigm Interchangeability**: Many systems can be validly implemented with either paradigm. E.g., Actor inheritance hierarchy (Domain) ↔ ECS components + systems (Data-Driven); Buff objects with encapsulated rules (Domain) ↔ Tag + Effect data entries resolved by a generic pipeline (Data-Driven). See **Selection Criteria** table above for trade-off signals.
 6.  **Integration**: Application Layer bridges different paradigms.
+
+**Selection Criteria** — when both DDD and Data-Driven fit, use these signals:
+
+| Signal | Favor DDD | Favor Data-Driven |
+|--------|-----------|-------------------|
+| Entity interactions | Complex multi-entity rules (attacker × defender × buffs × environment) | Mostly CRUD + display, few cross-entity rules |
+| Behavior source | Varies by entity type, hard to express as pure data | Driven by config tables, designer-authored content |
+| Change frequency | Rules change with game balance iterations | Content/flow changes far more often than logic |
+| Performance profile | Acceptable overhead for rich object graphs | Needs batch processing, cache-friendly layouts |
+| Networking | Stateful objects acceptable | Flat state snapshots preferred (sync, rollback) |
+| Team workflow | Programmers own the logic | Designers need to iterate without code changes |
 
 ---
 
@@ -257,10 +257,13 @@ Plan incremental delivery milestones. Each milestone forms a playable/testable M
 ## 1. Existing Project Analysis
 > Skip this section for new projects.
 
-- **Directory & Module Structure**: Current layout overview.
-- **Architecture Pattern**: Identified paradigms in use.
-- **Integration Points**: Where new systems connect to existing code.
-- **Constraints & Tech Debt**: Known limitations to work around.
+- **Directory & Module Structure**: Layers, namespaces, key entry points.
+- **Technology Stack & Dependencies**: Engine, language, third-party libraries.
+- **Architectural Paradigms in Use**: DDD, ECS, MVC, etc.
+- **Module Boundaries & Communication**: Events, interfaces, direct calls.
+- **Data Flow**: Config loading, persistence, runtime state management.
+- **Constraints & Tech Debt**: Coupling issues, performance bottlenecks, deprecated patterns.
+- **Integration Points**: Where new systems hook in, what to extend.
 
 ## 2. Multi-Application Design
 - **Network Form**: Single-player / Client-Server / P2P.
@@ -378,6 +381,15 @@ Critical implementation examples that clarify design intent.
 - **Context**: Which class/module this belongs to.
 - **Code**: (language-appropriate snippet)
 - **Notes**: Why this approach, edge cases to handle.
+
+## 7. Evolution & Extension Points
+Document decisions from the Evolution Review (Phase 3 Step 2).
+
+### 7.x {Module or Cross-Module}
+- **Isolation**: How this module is decoupled from others (communication method, dependency direction).
+- **Abstractions**: Interfaces / strategies introduced at change points (and why).
+- **Composition**: Component or strategy splits applied (what was decomposed, how parts recombine).
+- **Anticipated Changes**: Likely future requirements and the extension points reserved for them.
 ````
 
 ---
@@ -392,12 +404,14 @@ Critical implementation examples that clarify design intent.
     2.  **Phase 1 - Requirement Analysis**:
         - Read `references/requirements.md`.
         - Focus on **Domain Model Analysis** for combat entities and **Use Cases** for combat flows.
+        - Plan milestones (e.g., M1: basic movement + attack, M2: damage rules + buffs, M3: AI combat).
         - Output: `architect/requirement.md`.
     3.  **Phase 2 - Technical Design**:
         - Read `references/macro-design.md` + `references/principles.md`.
         - Define multi-application structure and technology stack.
         - Select **DDD** for core combat (high rule complexity, rich domain concepts). Read `references/domain-driven-design.md`.
         - System refs: `system-skill.md`, `system-action-combat.md`, `system-time.md`, `system-scene.md`, `algorithm.md`.
+        - Map milestones to system scope (Milestone System Plan).
         - Output: `architect/technical_design.md`.
     4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
@@ -413,6 +427,7 @@ Critical implementation examples that clarify design intent.
     2.  **Phase 1 - Requirement Analysis**:
         - Read `references/requirements.md`.
         - Define domain entities (Skill, Effect) and use cases for skill interactions.
+        - Plan milestones (e.g., M1: basic skill cast + cooldown, M2: effects + buffs, M3: data-configurable skills).
         - Output: `architect/requirement.md`.
     3.  **Phase 2 - Technical Design**:
         - **Analyze existing project code** to understand current architecture.
@@ -420,6 +435,7 @@ Critical implementation examples that clarify design intent.
         - Select **DDD** for core skill logic (rules, interactions). Read `references/domain-driven-design.md`.
         - Select **Data-Driven** for skill configurations (tables, content). Read `references/data-driven-design.md`.
         - System refs: `system-skill.md`, `system-foundation.md`, `system-time.md`.
+        - Map milestones to system scope (Milestone System Plan).
         - Output: `architect/technical_design.md`.
     4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
@@ -435,11 +451,13 @@ Critical implementation examples that clarify design intent.
     2.  **Phase 1 - Requirement Analysis** (lightweight):
         - Read `references/requirements.md`.
         - Minimal analysis, focus on core puzzle mechanic.
+        - Plan milestones as iterations (e.g., M1: display map, M2: character movement, M3: puzzle interaction).
         - Output: `architect/requirement.md`.
     3.  **Phase 2 - Technical Design** (lightweight):
         - Read `references/macro-design.md` + `references/principles.md`.
         - Select **Use-Case Driven Prototype**. Read `references/prototype-design.md`.
         - System refs as needed: `system-time.md`, `algorithm.md`.
+        - Map milestones to prototype iteration breakdown.
         - Output: `architect/technical_design.md`.
     4.  **Phase 3 - Implementation Planning & Evolution**:
         - Read `references/evolution.md`.
