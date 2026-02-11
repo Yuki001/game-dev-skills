@@ -179,138 +179,83 @@ The final `architect/implementation.md` is used for actual code implementation.
 
 ## Example Workflows
 
-### Example 1: New Formal Project (Core Gameplay Focus)
+### Example 1: New Project (DDD Focus)
 
-- **User Input**: "I want to start a new ARPG project. The core combat is very complex with many states and interactions. How should I begin?"
+- **User Input**: "I want to build an ARPG with complex combat involving many states, damage rules, and AI interactions."
 - **Execution Path**:
-    1.  **Requirement Analysis**:
+    1.  **Phase 0**: Ask review preference.
+    2.  **Phase 1 - Requirement Analysis**:
         - Read `references/requirements.md`.
-        - Focus on **Domain Model Analysis** to capture complex combat concepts.
+        - Focus on **Domain Model Analysis** for combat entities and **Use Cases** for combat flows.
         - Output: `architect/requirement.md`.
-    2.  **Technical Design**:
-        - Read `references/macro-design.md`. Choose Unity/Unreal and define the layer structure.
-        - Read `references/principles.md`.
-        - Select **Domain-Driven Design (DDD)**. Read `references/domain-driven-design.md`.
-        - For Combat Actor structure (EC/ECS), read `references/system-scene.md`.
-        - For Skill System details, read `references/system-skill.md`.
-        - For Action Combat details (Hitboxes, Hurtboxes, Animations), read `references/system-action-combat.md`.
-        - For Player State Machine (HFSM), read `references/system-time.md`.
-        - For AI pathfinding or spatial queries, read `references/algorithm.md`.
-        - Implement Combat using Entities (Player, Enemy) and Services (DamageCalc).
+    3.  **Phase 2 - Technical Design**:
+        - Read `references/macro-design.md` + `references/principles.md`.
+        - Define multi-application structure and technology stack.
+        - Select **DDD** for core combat (high rule complexity, rich domain concepts). Read `references/domain-driven-design.md`.
+        - System refs: `system-skill.md`, `system-action-combat.md`, `system-time.md`, `system-scene.md`, `algorithm.md`.
         - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
+    4.  **Phase 3 - Implementation Planning**:
         - Output: `architect/implementation.md`.
-    4.  **Plan Refactoring**:
+    5.  **Phase 4 - Plan Refactoring**:
         - Read `references/evolution.md`.
-        - Apply Composition and Abstraction patterns.
+        - Apply composition and abstraction patterns.
         - Update: `architect/implementation.md`.
 
-### Example 2: Adding a UI Module (Data-heavy Focus)
+### Example 2: Existing Project (Hybrid Paradigms)
 
-- **User Input**: "I need to add a complex Inventory and Shop system to my existing game. How should I design the logic?"
+- **User Input**: "I want to add a Skill System to my current combat engine. It needs effects, cooldowns, and data-configurable skills."
 - **Execution Path**:
-    1.  **Requirement Analysis**:
+    1.  **Phase 0**: Ask review preference.
+    2.  **Phase 1 - Requirement Analysis**:
         - Read `references/requirements.md`.
-        - Focus on **Use Cases & User Flow** for inventory interactions.
+        - Define domain entities (Skill, Effect) and use cases for skill interactions.
         - Output: `architect/requirement.md`.
-    2.  **Technical Design**:
-        - Analyze the exist project code to understand the current architecture.
-        - Read `references/principles.md`.
-        - Select **Data-Driven Design**.
-        - Read `references/data-driven-design.md`.
-        - For MVVM and UI Management implementation, read `references/system-ui.md`.
-        - For Resource Caching (Icons/Models), read `references/system-foundation.md`.
-        - Design Item structures, Config tables, and the Global Container for the inventory state.
+    3.  **Phase 2 - Technical Design**:
+        - **Analyze existing project code** to understand current architecture.
+        - Read `references/macro-design.md` + `references/principles.md`.
+        - Select **DDD** for core skill logic (rules, interactions). Read `references/domain-driven-design.md`.
+        - Select **Data-Driven** for skill configurations (tables, content). Read `references/data-driven-design.md`.
+        - System refs: `system-skill.md`, `system-foundation.md`, `system-time.md`.
         - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
+    4.  **Phase 3 - Implementation Planning**:
         - Output: `architect/implementation.md`.
-    4.  **Plan Refactoring**:
+    5.  **Phase 4 - Plan Refactoring**:
         - Read `references/evolution.md`.
+        - Apply composition (component pattern for reusable effects) and abstraction (interfaces for targeting).
         - Update: `architect/implementation.md`.
 
 ### Example 3: Rapid Prototype
 
-- **User Input**: "I have an idea for a unique puzzle mechanic. I want to build a quick demo this weekend to see if it's fun."
+- **User Input**: "I have a puzzle mechanic idea. I want to build a quick demo this weekend to validate it."
 - **Execution Path**:
-    1.  **Requirement Analysis**:
+    1.  **Phase 0**: Ask review preference.
+    2.  **Phase 1 - Requirement Analysis** (lightweight):
+        - Read `references/requirements.md`.
         - Minimal analysis, focus on core puzzle mechanic.
-        - Output: `architect/requirement.md` (lightweight).
-    2.  **Technical Design**:
-        - Read `references/principles.md`.
-        - Jump to **Use-Case Driven Prototype Design**.
-        - Read `references/prototype-design.md`.
-        - For quick FSM or Update logic, read `references/system-time.md`.
-        - For quick UI (IMGUI), read `references/system-ui.md`.
-        - For core puzzle algorithms (Search/Graph), read `references/algorithm.md`.
-        - Output: `architect/technical_design.md` (lightweight).
-    3.  **Implementation Planning**:
-        - Focus on rapid implementation of the core puzzle use case.
-        - Output: `architect/implementation.md`.
-    4.  **Plan Refactoring**:
-        - Read `references/evolution.md`.
-        - Plan to extract PuzzleController after core mechanic is proven fun.
-        - Update: `architect/implementation.md`.
-
-### Example 4: Designing a New System in an Existing Project
-
-- **User Input**: "I want to add a Skill System to my current combat engine. It needs to support various effects, cooldowns, and resources. How should I architect it?"
-- **Execution Path**:
-    1.  **Requirement Analysis**:
-        - Read `references/requirements.md`.
-        - Focus on **Domain Model Analysis** to define entities like `Skill`, `Effect`, and `Requirement`.
         - Output: `architect/requirement.md`.
-    2.  **Technical Design**:
-        - Analyze the exist project code to understand the current architecture.
-        - Read `references/principles.md`.
-        - Apply **Domain-Driven Design (DDD)** for the core logic (e.g., `SkillExecutionService`). Read `references/domain-driven-design.md`.
-        - Apply **Data-Driven Design** for skill configurations (XML/JSON/Excel). Read `references/data-driven-design.md`.
-        - For Skill System details, read `references/system-skill.md`.
-        - For Scene and Actions, read `references/system-scene.md` and `references/system-time.md`.
-        - For Event triggering (e.g., OnSkillCast), read `references/system-foundation.md`.
+    3.  **Phase 2 - Technical Design** (lightweight):
+        - Read `references/macro-design.md` + `references/principles.md`.
+        - Select **Use-Case Driven Prototype**. Read `references/prototype-design.md`.
+        - System refs as needed: `system-time.md`, `algorithm.md`.
         - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
+    4.  **Phase 3 - Implementation Planning**:
+        - Focus on rapid implementation of core use case.
         - Output: `architect/implementation.md`.
-    4.  **Plan Refactoring**:
+    5.  **Phase 4 - Plan Refactoring**:
         - Read `references/evolution.md`.
-        - Use **Composition** (Component pattern) to build complex skills from reusable effects.
-        - Use **Abstraction** (Interfaces) to handle different targeting systems (e.g., Point vs. Target).
+        - Plan extraction points for after mechanic is validated.
         - Update: `architect/implementation.md`.
 
-### Example 5: Architecture and Performance Refactoring
+### Example 4: Refactor Extension (On-Demand)
 
-- **User Input**: "I've drafted the plan for the new system. Can you review and refactor it? I want to make sure the architecture is clean and scalable, and that it runs efficiently."
+- **User Input**: "I've drafted the implementation plan. Review and refactor it for better architecture and performance."
 - **Execution Path**:
-    1.  **Analyze Existing Plan**: Review `architect/implementation.md` to identify coupling issues and potential hotspots.
-    2.  **Read References**:
-        - Read `references/evolution.md` to guide architectural separation and extensibility.
-        - Read `references/performance-optimization.md` to find opportunities for caching, pooling, or algorithmic improvements.
-    3.  **Plan Refactoring**:
-        - Apply **Composition** to decouple monolithic classes (from `evolution.md`).
-        - Introduce **Object Pooling** for frequently created entities (from `performance-optimization.md`).
-        - Implement **Throttling/Time-Slicing** for heavy update loops.
-        - Update: `architect/implementation.md`.
-
-### Example 6: Narrative-Driven Game (Visual Novel / RPG)
-
-- **User Input**: "I'm building a story-heavy RPG with complex branching dialogues and cutscenes. How should I structure the narrative system?"
-- **Execution Path**:
-    1.  **Requirement Analysis**:
-        - Read `references/requirements.md`.
-        - Focus on **Use Cases** for dialogue flow and state tracking.
-        - Output: `architect/requirement.md`.
-    2.  **Technical Design**:
-        - Read `references/principles.md`.
-        - Select **Data-Driven Design** for dialogue content.
-        - Read `references/system-narrative.md` for the core architecture (Commands, Sequences, Blackboard).
-        - For UI presentation (Dialogue Box), read `references/system-ui.md`.
-        - For Resource Management (Character Portraits, Audio), read `references/system-foundation.md`.
-        - Design the **Command Sequence** structure and **Variable Blackboard**.
-        - Output: `architect/technical_design.md`.
-    3.  **Implementation Planning**:
-        - Output: `architect/implementation.md`.
-    4.  **Plan Refactoring**:
+    1.  **Read** existing `architect/implementation.md`.
+    2.  **Phase 4 - Plan Refactoring**:
         - Read `references/evolution.md`.
-        - Ensure separation between Logic (Flow) and Presentation (UI).
+        - Read `references/performance-optimization.md` (user requested performance).
+        - Apply isolation, composition, and abstraction patterns.
+        - Introduce pooling, caching, or time-slicing where needed.
         - Update: `architect/implementation.md`.
 
 ---
