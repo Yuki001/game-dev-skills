@@ -70,6 +70,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 - **References**:
   - Read `references/macro-design.md` for high-level structure
   - Read `references/principles.md` for core principles
+  - Read `references/system-multiplayer.md` for multiplayer design **IF** user requests network multiplayer support
 
 **Key Tasks**:
 1. If existing project: Analyze the existing project code to understand the current architecture
@@ -106,6 +107,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 | Action Combat System (HitBox, Damage, Melee, Projectiles) | `references/system-action-combat.md` |
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
+| Multiplayer System (Client-Server, Sync Models, Distributed Server, AOI, Communication) | `references/system-multiplayer.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 #### Mixing Paradigms
