@@ -1,6 +1,22 @@
 # Game Architect - Standalone Workflow
 
-> This is the standalone workflow for the Game Architect skill. Use this when **no external workflow skill** (e.g., OpenSpec) is available. If a workflow skill is active, ignore this file and use the SKILL.md as a domain knowledge reference instead.
+> This is the standalone workflow for the Game Architect skill. Use this when **no external workflow skill** (e.g., OpenSpec, SpecKit) is available. If a workflow skill is active, ignore this file and use the SKILL.md as a domain knowledge reference instead.
+
+## Output Documents
+
+All documents are placed in an `architect/` directory (create if needed). The pipeline produces:
+
+```
+requirement.md  --->  technical_design.md  --->  implementation.md
+```
+
+| Document | Purpose | Description |
+|----------|---------|-------------|
+| `requirement.md` | Requirements Analysis | Analyzes and formalizes user requirements |
+| `technical_design.md` | Technical Solution Design | **Core document** - designs system approaches and patterns |
+| `implementation.md` | Implementation Plan | Details data structures, algorithms, class designs, key code, and evolution strategies |
+
+---
 
 ## Workflow
 
