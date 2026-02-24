@@ -1,6 +1,6 @@
 ---
 name: game-architect
-description: READ this skill when designing or planning any game system architecture — including combat, skills, AI, UI, multiplayer, narrative, or scene systems. Contains paradigm selection guides (DDD / Data-Driven / Prototype), system-specific design references, and mixing strategies. Works as a domain knowledge plugin alongside workflow skills (OpenSpec, SpecKit) or standalone via workflow-standalone.md.
+description: READ this skill when designing or planning any game system architecture — including combat, skills, AI, UI, multiplayer, narrative, or scene systems. Contains paradigm selection guides (DDD / Data-Driven / Prototype), system-specific design references, and mixing strategies. Works as a domain knowledge plugin alongside workflow skills (OpenSpec, SpecKit) or plan mode of an agent.
 ---
 
 # Game Architect Skill
@@ -8,20 +8,24 @@ description: READ this skill when designing or planning any game system architec
 Game architecture domain knowledge reference. Provides paradigm selection, system design references for game project architecture.
 
 > [!NOTE]
-> This skill contains **domain knowledge only**, not a workflow. For workflow control, use an external workflow skill (e.g., OpenSpec, SpecKit) or the fallback `workflow-standalone.md`.
+> This skill contains **domain knowledge only**, not a workflow. Pair it with a workflow skill (e.g., OpenSpec, SpecKit) or an agent's plan mode for structured design flow.
 
 ## Usage Modes
 
 ### With Workflow Skill (Recommended)
 
-When used with a workflow skill (e.g., OpenSpec, SpecKit), this skill serves as a domain knowledge plugin:
+When used with a workflow skill (e.g., OpenSpec, SpecKit) or in the plan mode of an agent, this skill serves as a domain knowledge plugin:
 
 - **During requirements/spec phases**: Consult the Paradigm Selection Guide and System-Specific References to inform architectural decisions
 - **During design/planning phases**: Use the Reference Lookup Guide below to read relevant `references/` documents
 
-### Standalone (Fallback)
+### Standalone
 
-If no workflow skill is available, use `workflow-standalone.md` for a self-contained Phase 0→1→2→3 pipeline that produces `architect/requirement.md → technical_design.md → implementation.md`.
+A lightweight `workflow-standalone.md` is also available as a self-contained design pipeline if needed.
+
+### Knowledge Mode (Query)
+
+When user requests to query knowledge for game architecture, this skill provides a reference lookup guide to relevant `references/` documents based on the task.
 
 ---
 

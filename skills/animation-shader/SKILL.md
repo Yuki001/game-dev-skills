@@ -1,6 +1,6 @@
 ---
 name: animation-shader
-description: READ this skill when implementing or configuring animation-style shaders (Toon/Cel Shaders) — including outlines, rim lighting, toon shading, MatCap, emission, dissolve, hatching, or any stylized rendering effect. Contains preset styles and feature-to-reference mappings for lilToon, Poiyomi, UTS2, RToon, SToon, and ToonShadingCollection. Works as a domain knowledge plugin alongside workflow skills (OpenSpec, SpecKit) or standalone via workflow-standalone.md.
+description: READ this skill when implementing or configuring animation-style shaders (Toon/Cel Shaders) — including outlines, rim lighting, toon shading, MatCap, emission, dissolve, hatching, or any stylized rendering effect. Contains preset styles and feature-to-reference mappings for lilToon, Poiyomi, UTS2, RToon, SToon, and ToonShadingCollection. Works as a domain knowledge plugin alongside workflow skills (OpenSpec, SpecKit) or plan mode of an agent.
 metadata:
   short-description: Implement and configure Animation-Style Shaders
 ---
@@ -10,21 +10,25 @@ metadata:
 Domain knowledge reference for animation-style shaders (Toon Shaders). Contains preset styles, feature lists, and reference mappings for popular shader libraries.
 
 > [!NOTE]
-> This skill contains **domain knowledge only**, not a workflow. For workflow control, use an external workflow skill (e.g., OpenSpec, SpecKit) or the fallback `workflow-standalone.md`.
+> This skill contains **domain knowledge only**, not a workflow. Pair it with a workflow skill (e.g., OpenSpec, SpecKit) or an agent's plan mode for structured design flow.
 
 ## Usage Modes
 
 ### With Workflow Skill (Recommended)
 
-When used with a workflow skill (e.g., OpenSpec, SpecKit), this skill serves as a domain knowledge plugin:
+When used with a workflow skill (e.g., OpenSpec, SpecKit) or in the plan mode of an agent, this skill serves as a domain knowledge plugin:
 
 - **During requirements/spec phases**: Use the Presents section to identify the target style and map user requests to concrete feature sets
 - **During design/planning phases**: Use the Feature List to look up all relevant `references/` documents for each feature
 - **Key rule**: For each identified feature, read ALL reference files listed — do not select just one
 
-### Standalone (Fallback)
+### Standalone
 
-If no workflow skill is available, use `workflow-standalone.md` for a step-by-step workflow that guides preset selection, feature merging, and reference lookup.
+A lightweight `workflow-standalone.md` is also available as a self-contained design pipeline if needed.
+
+### Knowledge Mode (Query)
+
+When user requests to query knowledge for animation shaders, this skill provides preset styles and feature-to-reference mappings based on the task.
 
 ## Presents
 
