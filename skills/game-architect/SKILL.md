@@ -18,7 +18,6 @@ When used with a workflow skill (e.g., OpenSpec, SpecKit), this skill serves as 
 
 - **During requirements/spec phases**: Consult the Paradigm Selection Guide and System-Specific References to inform architectural decisions
 - **During design/planning phases**: Use the Reference Lookup Guide below to read relevant `references/` documents
-- **For output formatting**: Use the Document Templates in `workflow-standalone.md` as recommended structures for architecture documents
 
 ### Standalone (Fallback)
 
@@ -29,6 +28,8 @@ If no workflow skill is available, use `workflow-standalone.md` for a self-conta
 ## Reference Lookup Guide
 
 When designing game architecture, read the relevant `references/` documents based on the task:
+
+### Architecture References
 
 | When | Read |
 |------|------|
@@ -44,17 +45,7 @@ When designing game architecture, read the relevant `references/` documents base
 
 For system-specific design, see the System-Specific References table below.
 
----
-
-## Paradigm Selection Guide
-
-| Paradigm | KeyPoint | Applicability Scope | Examples | Reference |
-| :--- | :--- | :--- | :--- | :--- |
-| **Domain-Driven Design (DDD)** | OOP & Entity First | High Rule Complexity. <br> Rich Domain Concepts. <br> Many Distinct Entities. | Core Combat Logic, Physics Interactions, Damage/Buff Rules, Complex AI Decision. | `references/domain-driven-design.md` |
-| **Data-Driven Design** | Data Layer First | High Content Complexity. <br>  Flow Orchestration. <br> Simple Data Management. | **Content**:  Quests, Level Design.<br>**Flow**: Tutorial Flow, Skill Execution, Narrative.<br>**Mgmt**: Inventory, Shop, Mail, Leaderboard. | `references/data-driven-design.md` |
-| **Use-Case Driven Prototype** | Use-Case Implementation First | Rapid Validation | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
-
-#### System-Specific References
+### System-Specific References
 
 | System Category | Reference |
 |----------------|-----------|
@@ -69,7 +60,17 @@ For system-specific design, see the System-Specific References table below.
 | Multiplayer System (Client-Server, Sync Models, Distributed Server, AOI, Communication) | `references/system-multiplayer.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
-#### Mixing Paradigms
+---
+
+## Paradigm Selection Guide
+
+| Paradigm | KeyPoint | Applicability Scope | Examples | Reference |
+| :--- | :--- | :--- | :--- | :--- |
+| **Domain-Driven Design (DDD)** | OOP & Entity First | High Rule Complexity. <br> Rich Domain Concepts. <br> Many Distinct Entities. | Core Combat Logic, Physics Interactions, Damage/Buff Rules, Complex AI Decision. | `references/domain-driven-design.md` |
+| **Data-Driven Design** | Data Layer First | High Content Complexity. <br>  Flow Orchestration. <br> Simple Data Management. | **Content**:  Quests, Level Design.<br>**Flow**: Tutorial Flow, Skill Execution, Narrative.<br>**Mgmt**: Inventory, Shop, Mail, Leaderboard. | `references/data-driven-design.md` |
+| **Use-Case Driven Prototype** | Use-Case Implementation First | Rapid Validation | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
+
+### Mixing Paradigms
 
 Most projects mix paradigms:
 1.  **Macro Consistency**: All modules follow the same Module Management Framework.
@@ -82,7 +83,9 @@ Most projects mix paradigms:
 5.  **Paradigm Interchangeability**: Many systems can be validly implemented with either paradigm. E.g., Actor inheritance hierarchy (Domain) ↔ ECS components + systems (Data-Driven); Buff objects with encapsulated rules (Domain) ↔ Tag + Effect data entries resolved by a generic pipeline (Data-Driven). See **Selection Criteria** table above for trade-off signals.
 6.  **Integration**: Application Layer bridges different paradigms.
 
-**Selection Criteria** — when both DDD and Data-Driven fit, use these signals:
+### Selection Criteria
+
+When both DDD and Data-Driven fit, use these signals:
 
 | Signal | Favor DDD | Favor Data-Driven |
 |--------|-----------|-------------------|
