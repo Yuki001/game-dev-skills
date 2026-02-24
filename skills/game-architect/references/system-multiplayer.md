@@ -11,13 +11,13 @@ Reference for networked multiplayer game architecture decisions and system desig
 | **Dedicated Server** | Long (TCP/WebSocket) | MMO, competitive FPS, real-time action | Authoritative, anti-cheat friendly, server push; requires infrastructure, per-connection resource cost |
 | **Web Server** | Short (HTTP/REST) | Turn-based, idle, casual, social, meta-game | Stateless, easy to scale, CDN-friendly; client-initiated only, no real-time push |
 | **Player-Hosted** | Long (Listen Server) | Casual co-op, small PvE, LAN | Zero server cost; host advantage, NAT traversal, host migration needed |
-| **Peer-to-Peer** | Long (Full Mesh) | Fighting games, 2-player sessions | Lowest latency; scales poorly ($O(N^2)$ connections), cheat-vulnerable |
+| **Peer-to-Peer** | Unreliable (UDP) | Fighting games, 2-player sessions | Lowest latency; scales poorly ($O(N^2)$ connections), cheat-vulnerable |
 
 ### Dedicated Server (Long Connection)
 - **Characteristics**: Bidirectional, real-time, server pushes state at any time.
+- **Connection Method**: Reliable connection, e.g., TCP, reliable UDP, WebSocket, etc.
 - **Session State**: Server maintains per-connection session in memory (player data, game state).
 - **Connection Cost**: Each connection consumes resources (memory, file descriptors). Requires connection limits and graceful degradation.
-- **Regional Deployment**: Place servers close to players. Use latency-based matchmaking.
 
 ### Web Server (Short Connection)
 - **Characteristics**: Request-response only, stateless per request, client-initiated.
@@ -28,15 +28,21 @@ Reference for networked multiplayer game architecture decisions and system desig
 - **Optimistic Update**: Client applies action locally, sends to server, server validates and returns authoritative result. Revert on rejection.
 - **Batch Requests**: Group multiple actions into a single HTTP request to reduce round-trips.
 
-### Player-Hosted & P2P
+### Player-Hosted
+- **Characteristics**: Dual-purpose binary (client + server in one), requires discovery/lobby service, NAT traversal for LAN connectivity.
+- **Dual-Purpose Binary**: The distributed executable contains both client and server; mode is selected at launch.
+- **Conditional Code**: Code uses conditional branches to handle both client and server logic within the same program.
+- **Discovery / Lobby Service**: Uses a discovery or lobby service to find available servers.
 - **NAT Traversal**: STUN/TURN/ICE for connection establishment. Relay server as fallback.
-- **Host Migration**: For player-hosted, transfer authority when host disconnects. Requires state serialization and handoff protocol.
+
+### Peer-to-Peer
+- **Characteristics**: Full mesh connection; each client establishes connections with all other clients.
+- **Connection Method**: Connection does not require reliability (primarily UDP, but TCP is also possible).
+- **Synchronization**: Each client continuously sends its own state to synchronize.
 
 ### Hybrid Strategy
-- **Web + Push Channel**: HTTP/REST for actions, WebSocket/SSE for real-time notifications (chat, events, match found).
-- **Connection Upgrade**: Start with HTTP for login and lobby; upgrade to WebSocket/TCP when entering real-time gameplay.
-- **Fallback**: If WebSocket fails (firewall, proxy), fall back to HTTP long-polling.
-- **Relay + Authoritative**: P2P between players for latency, relay through server for authority validation.
+- **Dedicated Server + Web Server**: Web server for data requests, dedicated server for real-time notifications.
+- **Dedicated Server + Peer-to-Peer**: Dedicated server for user services, peer-to-peer as auxiliary for in-game synchronization.
 
 ## 2. Session Models
 
@@ -103,8 +109,6 @@ All clients execute the same inputs on the same logical frame; deterministic sim
 
 ### Hybrid Strategy
 - **State Sync + Lockstep Subsystem**: Core world via state sync, specific subsystems (e.g., combat resolution) via lockstep frames.
-- **State Sync + Snapshot Interpolation**: Server sends periodic snapshots; clients interpolate between them for visual smoothness (Quake/Source model).
-- **Selective Authority**: Some entities state-synced (NPC, environment), player actions frame-synced within combat instances.
 
 ## 4. Distributed Server Architecture
 
@@ -203,29 +207,10 @@ Scene A (unregister player) → Connector (rebind to Scene B)
 - **Service Discovery**: Registry (Consul, etcd, ZooKeeper) for dynamic process lookup and health checking.
 
 ### Cluster Management
-
-How the cluster of server processes is orchestrated as a whole.
-
-**Startup & Shutdown**:
-- **Boot Order**: Processes have dependency order. Typical sequence: DB Proxy → Auth → Global → Lobby → Player / Game / Scene → Connector → Gateway. Each process reports ready before dependents start.
-- **Graceful Shutdown**: Reverse order. Gateway stops accepting new connections → Connector drains sessions (notify clients of maintenance) → Game/Scene finish current ticks and flush state → Player flushes to DB → DB Proxy completes write queue.
-- **Rolling Restart**: Update one process instance at a time. Routing layer redirects traffic away from the restarting instance. No downtime if at least one instance per role remains healthy.
-
-**Routing**:
-- **Routing Table**: Central registry mapping logical targets to physical process addresses. E.g., `PlayerID → Player process`, `RoomID → Game process`, `RegionID → Scene process`.
-- **Connector Routing**: Connector holds a local routing cache per session (which Player, which Game/Scene the client is bound to). Updated on login, room join, region transfer.
-- **Gateway Load Balancing**: Distribute new connections across Connectors (round-robin, least-connections, or latency-based).
-- **Dynamic Routing Update**: When a process starts/stops, routing table updates propagate to all Connectors via service discovery events or message bus.
-
-**Keep-Alive & Health**:
-- **Inter-Process Heartbeat**: Processes exchange heartbeats with their dependents (Connector ↔ Game, Connector ↔ Player). Detect process crash within seconds.
-- **Health Reporting**: Each process periodically reports load metrics (CPU, memory, connection count, room count) to a central monitor or service registry.
-- **Failure Detection & Recovery**: If a process misses N heartbeats → mark as dead → trigger failover (reassign rooms/players to healthy instances, or spawn replacement).
-- **Player Recovery**: On Player process crash, Connector holds session; new Player process loads data from DB Proxy and resumes. Client may experience brief freeze but not disconnection.
-
-**Configuration**:
-- **Central Config**: Cluster topology, process addresses, capacity limits stored in config service (etcd, Consul KV, or config files).
-- **Hot Reload**: Non-structural config changes (game balance, feature flags) pushed to running processes without restart.
+- **Boot Order**: Processes start in dependency order (DB Proxy → Auth → Global → Lobby → Player/Game/Scene → Connector → Gateway). Graceful shutdown in reverse.
+- **Routing**: Central routing table maps logical targets (PlayerID, RoomID, RegionID) to physical process addresses. Connectors cache per-session bindings, updated on login/join/transfer.
+- **Health & Failover**: Inter-process heartbeat detects crashes within seconds. Failed processes trigger reassignment of rooms/players to healthy instances. On Player process crash, Connector holds session while replacement loads from DB.
+- **Configuration**: Cluster topology and capacity in central config service. Non-structural changes (balance, feature flags) hot-reloaded without restart.
 
 ### Cross-Server Architecture
 - **Seamless World**: Region boundary handoff — when player crosses boundary, authority transfers from Scene A to Scene B.
@@ -287,7 +272,7 @@ Organize protocols by **system module**. Each system defines a set of messages f
 | `Change` | Notify | Server pushes partial update (single entry changed) |
 | `Refresh` | Notify | Server pushes full list replacement (bulk change) |
 
-**Per-System Protocol Examples**:
+**System Protocol Examples**:
 
 ```
 -- Inventory (CRUD + Use) --
@@ -295,27 +280,6 @@ Item_List_Req / Item_List_Resp         # Open bag, get full inventory
 Item_Use_Req / Item_Use_Resp           # Use a consumable
 Item_Discard_Req / Item_Discard_Resp   # Drop an item
 Item_Change_Notify                     # Server pushes item quantity/state change
-
--- Shop --
-Shop_List_Req / Shop_List_Resp         # Open shop, get listings
-Shop_Buy_Req / Shop_Buy_Resp           # Purchase an item
-Shop_Refresh_Notify                    # Shop inventory refreshed (timer or manual)
-
--- Mail --
-Mail_List_Req / Mail_List_Resp         # Get mail list
-Mail_Read_Req / Mail_Read_Resp         # Read a mail (mark as read, claim attachments)
-Mail_Delete_Req / Mail_Delete_Resp     # Delete a mail
-Mail_New_Notify                        # Server pushes new mail arrival
-
--- Friends --
-Friend_List_Req / Friend_List_Resp     # Get friend list with online status
-Friend_Add_Req / Friend_Add_Resp       # Send friend request
-Friend_Remove_Req / Friend_Remove_Resp # Remove a friend
-Friend_Status_Notify                   # Friend online/offline status change
-
--- Chat --
-Chat_Send_Req / Chat_Send_Resp         # Send a message to channel
-Chat_Msg_Notify                        # Server pushes incoming message
 
 -- Gameplay (Command, not CRUD) --
 Move_Req                               # Player movement input
