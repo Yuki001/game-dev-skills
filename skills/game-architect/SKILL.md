@@ -62,6 +62,7 @@ For system-specific design, see the System-Specific References table below.
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
 | Multiplayer System (Client-Server, Sync Models, Distributed Server, AOI, Communication) | `references/system-multiplayer.md` |
+| Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 ---
