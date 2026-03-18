@@ -40,6 +40,8 @@ When designing game architecture, read the relevant `references/` documents base
 | Always (high-level structure) | `references/macro-design.md` |
 | Always (core principles) | `references/principles.md` |
 | Requirement analysis | `references/requirements.md` |
+| Project structure & file organization | `references/project-structure.md` |
+| Data storage, assets, configuration design | `references/data-and-assets.md` |
 | Choosing DDD paradigm | `references/domain-driven-design.md` |
 | Choosing Data-Driven paradigm | `references/data-driven-design.md` |
 | Choosing Prototype paradigm | `references/prototype-design.md` |
