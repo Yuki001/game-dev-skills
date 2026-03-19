@@ -12,52 +12,12 @@ Project structure design determines how code, assets, and resources are physical
 - **Tool-Friendly**: Structure should work well with version control, build systems, and IDE tooling.
 - **Single Source of Truth**: Avoid duplicating files; use references or shared directories instead.
 
-## Hybrid Classification
-
-There are two fundamental classification approaches for project structure:
-
-- **By Format**: Organize files by their technical format (scripts, textures, models, audio). Simple and intuitive; good for batch operations and tooling, but harder to find all files related to one feature.
-- **By Logical Module**: Organize files by game feature (player, enemy, combat, UI). Feature-centric; supports parallel development, but requires upfront planning.
-
-The recommended approach combines both as two layers:
-
-- **Layer 1 — By Format**: Top-level directories separate files by format/type (code, textures, models, audio, etc.).
-- **Layer 2 — By Logical Module**: Within each format directory, organize by game feature or module.
-
-This hybrid works well because **code/scripts benefit from standalone format-level separation** — they are edited frequently, have different tooling (linters, compilers, IDE indexing), and are easier to navigate when grouped by type first. Assets similarly benefit from format-level grouping for batch operations and pipeline processing.
-
-### Structure Example
-```
-/scripts              - All code/scripts (Layer 1: format)
-  /player             - Player logic (Layer 2: module)
-  /enemy              - Enemy logic
-  /combat             - Combat system
-  /ui                 - UI logic
-/textures             - All textures (Layer 1: format)
-  /player
-  /enemy
-  /environment
-/models               - All 3D models
-  /characters
-  /props
-/audio                - All audio files
-  /music
-  /sfx
-/prefabs              - Prefabs/blueprints
-/configs              - Configuration/data files
-```
-
-### When to Prefer Module-First
-For very large projects with strong team module ownership, inverting the layers (module first, format second) can reduce cross-directory navigation for feature work:
-```
-/player
-  /scripts
-  /textures
-  /models
-/enemy
-  /scripts
-  /textures
-```
+You can use following order to design project structure:
+1. Multi-Application Project Structure
+2. Multi-Role Project Structure
+3. Imported Asset Separation (For client projects)
+4. Classification In Detailed Structure
+5. Additional Content Placement
 
 ## Multi-Application Project Structure
 
@@ -103,35 +63,6 @@ Some frameworks (e.g., Node.js, Go) conventionally host both server and client i
 - **Content**: Protocol definitions, data structures, utility functions, constants.
 - **Principle**: Only share truly common code, avoid over-sharing.
 
-## Asset File Structure
-
-Asset organization is critical for art-heavy game projects.
-
-### Source vs. Imported Assets
-Distinguish between original source files and engine-imported assets.
-
-- **Source Assets** (Raw/Original):
-  - Content: PSD, AI, FBX source files, high-resolution originals.
-  - Location: Separate directory or external repository.
-  - Version Control: May use specialized asset management systems (Perforce, Git LFS).
-
-- **Imported Assets** (Engine-Ready):
-  - Content: PNG, optimized FBX, compressed audio, engine-specific formats.
-  - Location: Project asset directory.
-  - Version Control: Included in main repository.
-
-- **Structure Example**:
-  ```
-  /assets           - Engine-imported assets
-  /assets_source    - Original source files (may be external)
-  ```
-
-### Asset Organization Principles
-- **By Feature Module**: Group assets by game feature.
-- **By Asset Type**: Within modules, organize by type (textures, models, audio).
-- **Naming Conventions**: Use consistent prefixes/suffixes (e.g., `T_` for textures, `M_` for materials).
-- **Shared Assets**: Place common assets in `/common` or `/shared` directory.
-
 ## Multi-Role Project Structure
 
 Large teams involve multiple roles (programmers, artists, designers) with different workflow needs.
@@ -162,6 +93,76 @@ For network games, separate client and server code.
   /client
   /server
   /protocol         - Shared network protocol
+  ```
+
+## Classification In Detailed Structure
+
+There are two fundamental classification approaches for project detailed structure:
+
+- **By Format**: Organize files by their technical format (scripts, textures, models, audio). Simple and intuitive; good for batch operations and tooling, but harder to find all files related to one feature.
+- **By Logical Module**: Organize files by game feature (player, enemy, combat, UI). Feature-centric; supports parallel development, but requires upfront planning.
+
+The recommended approach combines both as two layers:
+
+- **Layer 1 — By Format**: Top-level directories separate files by format/type (code, textures, models, audio, etc.).
+- **Layer 2 — By Logical Module**: Within each format directory, organize by game feature or module.
+
+This hybrid works well because **code/scripts benefit from standalone format-level separation** — they are edited frequently, have different tooling (linters, compilers, IDE indexing), and are easier to navigate when grouped by type first. Assets similarly benefit from format-level grouping for batch operations and pipeline processing.
+
+### Structure Example
+```
+/scripts              - All code/scripts (Layer 1: format)
+  /player             - Player logic (Layer 2: module)
+  /enemy              - Enemy logic
+  /combat             - Combat system
+  /ui                 - UI logic
+/textures             - All textures (Layer 1: format)
+  /player
+  /enemy
+  /environment
+/models               - All 3D models
+  /characters
+  /props
+/audio                - All audio files
+  /music
+  /sfx
+/prefabs              - Prefabs/blueprints
+/configs              - Configuration/data files
+```
+
+### When to Prefer Module-First
+For very large projects with strong team module ownership, inverting the layers (module first, format second) can reduce cross-directory navigation for feature work:
+```
+/player
+  /scripts
+  /textures
+  /models
+/enemy
+  /scripts
+  /textures
+```
+
+## Imported Asset Separation
+
+Imported asset separation is critical for art-heavy game projects.
+
+### Source vs. Imported Assets
+Distinguish between original source files and engine-imported assets.
+
+- **Source Assets** (Raw/Original):
+  - Content: PSD, AI, FBX source files, high-resolution originals.
+  - Location: Separate directory or external repository.
+  - Version Control: May use specialized asset management systems (Perforce, Git LFS).
+
+- **Imported Assets** (Engine-Ready):
+  - Content: PNG, optimized FBX, compressed audio, engine-specific formats.
+  - Location: Project asset directory.
+  - Version Control: Included in main repository.
+
+- **Structure Example**:
+  ```
+  /assets           - Engine-imported assets
+  /assets_source    - Original source files (may be external)
   ```
 
 ## Additional Content Placement
