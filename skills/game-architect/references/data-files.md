@@ -2,6 +2,15 @@
 
 Data file design covers how game configuration data and content are stored, processed, and utilized at development time and runtime. Effective data design improves iteration speed, reduces errors, and enables non-programmer content creation.
 
+## Data File Design Principles
+
+- **Designer Friendly**: Use formats and tools designers can work with directly, reducing programmer bottlenecks.
+- **Performance Aware**: Profile loading paths; apply binary formats, compression, or caching on critical data.
+- **Pipeline Friendly**: Organize data files to fit asset pipelines — support automated validation, transformation, and packaging across stages.
+- **Format by Context**: Choose formats to match usage: text for authoring and version control, binary for runtime; ensure convertibility between them.
+- **Versioning**: Tag data formats with version identifiers; provide automated migration when schemas change.
+- **Documentation**: Keep schemas and conventions documented so the team can author and review data with confidence.
+
 ## Data File Formats
 
 ### Text-Based Formats
@@ -236,21 +245,3 @@ Managing multi-language content.
   }
   ```
 
-### Best Practices
-- **Use String IDs**: Never hardcode display text in code.
-- **Context Information**: Include comments for translators.
-- **Pluralization**: Handle plural forms for different languages.
-- **Text Expansion**: Design UI to accommodate longer translations.
-- **Font Support**: Ensure fonts support all target languages.
-- **Testing**: Test with longest expected translations.
-
-## Best Practices
-
-- **Separation of Concerns**: Keep data separate from code logic.
-- **Validation**: Implement data validation in pipeline and runtime.
-- **Versioning**: Support data format versioning for backward compatibility.
-- **Hot Reload**: Enable runtime data reloading for faster iteration.
-- **Documentation**: Document data schemas and conventions clearly.
-- **Designer-Friendly**: Prioritize tools and formats that designers can use.
-- **Performance**: Profile data loading and optimize critical paths.
-- **Security**: Validate untrusted data (user saves, network data) thoroughly.

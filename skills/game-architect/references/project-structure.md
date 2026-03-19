@@ -2,50 +2,62 @@
 
 Project structure design determines how code, assets, and resources are physically organized in the file system. A well-designed structure improves development efficiency, team collaboration, and project maintainability.
 
-## Classification Approaches
+## Engineering Planning Principles
 
-### By Format Classification
-Organize files by their technical format or file type.
-- **Characteristics**: Simple and intuitive, easy to locate files by type.
-- **Applicable to**: Small projects, single-developer projects, asset-heavy projects.
-- **Structure Example**:
-  ```
-  /scripts      - All code files
-  /textures     - All texture files
-  /models       - All 3D models
-  /audio        - All audio files
-  /prefabs      - All prefabs/blueprints
-  ```
-- **Advantages**: Clear file type boundaries, easy to apply batch operations.
-- **Disadvantages**: Difficult to locate related files for a feature, poor scalability for large projects.
+- **Clarity First**: Structure should be self-explanatory; a new team member can navigate without documentation.
+- **Separation of Concerns**: Separate code, assets, configuration, and build artifacts.
+- **Minimize Coupling**: Modules should have clear boundaries and minimal cross-dependencies.
+- **Convention Over Configuration**: Establish and follow naming/organization conventions consistently.
+- **Scalability Awareness**: Design for projected team size and content volume, not just current state.
+- **Tool-Friendly**: Structure should work well with version control, build systems, and IDE tooling.
+- **Single Source of Truth**: Avoid duplicating files; use references or shared directories instead.
 
-### By Logical Module Classification
-Organize files by game features or logical modules.
-- **Characteristics**: Feature-centric organization, related files grouped together.
-- **Applicable to**: Medium to large projects, team collaboration, complex game logic.
-- **Structure Example**:
-  ```
-  /player       - Player-related code, assets, configs
-  /enemy        - Enemy-related files
-  /ui           - UI-related files
-  /combat       - Combat system files
-  ```
-- **Advantages**: Easy to locate feature-related files, supports parallel development, clear module boundaries.
-- **Disadvantages**: Requires upfront planning, may have shared resource duplication issues.
+## Hybrid Classification
 
-### Hybrid Classification
-Combine both approaches: top-level by module, sub-level by format.
-- **Structure Example**:
-  ```
+There are two fundamental classification approaches for project structure:
+
+- **By Format**: Organize files by their technical format (scripts, textures, models, audio). Simple and intuitive; good for batch operations and tooling, but harder to find all files related to one feature.
+- **By Logical Module**: Organize files by game feature (player, enemy, combat, UI). Feature-centric; supports parallel development, but requires upfront planning.
+
+The recommended approach combines both as two layers:
+
+- **Layer 1 — By Format**: Top-level directories separate files by format/type (code, textures, models, audio, etc.).
+- **Layer 2 — By Logical Module**: Within each format directory, organize by game feature or module.
+
+This hybrid works well because **code/scripts benefit from standalone format-level separation** — they are edited frequently, have different tooling (linters, compilers, IDE indexing), and are easier to navigate when grouped by type first. Assets similarly benefit from format-level grouping for batch operations and pipeline processing.
+
+### Structure Example
+```
+/scripts              - All code/scripts (Layer 1: format)
+  /player             - Player logic (Layer 2: module)
+  /enemy              - Enemy logic
+  /combat             - Combat system
+  /ui                 - UI logic
+/textures             - All textures (Layer 1: format)
   /player
-    /scripts
-    /textures
-    /models
   /enemy
-    /scripts
-    /textures
-  ```
-- **Best Practice**: Use module classification as primary structure, format classification as secondary.
+  /environment
+/models               - All 3D models
+  /characters
+  /props
+/audio                - All audio files
+  /music
+  /sfx
+/prefabs              - Prefabs/blueprints
+/configs              - Configuration/data files
+```
+
+### When to Prefer Module-First
+For very large projects with strong team module ownership, inverting the layers (module first, format second) can reduce cross-directory navigation for feature work:
+```
+/player
+  /scripts
+  /textures
+  /models
+/enemy
+  /scripts
+  /textures
+```
 
 ## Multi-Application Project Structure
 
@@ -71,6 +83,20 @@ Complex projects often contain multiple applications (client, server, tools, edi
 /tools            - Development tools
 /editor           - Custom editor
 ```
+
+### Embedded Client Pattern
+Some frameworks (e.g., Node.js, Go) conventionally host both server and client in a single project, with the server at the root and the client as a subdirectory. This allows running both from one codebase with shared dependencies and unified build/deploy.
+```
+/                 - Server application (root-level)
+  /src            - Server source code
+  /client         - Client application (embedded)
+    /src
+    /public
+  /shared         - Shared types/utilities
+  package.json    - Unified dependency management
+```
+- **Advantages**: Simplified development setup, shared code without submodules, single deployment pipeline.
+- **Disadvantages**: Coupled release cycles, larger single repository, potential confusion about boundaries.
 
 ### Shared Code Management
 - **Location**: Place in `/shared` or `/common` directory.
@@ -165,10 +191,9 @@ Compiled outputs and distributable builds.
 ## Version Control & Project Structure
 
 ### Version Control Strategies
-- **Git**: Suitable for code and text files, supports branching and merging.
-- **Git LFS**: Extension for large binary files (models, textures, audio).
-- **Perforce**: Traditional choice for game development, handles large binaries well.
-- **Hybrid**: Git for code, Perforce/LFS for assets.
+- **SVN**: Centralized repository; each developer's working directory is small. Supports lock-unlock workflow for binary files and per-directory access control.
+- **Git**: Distributed repository; supports full local work and effortless branching/merging. Use Git LFS extension for large binary files (models, textures, audio).
+- **Cloud Drive Sync** (Google Drive, OneDrive, Dropbox): Best suited for documentation and non-code assets. Provides instant sync and real-time collaboration on documents (e.g., Google Docs). Not suitable for code version control.
 
 ### Ignore Patterns
 Define what should not be version controlled.
