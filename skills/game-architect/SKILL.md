@@ -47,7 +47,8 @@ When designing game architecture, read the relevant `references/` documents base
 | Performance optimization needed | `references/performance-optimization.md` |
 | Multiplayer support needed | `references/system-multiplayer.md` |
 
-For system-specific design, see the System-Specific References table below.
+- For physical architecture design, see the Physical Architecture References table below.
+- For system-specific design, see the System-Specific References table below.
 
 ### Physical Architecture References
 
