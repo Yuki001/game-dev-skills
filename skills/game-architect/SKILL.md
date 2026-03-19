@@ -54,8 +54,8 @@ For system-specific design, see the System-Specific References table below.
 | When | Read |
 |------|------|
 | Project structure & file organization | `references/project-structure.md` |
-| Data formats, processing, i18n, metadata | `references/data-files.md` |
-| Asset conventions, pipelines, custom formats | `references/art-assets.md` |
+| Data formats, processing, custom formats, bundles, metadata | `references/data-files.md` |
+| Asset conventions & pipeline | `references/asset-conventions.md` |
 
 ### System-Specific References
 

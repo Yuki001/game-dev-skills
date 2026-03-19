@@ -220,6 +220,43 @@ Companion files that store additional information about assets.
 - Custom properties for gameplay use
 - Version and modification timestamps
 
+## Custom Format Design
+
+When standard formats are insufficient for performance or workflow needs, custom binary formats provide control over data layout, loading speed, and memory usage. Use when: loading speed is critical, need precise memory layout, need streaming or bundling, or need casual copy protection.
+
+### Format Structure
+
+**File Header**: Magic number (4 bytes, e.g. `GDAT`) + version + flags (compression/encryption/endianness) + TOC offset.
+
+**Section-Based Layout**: `[Header][TOC][Section 0: Metadata][Section 1: Vertex Data][...]`. Each section has type, offset, size, compression info in TOC, enabling selective loading.
+
+**Alignment**: Align sections to cache line (64 bytes), GPU data to GPU-friendly boundaries. Pad after variable-length data.
+
+### Versioning
+
+Forward compatibility via skipping unknown sections in TOC. Backward compatibility via version number in header. Provide offline migration tools between versions.
+
+### Loading Optimization
+
+**Memory-Mapped (mmap)**: File layout matches in-memory struct layout exactly. Near-instant loading, zero allocation. Trade-off: no compression, platform-specific alignment, larger files.
+
+**Compression**: Per-section independent compression. LZ4 for speed, Zstandard for size. Dictionary compression for small repetitive data. Streaming decompression for large assets.
+
+### Asset Bundle Design
+
+Bundling multiple assets into single files reduces I/O operations and enables atomic loading of related resources.
+
+**Bundle Strategies**:
+- **By Scene**: All assets needed for a scene in one bundle (minimizes load-time I/O).
+- **By Type**: All textures together, all meshes together (enables type-specific compression).
+- **By Frequency**: Hot assets (always loaded) vs cold assets (loaded on demand).
+- **By Platform**: Separate bundles per target platform with appropriate compression.
+
+**Bundle Structure**:
+- **Manifest**: Lists contained assets with IDs, types, offsets, and sizes.
+- **Shared Dependencies**: Common assets referenced by multiple bundles stored in a shared bundle.
+- **Patch Support**: Delta bundles that override or add assets without replacing the full bundle.
+
 ## Internationalization (i18n) Data
 
 Managing multi-language content.

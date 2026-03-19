@@ -1,6 +1,6 @@
-# Art Asset Design
+# Asset Conventions & Pipeline
 
-Art asset design covers how game art resources (textures, models, animations, audio, effects) are structured, processed, and integrated into the game through conventions and pipelines. Well-designed asset workflows ensure consistency across teams, reduce runtime errors, and enable efficient iteration.
+Asset conventions define the contracts between code and art resources (textures, models, animations, skeletons). When properly enforced through asset pipelines, conventions become stable interfaces that code can safely depend on — eliminating defensive checks, reducing runtime errors, and enabling efficient cross-team collaboration.
 
 ## Asset Conventions as Logic Interfaces
 
@@ -138,43 +138,4 @@ The asset pipeline transforms raw source assets into optimized runtime-ready for
 - **CI Integration**: Run full pipeline validation on asset commits (reject non-compliant assets).
 - **Build Reports**: Generate reports on asset sizes, compression ratios, convention violations.
 - **Dependency Graph**: Track which assets depend on others (material references texture, prefab references mesh).
-
-## Custom Format Design
-
-When standard formats are insufficient for performance or workflow needs, custom binary formats provide control over data layout, loading speed, and memory usage. Use when: loading speed is critical, need precise memory layout, need streaming or bundling, or need casual copy protection.
-
-### Format Structure
-
-**File Header**: Magic number (4 bytes, e.g. `GDAT`) + version + flags (compression/encryption/endianness) + TOC offset.
-
-**Section-Based Layout**: `[Header][TOC][Section 0: Metadata][Section 1: Vertex Data][...]`. Each section has type, offset, size, compression info in TOC, enabling selective loading.
-
-**Alignment**: Align sections to cache line (64 bytes), GPU data to GPU-friendly boundaries. Pad after variable-length data.
-
-### Versioning
-
-Forward compatibility via skipping unknown sections in TOC. Backward compatibility via version number in header. Provide offline migration tools between versions.
-
-### Loading Optimization
-
-**Memory-Mapped (mmap)**: File layout matches in-memory struct layout exactly. Near-instant loading, zero allocation. Trade-off: no compression, platform-specific alignment, larger files.
-
-**Compression**: Per-section independent compression. LZ4 for speed, Zstandard for size. Dictionary compression for small repetitive data. Streaming decompression for large assets.
-
-### Asset Bundle Design
-
-Bundling multiple assets into single files reduces I/O operations and enables atomic loading of related resources.
-
-**Bundle Strategies**:
-- **By Scene**: All assets needed for a scene in one bundle (minimizes load-time I/O).
-- **By Type**: All textures together, all meshes together (enables type-specific compression).
-- **By Frequency**: Hot assets (always loaded) vs cold assets (loaded on demand).
-- **By Platform**: Separate bundles per target platform with appropriate compression.
-
-**Bundle Structure**:
-- **Manifest**: Lists contained assets with IDs, types, offsets, and sizes.
-- **Shared Dependencies**: Common assets referenced by multiple bundles stored in a shared bundle.
-- **Patch Support**: Delta bundles that override or add assets without replacing the full bundle.
-
-
 
