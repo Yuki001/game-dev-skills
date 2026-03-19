@@ -40,8 +40,6 @@ When designing game architecture, read the relevant `references/` documents base
 | Always (high-level structure) | `references/macro-design.md` |
 | Always (core principles) | `references/principles.md` |
 | Requirement analysis | `references/requirements.md` |
-| Project structure & file organization | `references/project-structure.md` |
-| Data storage, assets, configuration design | `references/data-and-assets.md` |
 | Choosing DDD paradigm | `references/domain-driven-design.md` |
 | Choosing Data-Driven paradigm | `references/data-driven-design.md` |
 | Choosing Prototype paradigm | `references/prototype-design.md` |
@@ -50,6 +48,14 @@ When designing game architecture, read the relevant `references/` documents base
 | Multiplayer support needed | `references/system-multiplayer.md` |
 
 For system-specific design, see the System-Specific References table below.
+
+### Physical Architecture References
+
+| When | Read |
+|------|------|
+| Project structure & file organization | `references/project-structure.md` |
+| Data formats, processing, i18n, metadata | `references/data-files.md` |
+| Asset conventions, pipelines, custom formats | `references/art-assets.md` |
 
 ### System-Specific References
 
