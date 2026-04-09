@@ -45,7 +45,7 @@ When designing game architecture, read the relevant `references/` documents base
 | Choosing Prototype paradigm | `references/prototype-design.md` |
 | Evolution & extensibility review | `references/evolution.md` |
 | Performance optimization needed | `references/performance-optimization.md` |
-| Multiplayer support needed | `references/multiplayer-architecture.md` |
+| Multiplayer support needed | `references/multiplayer-overview.md` |
 
 - For physical architecture design, see the Physical Architecture References table below.
 - For multiplayer system design, see the Multiplayer References table below.
@@ -63,7 +63,7 @@ When designing game architecture, read the relevant `references/` documents base
 
 | Focus | Reference | Use When |
 |------|------|------|
-| Multiplayer gameplay architecture | `references/multiplayer-architecture.md` | Decide topology, session model, sync model, AOI, authority split |
+| Multiplayer overview | `references/multiplayer-overview.md` | Decide client/server responsibility, authority split, and gameplay sync style |
 | Multiplayer protocol and connection | `references/multiplayer-protocol.md` | Design messages, serialization, Req/Resp/Notify, heartbeat, reconnect |
 | Multiplayer server architecture | `references/multiplayer-server-architecture.md` | Design ownership boundaries, process roles, deployment, persistence, recovery |
 | Multiplayer server implementation | `references/multiplayer-server-implementation.md` | Design framework skeleton, core abstractions, lifecycle, module layout, implementation order |

@@ -62,7 +62,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
 - **References**:
   - Read `references/macro-design.md` for high-level structure
   - Read `references/principles.md` for core principles
-  - Read `references/multiplayer-architecture.md` for multiplayer gameplay structure **IF** user requests network multiplayer support
+  - Read `references/multiplayer-overview.md` for multiplayer gameplay structure **IF** user requests network multiplayer support
   - Read `references/multiplayer-protocol.md` for protocol / connection design **IF** message boundary design is needed
   - Read `references/multiplayer-server-architecture.md` for server topology and ownership **IF** backend or realtime server architecture is needed
 

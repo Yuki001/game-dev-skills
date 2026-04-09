@@ -4,7 +4,7 @@ Reference for planning game server architecture and selecting suitable framework
 
 Primary focus is authoritative online games. It also covers backend/platform services when they are part of the same product.
 
-Complements `multiplayer-architecture.md` (topology, session shape, sync model, client/server logic split) and `multiplayer-protocol.md` (message design, serialization, heartbeat, reconnect) with server-side architecture guidance.
+Complements `multiplayer-overview.md` (client/server logic split, authority model, sync style) and `multiplayer-protocol.md` (message design, serialization, heartbeat, reconnect) with server-side architecture guidance.
 
 ---
 
@@ -535,4 +535,4 @@ This section is about how game logic is organized inside a chosen framework or s
 
 - Read `multiplayer-server-implementation.md` if you need implementation-oriented framework skeleton, core abstractions, lifecycle, and build order.
 - Read `multiplayer-protocol.md` for protocol contracts, request flow, and sync rules.
-- Read `multiplayer-architecture.md` for gameplay topology and synchronization goals.
+- Read `multiplayer-overview.md` for gameplay-side authority split and synchronization goals.

@@ -1,12 +1,12 @@
-# Multiplayer Server Framework Implementation Guide
+# Multiplayer Server Implementation Guide
 
-Reference for implementing a reusable multiplayer server framework. This document focuses on framework skeleton, core abstractions, lifecycle, extension points, and implementation order.
+Reference for implementing multiplayer server infrastructure. This document focuses on reusable implementation patterns: framework skeleton, core abstractions, lifecycle, extension points, implementation order, and the parts that should vary by project needs.
 
-Use `multiplayer-server-architecture.md` for runtime model, ownership, deployment, persistence, and framework-family selection. Use `multiplayer-protocol.md` for protocol contracts and sync rules. Use `multiplayer-architecture.md` for gameplay-side topology and synchronization goals.
+Use `multiplayer-server-architecture.md` for runtime model, ownership, deployment, persistence, and framework-family selection. Use `multiplayer-protocol.md` for protocol contracts and sync rules. Use `multiplayer-overview.md` for gameplay-side authority split and synchronization goals.
 
 ---
 
-## 1. Scope
+## 1. Scope And How To Use This Document
 
 Use this document when the question is:
 
@@ -17,9 +17,14 @@ Use this document when the question is:
 
 This document is implementation-oriented. It is not a replacement for product-level server architecture decisions.
 
+Two reading rules:
+
+- Treat the abstractions in this document as a checklist, not a fixed class hierarchy.
+- Let project requirements decide module split, engineering structure, and concrete class design.
+
 ---
 
-## 2. Framework Goals
+## 2. Implementation Principles
 
 Recommended goals:
 
@@ -50,7 +55,35 @@ Patterns repeatedly validated by existing frameworks:
 
 ---
 
-## 3. Minimum Runtime Abstractions
+## 3. Core Skeleton
+
+### Stable Skeleton vs Project Variants
+
+Some parts of server implementation are relatively stable across projects. Others should change with runtime model, team size, language, engine, and framework family.
+
+Usually stable:
+
+- authority boundary
+- session and identity binding
+- message dispatch entry
+- owner serialization model
+- persistence boundary
+- replication boundary
+- lifecycle and cleanup
+- observability hooks
+
+Usually variant by project:
+
+- project folder structure
+- class granularity and inheritance depth
+- room-based vs scene-based vs encounter-based runtime base classes
+- handler organization: RPC, message registry, actor mailbox, or command bus
+- repository layering and cache strategy
+- plugin, hook, or composition style
+
+Use this document to identify the stable skeleton first. Then adapt the code organization to the actual project.
+
+### Minimum Runtime Abstractions
 
 Most multiplayer server frameworks can start with these abstractions:
 
@@ -74,9 +107,7 @@ Most multiplayer server frameworks can start with these abstractions:
 
 If a framework cannot clearly locate these responsibilities, it is usually still too vague to implement safely.
 
----
-
-## 4. Core Interface Shape
+### Core Interface Shape
 
 Keep interfaces small and stable.
 
@@ -106,35 +137,119 @@ Interface rules:
 - Prefer IDs and handles across module boundaries instead of direct object reach-through
 - Keep the contract layer stable enough that client SDK generation or shared-interface use remains possible
 
+Do not force every abstraction into a public interface. Small projects can keep some pieces as concrete classes and only abstract boundaries that are likely to change.
+
 ---
 
-## 5. Recommended Module Layout
+## 4. Code Organization
+
+### Project Structure Variants
+
+There is no single correct project structure. Pick the simplest structure that keeps ownership and dependency flow clear.
+
+Common shapes:
+
+- **feature-first**: group by player, room, combat, social, inventory; good when gameplay modules dominate
+- **layer-first**: group by transport, session, dispatch, runtime, persistence; good for framework-heavy infrastructure work
+- **hybrid**: keep stable infrastructure layers, but place gameplay code by feature; often the most practical default
+
+Class design can also vary:
+
+- **composition-first services** for backend/platform-heavy servers
+- **runtime base class + modules/components** for room or scene servers
+- **actor/mailbox objects** for entity-ownership systems
+- **plain handlers + repositories** for short-connection or turn-based services
+
+The key requirement is not the directory tree itself. The key requirement is that ownership, message flow, and persistence boundaries remain obvious in code review.
+
+### Concrete Structure Templates
+
+#### Room-Based Realtime Server
 
 ```text
 server/
-├── app/            # bootstrap, config, composition root
-├── contracts/      # shared interfaces, DTOs, message IDs, generated stubs
-├── transport/      # socket, websocket, gateway adapters
-├── protocol/       # message definitions, codecs, error codes
-├── session/        # session lifecycle and auth binding
-├── dispatch/       # routing, middleware, handler registry
-├── runtime/        # room/scene/encounter base runtime
-├── matchmaking/    # room query, reservation, join token flow
-├── presence/       # group/stream membership and fan-out registry
-├── player/         # player state authority and meta systems
-├── replication/    # delta build, AOI filter, broadcast
-├── persistence/    # repositories, cache, db proxy, checkpoint
-├── services/       # matchmaking, social, global services
-├── hooks/          # filters, extension points, plugin adapters
-├── ops/            # metrics, admin, tracing, health
-└── tests/          # integration tests and bot tests
+├── app/
+├── gateway/
+├── session/
+├── protocol/
+├── dispatch/
+├── rooms/
+│   ├── directory/
+│   ├── runtime/
+│   ├── handlers/
+│   └── replication/
+├── player/
+├── persistence/
+├── presence/
+└── ops/
 ```
 
-This layout is only a starter. Merge modules early if the team is small.
+Use when the main runtime unit is a room or match.
+
+- `gateway/` only handles connection and packet I/O
+- `session/` binds connection to identity and runtime location
+- `rooms/directory/` finds room by ID and controls lifecycle lookup
+- `rooms/runtime/` owns authoritative state and serial command execution
+- `rooms/handlers/` converts decoded messages into room commands
+- `rooms/replication/` builds room deltas or broadcasts
+
+#### Short-Connection Player Data Server
+
+```text
+server/
+├── app/
+├── api/
+├── auth/
+├── protocol/
+├── player/
+│   ├── service/
+│   ├── modules/
+│   └── delta/
+├── persistence/
+├── cache/
+└── ops/
+```
+
+Use when the server is mainly API-driven and the core authority unit is the player.
+
+- `api/` maps HTTP/RPC handlers to domain commands
+- `player/service/` loads player context and controls write ordering
+- `player/modules/` contains inventory, quests, progression, mail, and similar systems
+- `player/delta/` collects changed fields and attaches them to tick or business responses
+- `cache/` is infrastructure only; gameplay logic should not depend on cache-specific behavior
+
+#### Scene Or World Server
+
+```text
+server/
+├── app/
+├── gateway/
+├── session/
+├── protocol/
+├── dispatch/
+├── scene/
+│   ├── directory/
+│   ├── regions/
+│   ├── sync/
+│   └── transfer/
+├── player/
+├── persistence/
+├── presence/
+└── ops/
+```
+
+Use when the runtime is region-based or scene-based rather than room-based.
+
+- `scene/directory/` resolves which region owns an entity or player
+- `scene/regions/` runs authoritative regional logic
+- `scene/sync/` builds per-client filtered updates
+- `scene/transfer/` handles handoff across regions or scenes
 
 ---
 
-## 6. Common Runtime Patterns
+## 5. Runtime And Execution Model
+
+### Common Runtime Patterns
 
 These patterns usually belong in the framework layer, not in gameplay modules:
 
@@ -148,9 +263,7 @@ These patterns usually belong in the framework layer, not in gameplay modules:
 
 Use these as infrastructure primitives. Gameplay code should consume them through framework APIs instead of managing threads, connections, or resource reuse directly.
 
----
-
-## 7. Runtime Lifecycle
+### Runtime Lifecycle
 
 ### Process Lifecycle
 
@@ -184,9 +297,7 @@ For room or match based systems, a two-phase join is the safest default:
 
 This prevents last-slot races and gives reconnect and timeout cleanup a clear home.
 
----
-
-## 8. Message Flow Skeleton
+### Message Flow Skeleton
 
 Default request path:
 
@@ -213,9 +324,56 @@ Most successful frameworks make ordering explicit:
 
 Pick one default ordering rule per owner type. Hidden concurrent mutation is where framework complexity usually starts.
 
+### Concrete Request Paths
+
+#### Realtime Room Command
+
+```text
+socket packet
+-> session decode
+-> dispatch by room + message type
+-> room mailbox
+-> room handler
+-> mutate authoritative room state
+-> mark dirty entities or properties
+-> build outbound deltas
+-> send room broadcast / owner ack
+-> checkpoint or async persistence if needed
+```
+
+Typical split:
+
+- session checks identity and connection state
+- dispatch only finds the target owner
+- room handler validates command parameters
+- room runtime applies game rules
+- replication builds packets after state change, not inside transport code
+
+#### Short-Connection Player API
+
+```text
+HTTP/RPC request
+-> auth
+-> load player context
+-> route to player module handler
+-> mutate player state
+-> collect player delta
+-> persist by policy
+-> attach delta to response
+```
+
+Typical split:
+
+- API handler should not directly edit DB rows for gameplay behavior
+- player context should serialize writes for the same player
+- delta builder should be near player state mutation, not scattered across controllers
+- persistence policy can be immediate or queued, but should be explicit
+
 ---
 
-## 9. Realtime Runtime Skeleton
+## 6. Gameplay Runtime Integration
+
+### Realtime Runtime Skeleton
 
 For room or scene based frameworks, one runtime instance usually needs:
 
@@ -243,6 +401,8 @@ Dispose()
 
 Keep runtime code authoritative. Client-specific presentation should stay outside.
 
+Do not treat this method list as mandatory. Some frameworks use `OnMessage()` + internal command dispatch, some use `Tick()`, and some are request/response only. Keep the lifecycle concepts even if method names differ.
+
 ### Presence And Group Integration
 
 Most realtime frameworks benefit from a first-class audience abstraction:
@@ -265,9 +425,7 @@ ListMembers()
 
 The storage behind this abstraction can be in-memory for single-process mode and distributed later.
 
----
-
-## 10. Player And Runtime Separation
+### Player And Runtime Separation
 
 This is the most important framework boundary.
 
@@ -278,9 +436,39 @@ This is the most important framework boundary.
 
 Avoid writing long-lived player state directly inside room or scene runtime unless the project is intentionally minimal.
 
----
+### Core Object Relationships
 
-## 11. Replication Integration
+The most important implementation detail is not inheritance depth. It is whether object relationships stay clean.
+
+Recommended dependency direction:
+
+```text
+Transport/Session
+    -> Dispatcher
+        -> Owner Locator
+            -> RuntimeInstance or PlayerService
+                -> Domain Modules
+                -> ReplicationContext
+                -> PersistenceFacade
+```
+
+Recommended ownership rules:
+
+- `Session` can know current player ID and current runtime ID, but should not hold direct gameplay state
+- `Dispatcher` can resolve owner and handler, but should not contain business rules
+- `RuntimeInstance` or `PlayerService` is the main mutation boundary
+- `Domain Modules` can mutate owned state, but should not send packets directly
+- `ReplicationContext` builds outbound changes from authoritative state and visibility rules
+- `PersistenceFacade` hides repository/cache/write-queue details from gameplay modules
+
+Avoid these direct dependencies:
+
+- room or scene code directly calling socket send
+- gameplay modules directly calling DB clients
+- transport layer directly reading gameplay state
+- controllers or handlers directly composing replication payloads for every feature
+
+### Replication Integration
 
 A reusable framework should support at least one of these paths:
 
@@ -307,9 +495,14 @@ Implementation patterns validated by existing frameworks:
 - per-client filtered view for hidden information
 - initial full snapshot followed by incremental patching
 
----
+Concrete placement rule:
 
-## 12. Persistence Integration
+- dirty marking happens in owner context right after state mutation
+- filtering happens in replication layer, not in gameplay rule code
+- serialization happens at protocol boundary, not in domain objects
+- send scheduling happens in transport or outbound queue, not inside handlers
+
+### Persistence Integration
 
 Do not hardwire gameplay code directly to the database.
 
@@ -335,91 +528,51 @@ Also define where persistence is triggered from:
 - event/hook pipeline
 - async worker callback marshaled back to owner context
 
----
+Concrete placement rule:
 
-## 13. Single-Process Starter Version
+- gameplay modules call `PersistenceFacade` or repository interfaces
+- repository layer decides cache, DB, batching, and retry strategy
+- owner context decides whether a write is inline, deferred, settlement-only, or checkpoint-based
 
-A practical first implementation can be:
+### End-To-End Example
 
-- one process
-- one transport
-- one dispatcher
-- one player service
-- one room service or one scene service
-- one persistence adapter
-- one scheduler
-- one presence registry
-- optional HTTP/RPC API beside realtime transport
+#### Example: `MoveCommand` In A Room-Based Server
 
-Build order:
+1. transport receives packet and resolves session
+2. dispatcher routes by `roomId + messageId`
+3. room mailbox serializes the command
+4. room handler validates input shape and basic preconditions
+5. room runtime applies movement rules and updates authoritative position
+6. affected entities are marked dirty
+7. replication layer builds per-client deltas
+8. owner ack and room broadcasts are queued
+9. optional checkpoint or event persistence is triggered by policy
 
-1. transport + session + dispatcher
-2. auth and session binding
-3. reservation or join flow
-4. player service and storage
-5. room/scene runtime base class
-6. presence/group registry
-7. replication path
-8. reconnect and shutdown cleanup
-9. metrics and admin tools
+Resulting code responsibility split:
 
-If the single-process version is unclear, multi-node design will also be unclear.
+- transport owns packet I/O
+- dispatcher owns routing
+- room owns gameplay mutation
+- replication owns outbound state build
+- persistence owns durability path
 
 ---
 
-## 14. Multi-Node Evolution Path
+## 7. Applying This Reference
 
-When scale requires splitting, evolve in this order:
+### How To Adapt This Document
 
-1. separate gateway/connection from logic
-2. separate player/meta authority from runtime instances
-3. add runtime directory or routing registry
-4. externalize shared cache and service discovery
-5. add dedicated matchmaking/global services
+When applying this document to a real project, decide these before writing too much framework code:
 
-Do not split nodes before ownership and routing keys are stable.
+- Is the server room-based, scene-based, encounter-based, or request/response heavy?
+- Does the project need a reusable framework, or only one production codebase with clear modules?
+- Is the team better served by feature-first folders or infrastructure-first folders?
+- Which boundaries are expected to change: protocol, persistence, runtime model, or deployment shape?
+- Which abstractions should stay concrete until scale forces extraction?
 
-Useful evolution patterns from existing frameworks:
+If these answers are clear, the rest of the document becomes a menu of implementation patterns instead of a rigid blueprint.
 
-- room pinning: runtime stays on the node where it was created
-- sticky sessions for stateful realtime channels
-- local interface first, distributed backend later for presence or groups
-- same-process short path optimization before network hop
-
----
-
-## 15. Required Operational Baseline
-
-Even a small framework should include:
-
-- structured logging
-- metrics for connection count, queue depth, tick time, send size, write latency
-- health checks
-- graceful shutdown and drain
-- admin commands or debug endpoints
-- bot or scripted client testing entry
-- trace or correlation ID through request flow
-- slow-call or stuck-runtime detection
-
-Without these, the framework is difficult to validate under load.
-
----
-
-## 16. Common Implementation Mistakes
-
-- Coupling gameplay handlers directly to sockets and DB calls
-- Mixing player durable state with room temporary state
-- Building multi-node routing before single-node lifecycle is stable
-- Using one generic handler abstraction for every runtime shape
-- Omitting reconnect and shutdown behavior until late
-- Replicating all fields by default without visibility or rate control
-- Skipping reservation and capacity control in room-based systems
-- Mixing transport contracts, handler metadata, and gameplay logic in one module
-- Designing extension points only after game-specific code is already baked into the core
-
----
-
-## 17. Recommendation Checklist
+### Recommendation Checklist
 
 When producing an implementation plan, explicitly state:
 
@@ -438,8 +591,8 @@ When producing an implementation plan, explicitly state:
 
 ---
 
-## 18. What To Read Next
+## 8. What To Read Next
 
 - Read `multiplayer-server-architecture.md` for server architecture decisions
 - Read `multiplayer-protocol.md` for message contracts and sync rules
-- Read `multiplayer-architecture.md` for gameplay topology and sync model selection
+- Read `multiplayer-overview.md` for gameplay-side authority split and sync model selection
