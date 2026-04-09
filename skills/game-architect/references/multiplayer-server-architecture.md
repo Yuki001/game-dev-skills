@@ -388,50 +388,7 @@ If no checkpointing or replication exists, process crash loses in-memory room or
 
 ---
 
-## 7. Scalability And Operations
-
-### Horizontal Scaling Rules
-
-| Service Type | Usual Scaling Unit |
-|:---|:---|
-| **Stateless API/Auth** | Add instances behind a load balancer |
-| **Player-owned state** | Shard by player ID or account key |
-| **Room-owned state** | Distribute rooms at creation time |
-| **Scene-owned state** | Partition by region/zone/shard |
-| **Domain/global services** | Scale per service according to consistency needs |
-
-### Global Service Guidance
-
-Do not treat all global services the same:
-
-- **Leaderboards** often tolerate cached reads, asynchronous updates, and periodic recompute.
-- **Guild/social systems** often shard by guild ID or user ID.
-- **Mail/notifications** are often queue-driven.
-- **Economy services** often need transaction-oriented or single-writer design.
-
-### Operational Primitives
-
-| Primitive | Why It Matters |
-|:---|:---|
-| **Tracing** | Follow requests across hops and find distributed failures |
-| **Metrics** | Watch queue depth, tick time, connection count, write latency |
-| **Slow-call detection** | Detect stalls, deadlocks, bad handlers, overloaded services |
-| **Timers/schedulers** | Run retries, delayed tasks, match timeouts, daily resets |
-| **Admin/ops surface** | Runtime inspection, moderation, match control, profiling |
-| **Testing bots/robot clients** | Validate functionality and load before production |
-| **Config reload / hot reload** | Improve iteration speed, but require explicit state migration rules |
-
-### Common Scalability Limits
-
-- A single room usually cannot scale across multiple processes without custom partitioning.
-- DB-backed backends scale easily for reads but can bottleneck on hot writes.
-- Cross-owner transactions become the main pain point once services are split.
-- Broker topologies reduce mesh complexity but add routing hops.
-- Actor/location systems improve migration flexibility but increase operational complexity.
-
----
-
-## 8. Framework Families
+## 7. Framework Families
 
 This section maps requirement shapes to framework families. It is intentionally generic and should guide selection even when no exact product is known yet.
 
@@ -447,26 +404,6 @@ This section maps requirement shapes to framework families. It is intentionally 
 | **Action-routing / broker framework** | Route-driven distributed action games | Explicit routing, gateway separation, sticky session patterns | Meta services and persistence design |
 | **Service tree / custom microservices** | Broad platform architecture and custom service layout | Topology control, composition, explicit boundaries | Opinionated gameplay abstractions |
 | **Custom lightweight stack** | Narrow-scope games with experienced teams | Full control and low abstraction cost | Lifecycle, tooling, observability, scaling support |
-
-### Framework Traits To Recognize
-
-| Trait / Keyword | Usually Implies | Best For | Often Weak |
-|:---|:---|:---|:---|
-| **Room lifecycle** | Match/session authority is the core abstraction | Session games | Persistent world modeling |
-| **Seat reservation / two-phase join** | Matchmaker and room join are separated safely | Matchmaking-heavy session games | Crash recovery and durability |
-| **Automatic delta sync** | Framework optimizes replication for developer speed | Small and medium rooms | Fine protocol control |
-| **Workflow state machine / phase progression** | Stateful service advances through ordered combat or business phases | PvE battles, turn workflows, short-lived encounters | Realtime room semantics |
-| **Manual broadcast / custom protocol** | State sync is application-owned | Competitive action games | Fast onboarding |
-| **Interface-as-schema / contract-first RPC** | Protocol and tooling are strongly typed | Service APIs and typed clients | Built-in authority model |
-| **Unary + streaming dual mode** | Supports both APIs and long-lived realtime channels | Mixed backend + realtime workloads | World simulation structure |
-| **Group / stream abstraction** | Named broadcast targets are first-class | Rooms, parties, chat, spectators | Durable gameplay state |
-| **Plugin / hook runtime** | Core platform is extensible by injected logic | Backend customization and server rules | Full topology freedom |
-| **Actor location / mailbox** | Ownership and routing are decoupled from physical placement | MMOs and migrating entities | Simplicity |
-| **Entity + system separation** | Data and logic are intentionally decoupled | Complex simulation | Small CRUD-focused teams |
-| **Gateway-Broker-Logic** | Routing topology is a first-class concern | High connection counts and protected logic servers | Simplicity |
-| **Node-Service-Module tree** | Hierarchical composition with lifecycle-managed subparts | Custom service platforms | Built-in match abstractions |
-| **Presence / stream registry** | Location and online membership are first-class | Match joins, chat, reconnect | Transactional persistence |
-| **Property-based matchmaking** | Queueing and matching use attributes/tickets | Ranked and mode-constrained queues | Simulation logic itself |
 
 ### Keywords To Map To Architecture
 
@@ -493,7 +430,7 @@ When recommending a framework family, explicitly state:
 
 ---
 
-## 9. Module Writing Patterns
+## 8. Module Writing Patterns
 
 This section is about how game logic is organized inside a chosen framework or server runtime.
 
@@ -529,10 +466,3 @@ This section is about how game logic is organized inside a chosen framework or s
 | **Strong typing across network boundary** | Interface contract |
 | **Explicit ownership modeling** | Data-logic separation, hierarchical composition |
 
----
-
-## 10. What To Read Next
-
-- Read `multiplayer-server-implementation.md` if you need implementation-oriented framework skeleton, core abstractions, lifecycle, and build order.
-- Read `multiplayer-protocol.md` for protocol contracts, request flow, and sync rules.
-- Read `multiplayer-overview.md` for gameplay-side authority split and synchronization goals.
