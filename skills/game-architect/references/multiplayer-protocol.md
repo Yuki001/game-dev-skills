@@ -245,6 +245,34 @@ For web/API multiplayer or meta systems:
 - server should compute elapsed time for idle or offline progress
 - return deltas when payload size matters
 
+### Player Data Synchronization In Short-Connection Services
+
+In short-connection systems, player data synchronization should use a **client tick + attached delta** pattern.
+
+Rules:
+
+- On first login, server sends a **full snapshot** for the key systems needed to enter the game.
+- Other modules can be loaded later through `system open`, which may return a module-level full list or full snapshot.
+- After initialization, player data should sync mainly through **delta response**.
+- Client periodically calls a **Tick API**; `Tick Response` returns authoritative player-data changes since the last sync point.
+- Every normal business response should also attach the player-data delta caused by that request.
+- Client updates local player cache only from server responses.
+- If client state is invalid or too old, server should return a **full refresh** instead of a delta.
+
+Typical flows:
+
+- `login -> full snapshot for key systems`
+- `system open -> module full list / full snapshot`
+- `Tick -> player delta`
+- `business request -> response + attached player delta`
+
+Notes:
+
+- Tick is client-initiated polling, not server push.
+- Tick does not require the handler to run simulation steps; it only needs to return authoritative changes already produced on the server side.
+- For time-based systems, `elapsed = now - last_tick_time` is one possible server-side rule, not a required Tick step.
+- If one request changes multiple player modules, consolidate them into one attached delta.
+
 ---
 
 ## 12. What To Read Next

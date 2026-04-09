@@ -297,6 +297,14 @@ Encounter/combat services commonly use RPC or request/response dispatch with exp
 | **Lockstep / deterministic input sync** | Fighting, RTS, deterministic subsystems | Low bandwidth, fairness | Determinism and recovery are hard |
 | **Hybrid** | Mixed games | Tailored to subsystem needs | Harder to reason about end-to-end |
 
+### Replicated Scene Object Properties
+
+- Many engines provide built-in replicated properties or network variables for scene objects.
+- Typical usage is to mark selected properties as synchronized, set sync interval or dirty-check frequency, and let the runtime auto-send updates to relevant clients.
+- Common synchronized fields include transform, velocity, health, animation state, and interactable flags.
+- This is usually an engine-level implementation of automatic state sync, often combined with AOI and per-client filtering.
+- Use it for stable scene-object state; use event/RPC messages for one-shot actions.
+
 ### Lockstep Rules
 
 - Deterministic arithmetic and RNG are mandatory.
