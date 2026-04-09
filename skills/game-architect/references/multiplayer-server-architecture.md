@@ -528,3 +528,11 @@ This section is about how game logic is organized inside a chosen framework or s
 | **Hot reload friendliness** | Plugin system, data-logic separation |
 | **Strong typing across network boundary** | Interface contract |
 | **Explicit ownership modeling** | Data-logic separation, hierarchical composition |
+
+---
+
+## 10. What To Read Next
+
+- Read `multiplayer-server-implementation.md` if you need implementation-oriented framework skeleton, core abstractions, lifecycle, and build order.
+- Read `multiplayer-protocol.md` for protocol contracts, request flow, and sync rules.
+- Read `multiplayer-architecture.md` for gameplay topology and synchronization goals.

@@ -64,7 +64,7 @@ requirement.md  --->  technical_design.md  --->  implementation.md
   - Read `references/principles.md` for core principles
   - Read `references/multiplayer-architecture.md` for multiplayer gameplay structure **IF** user requests network multiplayer support
   - Read `references/multiplayer-protocol.md` for protocol / connection design **IF** message boundary design is needed
-  - Read `references/multiplayer-server.md` for server topology and ownership **IF** backend or realtime server architecture is needed
+  - Read `references/multiplayer-server-architecture.md` for server topology and ownership **IF** backend or realtime server architecture is needed
 
 **Key Tasks**:
 1. If existing project: Analyze the existing project code to understand the current architecture

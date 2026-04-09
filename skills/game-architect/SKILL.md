@@ -65,7 +65,8 @@ When designing game architecture, read the relevant `references/` documents base
 |------|------|------|
 | Multiplayer gameplay architecture | `references/multiplayer-architecture.md` | Decide topology, session model, sync model, AOI, authority split |
 | Multiplayer protocol and connection | `references/multiplayer-protocol.md` | Design messages, serialization, Req/Resp/Notify, heartbeat, reconnect |
-| Multiplayer server runtime | `references/multiplayer-server.md` | Design ownership boundaries, process roles, deployment, persistence, recovery |
+| Multiplayer server architecture | `references/multiplayer-server-architecture.md` | Design ownership boundaries, process roles, deployment, persistence, recovery |
+| Multiplayer server implementation | `references/multiplayer-server-implementation.md` | Design framework skeleton, core abstractions, lifecycle, module layout, implementation order |
 
 ### System-Specific References
 
