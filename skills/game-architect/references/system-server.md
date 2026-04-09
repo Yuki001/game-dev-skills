@@ -1,581 +1,522 @@
 # Game Server Architecture
 
-Practical guide for building authoritative dedicated game servers. Follow this document sequentially to construct a complete server from architecture selection to implementation patterns.
+Reference for planning game server architecture and selecting suitable framework families. This document is optimized for design work: identify the runtime model first, then choose ownership boundaries, deployment shape, sync model, and framework family.
 
-Complements `system-multiplayer.md` (network topology, sync models, protocol design) with server-side implementation guidance.
+Primary focus is authoritative online games. It also covers backend/platform services when they are part of the same product.
+
+Complements `system-multiplayer.md` (network topology, protocol design, sync mechanics) with server-side architecture guidance.
 
 ---
 
-## 1. Architecture Selection
+## 1. Scope And First Decision
 
-### What You're Building
+### What Kind Of Server Are You Designing
 
-An authoritative dedicated server where:
-- Server owns all game state (single source of truth)
-- Clients send inputs; server validates, simulates, broadcasts results
-- Each room/match runs on exactly one process (no live migration)
-- Player data persists independently of room lifecycle
+Most online games use one or both of these systems:
 
-### Choose Your Architecture Style
+- **Realtime authoritative runtime:** Server owns room or world state; clients send inputs; server validates, simulates, and broadcasts authoritative results.
+- **Backend/platform service:** Server handles authentication, storage, economy, quests, social systems, leaderboards, and other meta features through request/response APIs or async workflows.
 
-Pick the style that matches your game's core loop. Most production servers combine 2–3 styles.
+Use these defaults unless requirements clearly say otherwise:
 
-| Style | Best For | Provides | You Must Add |
+- Competitive or shared state should be server authoritative.
+- Runtime state and durable player/meta data should be separated.
+- One mutable state unit should have one clear owner at a time.
+- Start with the simplest topology that satisfies scale and failure requirements.
+
+### Runtime Model Decision Table
+
+| Runtime Model | Best Fit | Core Ownership Unit | Typical Server Shape |
 |:---|:---|:---|:---|
-| **Room-based** | Session games (MOBA, FPS, party) | Session lifecycle, matchmaking, auto state sync | Player data service, DB layer |
-| **Full-stack backend** | Mobile/social games needing complete backend | Auth, social, storage, leaderboards | Game loop logic (via plugin) |
-| **Actor/ECS** | Complex simulation, MMO, deterministic physics | Entity system, cross-process messaging, hot-reload | Network frontend, topology config |
-| **Action-routing** | Distributed action games, high player count | Broker routing, per-player thread safety, SDK gen | DB layer, social features |
-| **RPC-hub** | Type-safe realtime, Unity integration | Bidirectional streaming, group broadcast | Matchmaking, DB, player service |
-| **Service tree** | Flexible microservices, custom topology | Process hierarchy, profiler, multi-transport | All game logic and persistence |
+| **Room-based realtime** | Match-based games, lobbies, instanced sessions | Room or match | Room process/service with matchmaking and state sync |
+| **Encounter/combat service** | Stateful PvE flows, turn-based combat, lightweight battle instances | Encounter, battle, or workflow instance | Stateful service instance driven by API/service calls |
+| **Scene/world realtime** | Persistent worlds, region simulation, AOI-heavy games | Scene, region, or entity shard | Scene services with routing and handoff |
+| **Backend/platform** | Turn-based, idle, social, economy-heavy games | Player, request, or domain service | API services backed by storage |
+| **Hybrid** | Most commercial online games | Room/scene + player/meta service | Realtime runtime plus backend platform |
 
-**Common combinations:**
-- **Casual/indie:** Room-based + external DB (PostgreSQL/MongoDB)
-- **Mobile social:** Full-stack backend (all-in-one)
-- **Competitive session:** RPC-hub + player data service + DB proxy
-- **MMO/simulation:** Actor/ECS + action-routing gateway + scene sharding
-- **Microservices:** Service tree (full custom)
+### Fast Recommendation Matrix
 
-### Decision Table
+| Situation | Recommended Starting Point | Avoid By Default |
+|:---|:---|:---|
+| 2-20 player match game | Room-based realtime + persistent backend | Actor/world runtime, microservices |
+| Stateful PvE or turn-based combat flow without connection-centric rooms | Encounter/combat service + persistent backend | Full room allocation and realtime room lifecycle |
+| Turn-based or async multiplayer | Backend/platform service | Realtime-first stack unless match authority is required |
+| Session-based competitive game | Room-based realtime with separate player/meta service | Full BaaS as the only runtime |
+| Persistent world with AOI | Scene/world runtime with region ownership | Pure room model as the core world architecture |
+| One small team, fast shipping | Single process or simple room cluster | Full service decomposition |
+| Platform with multiple game modes | Dedicated gameplay runtime plus backend platform | One framework forced onto every subsystem |
 
-| Game Type | Room Size | Primary Need | Recommended |
+### Selection Heuristics For LLM Planning
+
+- If the game has **continuous simulation** and anti-cheat matters, begin with an authoritative realtime runtime.
+- If gameplay is **stateful and step-driven but not connection-centric**, prefer an encounter/combat service over a full room runtime.
+- If the game is mostly **CRUD + timers + progression**, begin with a backend/platform architecture.
+- If the game has **discrete matches**, prefer room ownership over shared global simulation.
+- If the game has **persistent spatial state**, prefer scene or region ownership with explicit handoff rules.
+- If the team is small and the game loop is simple, prefer opinionated frameworks with built-in lifecycle and sync.
+- If topology control, sharding, or migration is the hard problem, prefer lower-level runtime frameworks and explicit ownership modeling.
+- Do not recommend microservices by default. Split only for scale, ownership clarity, or failure isolation.
+
+---
+
+## 2. Ownership Model
+
+Clear ownership is the core design decision. Most other server decisions follow from it.
+
+### Common Ownership Units
+
+| Ownership Unit | Owns | Best For | Main Risk |
 |:---|:---|:---|:---|
-| Turn-based, card games | 2–10 | Simple sync, validation | Full-stack backend |
-| Party, casual multiplayer | 2–20 | Fast iteration | Room-based + DB |
-| MOBA, battle royale | 10–100 | Realtime sync, matchmaking | Room-based or RPC-hub + player service |
-| Action MMO | 50–500/region | Simulation fidelity | Actor/ECS + action-routing |
-| Persistent world | 1000+ | Region sharding, AOI | Actor/ECS or service tree |
+| **Player** | Inventory, currency, quests, progression, profile | Meta systems and account-bound state | Cross-player transactions and global coordination |
+| **Room** | Match simulation, combat, temporary session state | Session games | Crash loses in-memory match state if not checkpointed |
+| **Encounter** | Battle state machine, turn order, scripted PvE flow, short-lived combat state | Lightweight combat services and turn workflows | Easy to under-design persistence, idempotency, and recovery |
+| **Scene/Region** | Spatial simulation, AOI, world entities | MMO and persistent worlds | Transfer/handoff complexity |
+| **Entity/Actor** | One entity's mutable state and message mailbox | High-fidelity simulation, migratable ownership | Higher message-routing complexity |
+| **Service/Domain** | Guilds, mail, auction, leaderboard, economy | Cross-session systems | Can become bottleneck if boundaries are vague |
+
+### Ownership Rules
+
+- One mutable object should have one authoritative writer at a time.
+- Player/meta state and room/scene runtime state should usually be owned separately.
+- Cross-owner operations need explicit design: transaction, saga, lock, event, or compensation.
+- State should move only when there is a clear handoff rule.
+- Reads can be cached widely; writes should follow ownership boundaries.
+
+### Ownership Patterns
+
+| Pattern | Description | Use When |
+|:---|:---|:---|
+| **Single writer** | One room, actor, player service, or scene owns all writes | Default pattern for stateful systems |
+| **Pinned ownership** | State stays on the node where it was created | Rooms and session instances |
+| **Sharded ownership** | Ownership determined by player ID, room ID, region ID, or key range | Player services, scenes, domain services |
+| **Workflow ownership** | One short-lived encounter/workflow instance owns progression until completion | PvE combat flows, turn resolution, scripted encounters |
+| **Migrating ownership** | Ownership can move between processes while preserving logical identity | Entity-centric MMOs, region transfer |
+| **Stateless request handling** | No in-memory authoritative owner between requests | BaaS, request/response APIs |
 
 ---
 
-## 2. Process Topology
+## 3. Process Topology
 
-### Process Architecture Patterns
-
-Observed from production frameworks. Choose based on scale and complexity.
-
-| Pattern | Structure | Concurrency Model | Coordination | Best For |
-|:---|:---|:---|:---|:---|
-| **Single-process monolith** | All roles in one process | Single-threaded event loop or goroutines | None | Prototype, <100 CCU |
-| **Homogeneous multi-node** | Identical nodes, any handles any request | Goroutine-per-connection or async/await | Shared DB + presence cache | BaaS, stateless API, <10K CCU |
-| **Room-pinned multi-node** | Rooms pinned to creating node | Single-threaded per process or async | Redis pub/sub for IPC | Session games, 1K–10K CCU |
-| **Three-tier (External-Broker-Logic)** | External (connections), Broker (routing), Logic (game) | Per-player thread or virtual thread | Broker routes by cmd | Distributed action games, 10K+ CCU |
-| **Fiber/Actor multi-process** | Fiber per logical unit, Actor messaging | Fiber scheduled on thread pool | Actor location service, etcd | MMO, complex simulation, 10K+ CCU |
-| **Service tree cluster** | Node → Service → Module hierarchy | Goroutine per service | etcd or built-in master | Microservices, flexible topology |
-
-### Logical Roles (Composable)
-
-These are logical functions, not physical processes. Combine as needed.
-
-| Role | Responsibility | State | Scaling Strategy |
-|:---|:---|:---|:---|
-| **Connection** | Accept connections, heartbeat, protocol decode | Session state | Horizontal by connection count |
-| **Auth** | Token validation, account lookup | Stateless (DB-backed) | Horizontal by request rate |
-| **Player** | Player data authority: inventory, currency, quests, all meta-system CRUD | Player state | Shard by player ID |
-| **Matchmaker** | Find/create rooms, party formation | Soft state (ticket queue) | Horizontal by queue size |
-| **Room** | Session-based game logic: match simulation, combat, state authority | Game state | Horizontal by room count |
-| **Scene** | Persistent world logic: region management, AOI, entity authority | Region state | Horizontal by region |
-| **Global** | Cross-server services: social, leaderboards, guilds, mail, auctions | Service state | Horizontal by service type |
-| **DB Proxy** | Database access, cache, write batching | Cache | Horizontal by query rate |
-
-### Deployment Profiles
-
-The full role catalog represents maximum decomposition. Most projects should start with a simplified profile and split processes as scale demands.
-
-| Profile | Processes | When to Use |
-|:---|:---|:---|
-| **Minimal (Single Process)** | All roles embedded | Prototype, <100 CCU, game jam, LAN co-op. Single binary handles everything. No horizontal scaling needed. |
-| **BaaS (Backend-as-a-Service)** | **Auth** + **Player** + **DB Proxy** | Turn-based, idle, async multiplayer. No realtime room. Client sends CRUD requests (use item, complete quest), server validates and persists. Stateless request-response pattern. |
-| **Small Room** | **Auth** + **Player + Room** + **DB Proxy** | Small-scale online games (indie multiplayer, card games). Auth separated for security; Room embeds Player + Matchmaker + gameplay; DB Proxy for async persistence. |
-| **Standard Room** | **Connection** + **Auth** + **Matchmaker** + **Player** + **Room** + **DB Proxy** | Mid-scale room-based games (MOBA, FPS, battle royale). Player handles all meta-system CRUD independently. Room focuses on core gameplay, reads/writes player data via Player process. |
-| **Persistent World** | **Connection** + **Auth** + **Player** + **Scene** + **DB Proxy** + **Global** | MMO or sandbox. Player holds all player data across region transfers. Scene/World handles world simulation and AOI. Global handles cross-server services. |
-| **Full Scale** | All roles | Large MMO or platform with multiple game modes. Matchmaker + Player + Room + Scene coexist. Global services fully decomposed. |
-
-**Evolution Path**: Start with the simplest profile that fits. Split processes when a specific bottleneck emerges — e.g., split Player from Game/Room when meta-system CRUD load grows independently of gameplay, split Matchmaker when matchmaking needs independent scaling, add Connection when connection count exceeds single-process limits, add Global when cross-server features are needed.
-
-### Service Discovery
-
-| Mechanism | Implementation | Use When |
-|:---|:---|:---|
-| **Static config** | JSON file with node addresses | Single deployment, <10 nodes |
-| **Distributed KV** | etcd/ZooKeeper with TTL heartbeat | Dynamic scaling, health checks |
-| **Shared DB** | Presence table in main DB | DB already present, avoid new dependency |
-| **Pub/sub cache** | Redis pub/sub + hash for node mapping | Multi-node room coordination |
-| **Built-in master** | Dedicated master node, gossip or heartbeat | No external dependency |
-
-### Inter-Process Communication
-
-| Pattern | Mechanism | Use When |
-|:---|:---|:---|
-| **Direct RPC** | TCP call with discovery lookup | Low-latency, known target |
-| **Broker routing** | Central broker routes by cmd/subCmd | Many logic servers, avoid mesh |
-| **Pub/sub** | Redis channels or NATS | Presence, cross-node events |
-| **Actor mailbox** | Location service maps Actor ID → process | Entity-centric, location-transparent |
-| **Shared DB** | Write to DB, other nodes poll or get notified | Async, eventual consistency |
-
----
-
-## 3. Infrastructure Primitives
-
-Build these before game logic. They're the foundation.
-
-| Primitive | Purpose | Implementation Notes |
-|:---|:---|:---|
-| **Event bus** | Intra-process pub/sub | Auto-unregister on component dispose |
-| **Timer/scheduler** | One-shot, recurring, cron | Shared dispatcher, auto-clear |
-| **Object pool** | Reuse allocations | Critical for zero-GC hot paths |
-| **ID generator** | Unique IDs (entity, session, room) | Snowflake (distributed), UUID (simple) |
-| **Async primitive** | Coroutine, fiber, async/await | Match language runtime |
-| **Profiler** | Slow-call detection, deadlock warning | Instrument all entry points |
-| **Serialization** | Binary message encoding | Zero-GC for hot paths |
-| **Tracing** | Per-request trace ID | Full-link across processes |
-
-**Decision: framework vs. custom**
-- Use framework primitives if they integrate with lifecycle (auto-cleanup)
-- Bring your own if you need cross-platform (client + server) or framework lacks features
-
----
-
-## 4. Core Feature Modules
-
-Build in phases. ✓ = must-have, ○ = optional.
-
-### Phase 1: Connection & Session (✓ Required)
-
-| Module | What it does | Key concepts |
-|:---|:---|:---|
-| **Connection manager** | Accept clients, heartbeat, disconnect | WebSocket/TCP server, ping/pong, timeout |
-| **Session registry** | Track active sessions | Session ID, user binding, reconnection token |
-| **Authentication** | Validate identity, issue tokens | JWT, device ID, social login, refresh |
-
-### Phase 2: Message Routing (✓ Required)
-
-| Module | What it does | Key concepts |
-|:---|:---|:---|
-| **Message dispatch** | Route messages to handlers | Type registry, cmd/subCmd, RPC reflection |
-| **Broadcast** | Send to all/filtered clients | All, except-sender, group, single |
-
-### Phase 3: Game Logic Pattern (✓ Required)
-
-Your game logic layer determines the rest of the architecture. Choose one or hybrid based on game type.
-
-#### Pattern A: Room + Matchmaker (Session-based games)
-
-**Use for:** MOBA, FPS, battle royale, party games, card games — any game with discrete matches.
-
-| Module | Priority | What it does | Key concepts |
-|:---|:---|:---|:---|
-| **Room lifecycle** | ✓ | Create, join, run, dispose sessions | State machine, seat reservation, auto-dispose |
-| **Matchmaker** | ○ | Find/create rooms, party formation | Ticket queue, property matching, two-phase join |
-| **State sync** | ✓ | Broadcast game state | Choose: Schema delta, Manual broadcast, or Lockstep (see Section 5) |
-
-**State sync options for Room pattern:**
-- **Schema delta:** Auto-sync with delta compression (casual, web, small rooms)
-- **Manual broadcast:** Full control, custom encoding (any game type)
-- **Lockstep:** Deterministic simulation, input sync (fighting games, RTS)
-
-#### Pattern B: Scene (Persistent world)
-
-**Use for:** MMO, sandbox, persistent world — continuous world with region sharding.
-
-| Module | Priority | What it does | Key concepts |
-|:---|:---|:---|:---|
-| **Scene/Region manager** | ✓ | Manage world regions, entity authority | Region sharding, boundary handoff |
-| **AOI (Area of Interest)** | ✓ | Limit data per client to nearby entities | Grid-based, radius-based, hysteresis |
-| **State sync** | ✓ | Broadcast entity state | ECS snapshot, manual broadcast, delta compression |
-
-**State sync for Scene pattern:**
-- **ECS snapshot:** Serialize entity/component data, filter by AOI
-- **Manual broadcast:** Custom encoding with AOI filtering
-- **Delta compression:** Only changed entities/components
-
-#### Pattern C: Stateless API (BaaS, turn-based)
-
-**Use for:** Turn-based games, idle games, async multiplayer — no realtime simulation.
-
-| Module | Priority | What it does | Key concepts |
-|:---|:---|:---|:---|
-| **Request-response API** | ✓ | Handle game actions via HTTP/gRPC | Validate, execute, persist, respond |
-| **No realtime loop** | — | Client-side simulation or turn-based | Server validates results, no broadcast |
-
-**No state sync needed.** Server responds to each request with updated state. Client applies locally.
-
-### Phase 4: Player Data (✓ Required for all patterns)
-
-| Module | What it does | Key concepts |
-|:---|:---|:---|
-| **Player data service** | Load/save player state | Key-value, optimistic lock, write-behind cache |
-| **Persistence layer** | Database integration | Relational, document, ECS component store |
-
-### Phase 5: Meta Features (○ Optional)
-
-| Module | What it does | Key concepts |
-|:---|:---|:---|
-| **Leaderboards** | Ranked lists, tournaments | Best/set/increment, rank cache, cron reset |
-| **Social graph** | Friends, groups, chat | Edge table, membership, message history |
-| **Presence** | Online status, room location | Pub/sub streams, cross-node |
-
-### Phase 6: Operations (○ Optional)
-
-| Module | What it does | Key concepts |
-|:---|:---|:---|
-| **Admin dashboard** | Monitor, control | Web UI, metrics, profiler |
-| **Hot reload** | Update without restart | Script runtime, DLL swap, config reload |
-
----
-
-## 5. State Synchronization
-
-Choose based on game type.
-
-### Sync Approaches
-
-| Approach | Best For | Bandwidth | Complexity |
-|:---|:---|:---|:---|
-| **Schema delta** | Casual, web, small rooms | Low | Low (auto) |
-| **Manual broadcast** | Custom protocol, full control | Variable | Medium |
-| **ECS snapshot** | Complex simulation, AOI | Medium–High | High |
-| **Lockstep** | Deterministic, fighting, RTS | Low (inputs only) | High |
-
-### Lockstep Requirements
-
-For deterministic simulation (fighting games, RTS):
-- Fixed-point math (no floats)
-- Deterministic random (seeded)
-- Input collection: advance only when all inputs received
-- Input delay: N-frame buffer for network transmission
-- Desync detection: periodic state hash comparison
-- Replay: store input log, fast-forward on reconnect
-
-### Hybrid Approach
-
-State sync for world + lockstep for combat subsystem. Use when:
-- Open world cannot be fully deterministic
-- Combat requires frame-perfect fairness
-
-### Per-Client Filtering
-
-Limit what each client sees:
-- **Property filter:** Per-field predicate (hidden cards, fog of war)
-- **AOI:** Only entities within radius/grid
-- **Ownership:** Only owned or visible objects
-
-### Tick Rate Design
-
-| Parameter | Typical Range | Notes |
-|:---|:---|:---|
-| Simulation rate | 10–128 Hz | Match physics needs |
-| Broadcast rate | 20–60 Hz | Higher = smoother, more bandwidth |
-| Input collection | 1–4 frames | Batch to reduce overhead |
-
-Decouple simulation from broadcast: simulate at 60 Hz, broadcast at 20 Hz. Clients interpolate.
-
----
-
-## 6. Room Lifecycle
-
-### State Machine
-
-```
-Create → Wait → [Auth per client] → Join → Running → Leave → Dispose
-                                              ↑           ↓
-                                         Reconnect ← Disconnect
-```
-
-| State | Server Actions | Client Actions |
-|:---|:---|:---|
-| **Create** | Allocate, initialize, register | — |
-| **Wait** | Accept joins, validate seats | Request join, auth token |
-| **Auth** | Validate token, call hook | Wait |
-| **Join** | Add to presence, send snapshot | Receive, initialize |
-| **Running** | Process inputs, simulate, broadcast | Send inputs, apply patches |
-| **Leave** | Remove, call hook, check dispose | Disconnect or reconnect |
-| **Dispose** | Save state, deregister, cleanup | — |
-
-### Seat Reservation (Two-Phase Join)
-
-Prevents race conditions when multiple clients compete for last slot.
-
-**Phase 1 (Matchmaker):**
-- Client → Matchmaker.joinOrCreate()
-- Matchmaker finds/creates room, atomically reserves seat
-- Returns {roomId, sessionId, token}
-
-**Phase 2 (Room):**
-- Client → Room.connect(token)
-- Room validates token, clears timeout
-- Proceeds to Auth
-
-If client never connects: timeout clears reservation.
-
-### Reconnection
-
-| Pattern | Mechanism | State Recovery |
-|:---|:---|:---|
-| **Token-based** | Issue reconnection token on join | Hold session for timeout window (60–120s) |
-| **Session registry** | Persist session ID in cache | Load from cache, replay missed state |
-| **Input replay** | Store all inputs since join | Full state recovery (lockstep) |
-
-### Auto-Dispose vs. Persistent
-
-| Mode | Trigger | Use When |
-|:---|:---|:---|
-| **Auto-dispose** | Last client leaves (or empty timeout) | Session games, clean resource management |
-| **Persistent** | Explicit lifecycle control | Persistent world regions, scheduled events |
-
-### Party/Lobby Lifecycle
-
-```
-Party Create → Members Join → Enter Matchmaker as group
-  → Match found → Members notified → Each joins room
-  → Party dissolved (or persists)
-```
-
-Key: party leader controls ready-check; matchmaker keeps party together.
-
----
-
-## 7. Message Dispatch
-
-### Dispatch Patterns
-
-| Pattern | Mechanism | Best For |
-|:---|:---|:---|
-| **Type-switch** | Envelope type → switch → handler | Monolithic, fixed message set |
-| **Registry map** | `onMessage(type, handler)` | Dynamic registration |
-| **cmd/subCmd routing** | Two-level int route, reflection | MVC-style, auto-generated |
-| **Method-ID hash** | Interface method → int ID | Type-safe, compile-time |
-| **RPC reflection** | `RPC_MethodName` convention | Naming-driven |
-| **Actor mailbox** | Message → Actor ID → process | Entity-centric, location-transparent |
-
-### Broadcast Patterns
-
-| Pattern | Use When |
-|:---|:---|
-| **All** | Global event (game start, countdown) |
-| **Except sender** | Movement, actions visible to others |
-| **Filtered subset** | Team messages, private events |
-| **Group/stream** | Named groups (teams, spectators) |
-| **Single** | Personal response, private state |
-
-### Cross-Process Routing
-
-| Pattern | Mechanism |
-|:---|:---|
-| **Presence IPC** | Match ID encodes node; route via pub/sub |
-| **Match-ID routing** | Parse `{uuid}.{node}` from ID |
-| **Broker routing** | All messages via broker; broker resolves cmd → server |
-| **Actor location** | ActorLocation service maps Entity.Id → process |
-| **RPC call/cast** | `Call(service, method, args)` with discovery |
-
-### Middleware Pipeline
-
-Intercept for cross-cutting concerns (auth, rate limit, validation, logging).
-
-```
-Message → Filter 1 (auth) → Filter 2 (rate limit) → Filter 3 (validation)
-  → Handler → Filter 3 (transform) → Filter 1 (audit) → Response
-```
-
-Implementation: attribute-based, global registration, or per-handler chain.
-
----
-
-## 8. Persistence
-
-### Storage Models
-
-Choose based on data shape. Most servers use 2–3 models.
-
-| Model | Structure | Use When |
-|:---|:---|:---|
-| **Key-value** | `(collection, key, ownerId)` → JSON blob | Player saves, settings, inventory |
-| **ECS component** | Entity/Component as documents | Complex simulation state, component queries |
-| **Relational** | SQL tables, foreign keys | Structured data with joins: leaderboards, social, transactions |
-| **Document** | Flexible schema, nested objects | Semi-structured, evolving schema |
-| **Cache-aside** | Hot data in memory, cold in DB | Session state, presence, rank cache |
-
-**Typical combination:** Relational (accounts, social, leaderboards) + key-value (player saves) + cache-aside (presence, session routing).
-
-### Write Patterns
-
-| Pattern | Mechanism | Risk | Use When |
-|:---|:---|:---|:---|
-| **Write-behind** | Mutate in-memory, flush at interval | Data loss on crash | High-frequency (position, stats) |
-| **Write-through** | Immediate persist | Slower, DB bottleneck | Critical (currency, transactions) |
-| **Event sourcing** | Store state changes as events | Storage growth, replay cost | Audit trails, replay, match records |
-| **Single writer** | One process owns each data item | Requires routing | Prevents write conflicts |
-
-### Optimistic Locking
-
-Attach version field. On write: include expected version; fail if mismatch. Retry with fresh read.
-
-Use when: concurrent writes from multiple nodes to shared objects (leaderboards, storage). Not needed for single-writer data.
-
-### Match State Persistence
-
-| Approach | Trigger | Notes |
-|:---|:---|:---|
-| **Manual save on dispose** | `onDispose()` hook | Simple; risk of data loss on crash |
-| **Storage API in loop** | Explicit write at milestones | Controlled checkpoints |
-| **DB component** | Auto-serialize on change | Transparent, framework-managed |
-| **Input log** | Store all inputs | Enables replay; expensive for long matches |
-
----
-
-## 9. Scalability
+Once ownership is clear, choose the minimum deployment topology that can host it.
 
 ### Topology Patterns
 
-| Topology | Coordination | State Distribution | Scaling Unit |
+| Pattern | Structure | Best For | Tradeoff |
 |:---|:---|:---|:---|
-| **Single-process** | None | All in-memory | Vertical only |
-| **Multi-process pub/sub** | Redis pub/sub + hash | Stateless API, stateful rooms pinned | Add nodes, rooms distributed at creation |
-| **Shared-DB multi-node** | Shared DB, presence table | Stateless API, stateful matches | Add homogeneous nodes |
-| **Three-tier broker** | Broker routes by cmd | External stateless, Logic stateful | Scale each tier independently |
-| **Multi-fiber** | Actor location, etcd | Fiber per unit, cross-fiber messaging | Add processes, configure services |
-| **Service cluster** | etcd or master, RPC | Service owns state | Add nodes, configure placement |
+| **Single-process monolith** | All roles in one process | Prototype, LAN, early production | Fastest to build, weakest scaling/isolation |
+| **Homogeneous multi-node** | Any node handles most requests; DB-backed state | API-heavy backends, BaaS | Simple scaling, weak fit for large in-memory runtimes |
+| **Room-pinned multi-node** | Rooms created on one node stay there | Session games | Good match scaling, each room limited to one node |
+| **Gateway-Broker-Logic** | External gateway, centralized routing, protected logic servers | High connection counts, command-routed architectures | More moving parts and routing complexity |
+| **Actor/Location cluster** | Message routing through location or actor registry | Migratable entities, world simulation | More complex operations and debugging |
+| **Service tree cluster** | Process contains services, services contain modules | Custom platforms and service-oriented backends | Flexible but easy to over-design |
 
-### Room Pinning
+### Logical Roles
 
-Rooms created on one process stay there. No live migration.
+| Role | Responsibility | Typical State |
+|:---|:---|:---|
+| **Connection/Gateway** | Accept connections, heartbeat, protocol decode, session binding | Session state |
+| **Auth** | Identity validation, token/session issuance | Stateless or DB-backed |
+| **Matchmaker** | Queueing, property matching, room assignment | Soft state |
+| **Player** | Durable player and meta-system authority | Player state |
+| **Room** | Session gameplay authority | Match state |
+| **Encounter/Combat** | Short-lived battle or turn-flow authority | Encounter state |
+| **Scene** | Persistent world authority | Region state |
+| **Global/Domain** | Social, guild, mail, leaderboard, economy, auction | Service/domain state |
+| **Persistence/DB proxy** | Database access, cache, batching, storage policy | Cache and write queues |
 
-**Implications:**
-- Match ID encodes hosting node (e.g., `{uuid}.{nodeName}`)
-- Cross-node join: forward via IPC to hosting node
-- Process crash loses all rooms; clients reconnect to new room
-- Load balance at creation time (assign to least-loaded)
+### Deployment Profiles
 
-### Horizontal Scaling
+| Profile | Processes | When To Use |
+|:---|:---|:---|
+| **Minimal** | Everything embedded | Prototype, small release, low CCU |
+| **Backend-only** | Auth + API + Persistence | Turn-based, idle, social, async multiplayer |
+| **Combat service** | Auth + Player + Encounter/API + Persistence | Lightweight PvE combat, card battle loops, turn workflows without room allocation |
+| **Small room** | Auth + Room/API + Persistence | Small session games with limited backend complexity |
+| **Standard room** | Gateway + Auth + Matchmaker + Player + Room + Persistence | Mid-scale realtime match games |
+| **Persistent world** | Gateway + Auth + Player + Scene + Global + Persistence | MMO or sandbox worlds |
+| **Full platform** | Separate gameplay and domain services | Large products with multiple game modes |
 
-| Service Type | Strategy |
-|:---|:---|
-| **Stateless** (Auth, Lobby, DB Proxy) | Add instances behind load balancer |
-| **Stateful by player** (Player) | Shard by player ID (consistent hash) |
-| **Stateful by room** (Room) | Shard by room ID, assign at creation |
-| **Stateful by region** (Scene) | Shard by region/zone ID, fixed mapping |
-| **Global** (Leaderboards, Guilds) | Single instance or active-passive HA |
+### Service Discovery And IPC
 
-**Design principle:** Push state to edges (player, room). Keep routing layer stateless. Minimize cross-process state sharing.
+| Concern | Common Choices | Use When |
+|:---|:---|:---|
+| **Discovery** | Static config, shared DB, distributed KV, built-in cluster registry | Depends on cluster size and dynamic scaling needs |
+| **Routing** | Direct RPC, broker routing, actor location, pub/sub streams | Depends on ownership style and fan-out needs |
+| **Presence** | Session registry, stream registry, online-location table | Match joins, chat, parties, reconnect |
+| **Events** | In-process event bus, distributed pub/sub, domain events | Cross-system coordination |
+
+### Evolution Rule
+
+Start from the smallest profile that fits. Split processes only when one of these becomes true:
+
+- One role has a clearly different scaling curve.
+- One role needs separate failure isolation.
+- One role needs independent deployment or ownership by another team.
+- One role creates contention because its writes should be isolated.
 
 ---
 
-## 10. Module Writing Patterns
+## 4. Runtime Architecture
 
-How to add game logic to your server. Choose the pattern that fits your architecture.
+This section covers the runtime model for live gameplay and connection handling.
+
+### Room-Based Runtime
+
+Best for session games: card battles, party games, shooters, MOBAs, raid instances.
+
+**Core characteristics:**
+
+- Room is the authoritative owner for match state.
+- Room lifecycle is explicit: create, accept joins, run, leave/reconnect, dispose.
+- Matchmaker usually assigns or creates rooms before the client joins.
+- Room state is isolated from other rooms.
+- Room scaling is horizontal at room granularity, not inside a single room.
+
+**Typical lifecycle:**
+
+`Create -> Wait -> Auth/Validate -> Join -> Running -> Leave/Reconnect -> Dispose`
+
+**Important room decisions:**
+
+- Whether seats are reserved before join
+- Whether rooms auto-dispose when empty
+- Whether reconnect resumes session or recreates state
+- Whether match state is checkpointed
+
+### Encounter/Combat Runtime
+
+Best for lightweight but stateful combat flows: PvE card battles, asynchronous turn resolution, scripted boss fights, roguelike encounters, and short-lived battle workflows that do not need room allocation or connection-centric lifecycle.
+
+**Core characteristics:**
+
+- Encounter is the authoritative owner for battle state until the workflow completes.
+- Clients usually drive it through API calls or service calls rather than room join and long-lived room presence.
+- Lifecycle is short-lived but still stateful: create, advance phases/turns, resolve actions, complete, persist outcome, dispose.
+- It behaves like a lightweight room in ownership terms, but operationally behaves more like a stateful backend service.
+
+**Use this model when:**
+
+- The combat flow has authoritative state and ordered actions.
+- The system needs turn/phase validation, buffs, cooldowns, or scripted progression.
+- You do not need matchmaking, live room membership, or high-frequency broadcast.
+- Recovery and idempotent action handling matter more than realtime transport.
+
+**Important encounter decisions:**
+
+- What key owns the encounter: player, party, dungeon run, stage instance, or encounter ID
+- Whether the encounter lives only in memory, is checkpointed each turn, or persists every action
+- Whether duplicate client actions must be idempotent
+- Whether resolution is synchronous, asynchronous, or queue-driven
+- How combat completion commits rewards and side effects back into player/meta systems
+
+### Scene/World Runtime
+
+Best for persistent worlds, region-based worlds, heavy AOI, or migrating entity ownership.
+
+**Core characteristics:**
+
+- Spatial world is partitioned by region, scene, shard, or entity ownership.
+- AOI determines what each client receives.
+- Handoffs between regions or owners must be explicit.
+- World runtime usually needs more routing and location-awareness than room systems.
+
+**Important world decisions:**
+
+- What unit owns a moving entity
+- How region boundaries trigger transfer
+- Where global services stop and scene ownership begins
+- How entity identity survives migration
+
+### Backend/Platform Runtime
+
+Best for request/response gameplay, meta progression, economy, and social systems.
+
+**Core characteristics:**
+
+- Server validates requests and persists results.
+- There may be no continuously running room or world loop.
+- Most scale is API throughput and storage throughput rather than simulation throughput.
+- Consistency and permissions matter more than snapshot/broadcast smoothness.
+
+### Session And Connection Management
+
+| Concern | Guideline |
+|:---|:---|
+| **Authentication** | Authenticate before binding durable identity to a live session |
+| **Heartbeat** | Detect stale connections and clean up routing state |
+| **Session registry** | Track live sessions, room/scene location, and reconnect eligibility |
+| **Reconnection** | Preserve session only for an explicit timeout window and recovery policy |
+| **Connection separation** | Separate gateway/connection concerns from gameplay authority when scale grows |
+
+### Matchmaking And Join Flow
+
+For room-based games, a two-phase join is the safest default:
+
+1. Matchmaker finds or creates a room and reserves capacity.
+2. Client connects to the assigned room using a temporary token or reservation.
+3. Room validates the reservation and turns it into a live session.
+
+This prevents last-slot race conditions and allows timeout-based cleanup.
+
+---
+
+## 5. Communication And State Sync
+
+This section centralizes topics that were previously scattered across dispatch, broadcasting, sync, and room chapters.
+
+### Dispatch Patterns
+
+| Pattern | Best For | Tradeoff |
+|:---|:---|:---|
+| **Type switch / message registry** | Monoliths and fixed message sets | Simple but less scalable for large codebases |
+| **cmd/subCmd routing** | Command-driven servers and brokers | Efficient and explicit, less type-rich |
+| **RPC / method dispatch** | Typed service APIs and request/response systems | Good tooling, may hide protocol costs |
+| **Actor mailbox** | Entity-centric ownership | Excellent isolation, more routing infrastructure |
+| **Filter / middleware pipeline** | Auth, rate limit, validation, logging, audit | Great cross-cutting control, adds indirection |
+
+Encounter/combat services commonly use RPC or request/response dispatch with explicit phase validation rather than room-message broadcasting.
+
+### Broadcast And Targeting Patterns
+
+| Pattern | Use When |
+|:---|:---|
+| **All** | Countdown, start/end signals, global room events |
+| **Except sender** | Visible movement/actions |
+| **Filtered subset** | Teams, factions, spectators, private info |
+| **Named group/stream** | Parties, rooms, chat, channels |
+| **Single target** | Private responses, inventory, authoritative correction |
+
+### State Synchronization Models
+
+| Model | Best For | Strength | Weakness |
+|:---|:---|:---|:---|
+| **Automatic delta/schema sync** | Small to medium rooms, fast iteration | Low implementation cost | Less control over payload design |
+| **Manual broadcast** | Competitive action, custom protocol | Full control | More engineering work |
+| **Turn/phase response sync** | Encounter services and turn workflows | Simple authoritative progression | Less suitable for high-frequency realtime state |
+| **Snapshot + AOI filtering** | Persistent worlds and ECS/entity sync | Strong world modeling | Higher complexity and bandwidth |
+| **Lockstep / deterministic input sync** | Fighting, RTS, deterministic subsystems | Low bandwidth, fairness | Determinism and recovery are hard |
+| **Hybrid** | Mixed games | Tailored to subsystem needs | Harder to reason about end-to-end |
+
+### Lockstep Rules
+
+- Deterministic arithmetic and RNG are mandatory.
+- Input scheduling policy must be explicit: wait-all, delayed execute, prediction, rollback, or timeout fallback.
+- Desync detection should use state hashes or equivalent verification.
+- Recovery should define snapshot, rollback, replay, or bot takeover behavior.
+
+Strict wait-for-all-input is the simplest lockstep model, not the only valid one.
+
+### Per-Client Filtering
+
+Apply visibility rules before send:
+
+- **Ownership filter:** Only owner sees private state.
+- **Property filter:** Hide cards, fog-of-war data, secret stats, hidden entities.
+- **AOI filter:** Only send nearby or relevant entities.
+- **Role filter:** Spectator, team, admin, or replay client gets a different view.
+
+### Tick And Rate Design
+
+| Parameter | Typical Range | Notes |
+|:---|:---|:---|
+| Simulation rate | 10-128 Hz | Depends on mechanics and physics needs |
+| Broadcast rate | 10-60 Hz | Usually lower than simulation |
+| Input batching | 1-4 frames | Reduces overhead for input-driven protocols |
+
+Default principle: decouple simulation from outbound broadcast where possible.
+
+---
+
+## 6. Persistence And Recovery
+
+Durability policy should be designed explicitly instead of being inferred from framework defaults.
+
+### Storage Models
+
+| Model | Best For | Notes |
+|:---|:---|:---|
+| **Key-value/document** | Player saves, settings, inventory, flexible state | Good for owner-scoped blobs |
+| **Relational** | Economy, guilds, social edges, transactions, leaderboards | Best when constraints and joins matter |
+| **Component/entity storage** | Simulation-heavy systems, entity persistence | Fits ECS/entity ownership models |
+| **Cache-aside / write-behind cache** | Hot data with persistent backing store | Must define flush and crash policy |
+| **Event log / event sourcing** | Replay, audit, rebuild, match records | Strong history, higher replay cost |
+
+### Write Policies
+
+| Policy | Use When | Main Risk |
+|:---|:---|:---|
+| **Write-through** | Economy, purchases, critical progression | Higher latency and DB pressure |
+| **Write-behind** | High-frequency mutable state | Data loss on crash |
+| **Checkpointing** | Match/scene recovery | Stale checkpoints if interval is too large |
+| **Step/turn checkpointing** | Encounter workflows and turn-based combat | Progress loss if checkpoints are too sparse |
+| **Input log / replay log** | Lockstep, replay, reconstruction | Long-running sessions create large logs |
+| **Optimistic locking** | Multi-node writes to shared objects | Retry logic required |
+
+### Match And World Recovery
+
+For each runtime owner, choose a recovery policy explicitly:
+
+- Recreate empty/new runtime and reconnect users
+- Restore from checkpoint or persisted snapshot
+- Replay authoritative input/event log
+- End the activity and compensate affected users
+
+For encounter/combat services, also define:
+
+- Whether action requests are idempotent by action ID or sequence number
+- Whether rewards are committed only at finalization or incrementally during combat
+- Whether combat can resume after process restart or must restart from the last checkpoint
+
+If no checkpointing or replication exists, process crash loses in-memory room or scene state.
+
+### Reconnection Policy
+
+| Pattern | Mechanism | Best For |
+|:---|:---|:---|
+| **Short timeout resume** | Hold session for a limited reconnect window | Most session games |
+| **Registry-based resume** | Cache session location and resume token | Multi-node games |
+| **Replay-based recovery** | Replay missed state or input history | Lockstep or authoritative replay systems |
+| **Fresh join only** | No runtime recovery | Casual, low-stakes or disposable sessions |
+
+---
+
+## 7. Scalability And Operations
+
+### Horizontal Scaling Rules
+
+| Service Type | Usual Scaling Unit |
+|:---|:---|
+| **Stateless API/Auth** | Add instances behind a load balancer |
+| **Player-owned state** | Shard by player ID or account key |
+| **Room-owned state** | Distribute rooms at creation time |
+| **Scene-owned state** | Partition by region/zone/shard |
+| **Domain/global services** | Scale per service according to consistency needs |
+
+### Global Service Guidance
+
+Do not treat all global services the same:
+
+- **Leaderboards** often tolerate cached reads, asynchronous updates, and periodic recompute.
+- **Guild/social systems** often shard by guild ID or user ID.
+- **Mail/notifications** are often queue-driven.
+- **Economy services** often need transaction-oriented or single-writer design.
+
+### Operational Primitives
+
+| Primitive | Why It Matters |
+|:---|:---|
+| **Tracing** | Follow requests across hops and find distributed failures |
+| **Metrics** | Watch queue depth, tick time, connection count, write latency |
+| **Slow-call detection** | Detect stalls, deadlocks, bad handlers, overloaded services |
+| **Timers/schedulers** | Run retries, delayed tasks, match timeouts, daily resets |
+| **Admin/ops surface** | Runtime inspection, moderation, match control, profiling |
+| **Testing bots/robot clients** | Validate functionality and load before production |
+| **Config reload / hot reload** | Improve iteration speed, but require explicit state migration rules |
+
+### Common Scalability Limits
+
+- A single room usually cannot scale across multiple processes without custom partitioning.
+- DB-backed backends scale easily for reads but can bottleneck on hot writes.
+- Cross-owner transactions become the main pain point once services are split.
+- Broker topologies reduce mesh complexity but add routing hops.
+- Actor/location systems improve migration flexibility but increase operational complexity.
+
+---
+
+## 8. Framework Families
+
+This section maps requirement shapes to framework families. It is intentionally generic and should guide selection even when no exact product is known yet.
+
+### Family Mapping
+
+| Framework Family | Best Fit | Strengths | Usually Not Enough By Itself |
+|:---|:---|:---|:---|
+| **Room-based realtime framework** | Session games with clear room ownership | Room lifecycle, matchmaking hooks, state sync, fast iteration | Durable player data, economy, persistent worlds |
+| **Backend platform / BaaS** | Meta-heavy, turn-based, async, social-heavy games | Auth, storage, leaderboards, social features, APIs | High-fidelity realtime runtime |
+| **Stateful workflow / encounter service stack** | PvE combat flows, turn workflows, short-lived authoritative battles | Simple deployment, API-driven progression, easy integration with player/meta services | Large-scale realtime presence, high-frequency room broadcast |
+| **Actor/ECS runtime** | Persistent worlds, entity-rich simulation | Ownership clarity, migration-friendly routing, simulation structure | Productized backend features and simple onboarding |
+| **RPC-hub realtime framework** | Typed request/response plus realtime channels | Strong contracts, group broadcast, middleware pipeline | Matchmaking, ownership model, persistence conventions |
+| **Action-routing / broker framework** | Route-driven distributed action games | Explicit routing, gateway separation, sticky session patterns | Meta services and persistence design |
+| **Service tree / custom microservices** | Broad platform architecture and custom service layout | Topology control, composition, explicit boundaries | Opinionated gameplay abstractions |
+| **Custom lightweight stack** | Narrow-scope games with experienced teams | Full control and low abstraction cost | Lifecycle, tooling, observability, scaling support |
+
+### Framework Traits To Recognize
+
+| Trait / Keyword | Usually Implies | Best For | Often Weak |
+|:---|:---|:---|:---|
+| **Room lifecycle** | Match/session authority is the core abstraction | Session games | Persistent world modeling |
+| **Seat reservation / two-phase join** | Matchmaker and room join are separated safely | Matchmaking-heavy session games | Crash recovery and durability |
+| **Automatic delta sync** | Framework optimizes replication for developer speed | Small and medium rooms | Fine protocol control |
+| **Workflow state machine / phase progression** | Stateful service advances through ordered combat or business phases | PvE battles, turn workflows, short-lived encounters | Realtime room semantics |
+| **Manual broadcast / custom protocol** | State sync is application-owned | Competitive action games | Fast onboarding |
+| **Interface-as-schema / contract-first RPC** | Protocol and tooling are strongly typed | Service APIs and typed clients | Built-in authority model |
+| **Unary + streaming dual mode** | Supports both APIs and long-lived realtime channels | Mixed backend + realtime workloads | World simulation structure |
+| **Group / stream abstraction** | Named broadcast targets are first-class | Rooms, parties, chat, spectators | Durable gameplay state |
+| **Plugin / hook runtime** | Core platform is extensible by injected logic | Backend customization and server rules | Full topology freedom |
+| **Actor location / mailbox** | Ownership and routing are decoupled from physical placement | MMOs and migrating entities | Simplicity |
+| **Entity + system separation** | Data and logic are intentionally decoupled | Complex simulation | Small CRUD-focused teams |
+| **Gateway-Broker-Logic** | Routing topology is a first-class concern | High connection counts and protected logic servers | Simplicity |
+| **Node-Service-Module tree** | Hierarchical composition with lifecycle-managed subparts | Custom service platforms | Built-in match abstractions |
+| **Presence / stream registry** | Location and online membership are first-class | Match joins, chat, reconnect | Transactional persistence |
+| **Property-based matchmaking** | Queueing and matching use attributes/tickets | Ranked and mode-constrained queues | Simulation logic itself |
+
+### Keywords To Map To Architecture
+
+- **"room", "lobby", "seat reservation", "match instance", "auto-dispose"** -> room-based realtime
+- **"battle workflow", "turn flow", "phase progression", "encounter state", "PVE combat service"** -> encounter/combat service
+- **"storage", "leaderboard", "social", "friends", "tournament", "backend APIs"** -> backend/platform
+- **"AOI", "region transfer", "entity location", "actor mailbox", "world shard"** -> actor/ECS or scene/world runtime
+- **"typed contract", "bidirectional RPC", "duplex stream", "group broadcast"** -> RPC-hub realtime
+- **"gateway", "broker", "route registry", "cmd/subCmd", "logic server behind broker"** -> action-routing / broker
+- **"service tree", "module hierarchy", "graceful retire", "configurable topology"** -> service-tree/custom microservices
+- **"plugin hooks", "before/after API", "runtime module", "match handler extension"** -> backend platform with embedded custom logic
+
+### Recommendation Checklist For LLM
+
+When recommending a framework family, explicitly state:
+
+- Why it fits the runtime model
+- What ownership unit it assumes
+- What it gives out of the box
+- What still needs custom services
+- What the first deployment profile should be
+- What should not be overbuilt yet
+- What scaling path remains open later
+
+---
+
+## 9. Module Writing Patterns
+
+This section is about how game logic is organized inside a chosen framework or server runtime.
 
 ### Pattern Catalog
 
-| Pattern | Core Concept | How You Add Logic | State Management | Message Handling |
-|:---|:---|:---|:---|:---|
-| **Class extension** | Extend framework base class | Override lifecycle methods | Declarative schema with auto-sync | Registry-based handler registration |
-| **Plugin system** | Entry function registers extensions | Register hooks, RPC handlers, match loops | Manual via framework API | RPC registration, before/after hooks |
-| **Annotation-driven** | Plain classes with metadata | Annotate classes and methods | Class fields | Framework scans and routes by metadata |
-| **Data-logic separation** | Pure data + pure logic | Define data classes, write static logic functions | Data classes only | Message routing to entity by ID |
-| **Interface contract** | Interface defines protocol | Implement interface methods | Class fields | Interface methods are handlers |
-| **Hierarchical composition** | Tree of services/modules | Embed base, add children | Service/module fields | Naming convention for RPC methods |
+| Pattern | Core Idea | Best For | Weakness |
+|:---|:---|:---|:---|
+| **Class extension** | Extend framework base classes and override lifecycle | Opinionated room frameworks, fast iteration | Tighter coupling to framework |
+| **Plugin system** | Register hooks, RPCs, or match handlers into a complete server | BaaS and extensible backend platforms | Framework boundaries limit architecture freedom |
+| **Annotation / metadata driven** | Plain classes discovered through metadata | Routing-heavy and framework-managed codebases | Implicit behavior can hide control flow |
+| **Data-logic separation** | Data containers plus stateless systems operating on them | ECS/entity-heavy runtime and deterministic systems | Steeper learning curve |
+| **Interface contract** | Shared protocol/interface defines handlers | Typed RPC/service architectures | Usually does not define state ownership for you |
+| **Hierarchical composition** | Service contains modules and child modules | Service platforms and modular backends | Less opinionated about gameplay flow |
 
-### Pattern Details
+### Pattern Selection Guide
 
-#### Class Extension
-
-**Concept:** Framework provides base class with lifecycle. You extend and override.
-
-**Key characteristics:**
-- Inheritance-based
-- Lifecycle hooks: create, join, leave, dispose
-- State defined with decorators or schema
-- Auto state sync (delta compression)
-- Handler registration via method calls
-
-**Best for:** Small teams, fast iteration, automatic state sync.
-
-#### Plugin System
-
-**Concept:** Framework is complete; you add custom logic via plugins.
-
-**Key characteristics:**
-- Entry function called at startup
-- Register hooks (intercept framework operations)
-- Register RPC endpoints (custom logic)
-- Optional match handler (game loop)
-- Access framework services (storage, social, leaderboards)
-- Multi-language support (compiled, scripted)
-
-**Best for:** Full backend services + custom game logic, hot-reload.
-
-#### Annotation-Driven
-
-**Concept:** Plain classes, no inheritance. Framework discovers via annotations.
-
-**Key characteristics:**
-- Metadata on classes and methods
-- Framework scans and builds routing table
-- Methods are plain functions (input → output)
-- Per-player thread safety
-- Auto-generate client SDK from metadata
-
-**Best for:** MVC background, distributed scaling, low coupling.
-
-#### Data-Logic Separation
-
-**Concept:** Data and logic are completely separate. Data = components, logic = systems.
-
-**Key characteristics:**
-- Data classes: pure data, no methods
-- Logic functions: static methods operating on data
-- Event-driven lifecycle (awake, update, destroy)
-- Entity ID for message routing
-- Cross-process messaging via entity location
-- Hot-reload via dynamic loading
-
-**Best for:** Complex simulation, client-server code sharing, deterministic physics.
-
-#### Interface Contract
-
-**Concept:** Interface defines protocol, shared between client and server.
-
-**Key characteristics:**
-- Interface as schema (no separate IDL)
-- Server implements interface
-- Client gets typed proxy
-- Bidirectional streaming
-- Group abstraction for broadcast
-- Type-safe across network boundary
-
-**Best for:** Type safety, strong tooling, RPC-centric architecture.
-
-#### Hierarchical Composition
-
-**Concept:** Services contain modules, modules contain sub-modules. Tree structure.
-
-**Key characteristics:**
-- Embed base service/module
-- Lifecycle hooks: init, start, release
-- Add child modules for organization
-- Shared timer and event system in tree
-- RPC via naming convention
-- Optional concurrent mode
-
-**Best for:** Flexible topology, microservices, explicit control.
-
-### Pattern Comparison
-
-| Concern | Class Extension | Plugin System | Annotation | Data-Logic | Interface Contract | Hierarchical |
-|:---|:---|:---|:---|:---|:---|:---|
-| **Coupling** | Medium (inheritance) | Low (plugin interface) | Very Low (metadata) | Very Low (pure separation) | Low (interface) | Low (composition) |
-| **Testability** | Medium | High | High | High | Medium | Medium |
-| **Hot-reload** | Limited | Yes (scripts) | No | Yes (dynamic load) | No | No |
-| **State sync** | Automatic | Manual | Manual | Manual | Manual | Manual |
-| **Learning curve** | Low | Medium | Low | High | Medium | Medium |
-
-### Decision Guide
-
-| Your Priority | Recommended Pattern |
+| Priority | Prefer |
 |:---|:---|
-| Fast iteration, automatic state sync | Class extension |
-| Full backend + custom logic, hot-reload | Plugin system |
-| Low coupling, plain code, distributed | Annotation-driven |
-| Complex simulation, code sharing | Data-logic separation |
-| Type safety, strong tooling | Interface contract |
-| Flexible topology, explicit control | Hierarchical composition |
+| Fast iteration and built-in lifecycle | Class extension |
+| Full backend plus custom logic | Plugin system |
+| Low coupling and framework-managed routing | Annotation / metadata driven |
+| Simulation purity and ownership clarity | Data-logic separation |
+| Strong typing and shared contracts | Interface contract |
+| Explicit composition and custom service structure | Hierarchical composition |
+
+### Pattern Tradeoffs
+
+| Concern | Most Favorable Patterns |
+|:---|:---|
+| **Low learning curve** | Class extension, plugin system |
+| **Testability** | Plugin system, data-logic separation, annotation-driven |
+| **Hot reload friendliness** | Plugin system, data-logic separation |
+| **Strong typing across network boundary** | Interface contract |
+| **Explicit ownership modeling** | Data-logic separation, hierarchical composition |
