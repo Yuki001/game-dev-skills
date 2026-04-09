@@ -4,7 +4,7 @@ Reference for planning game server architecture and selecting suitable framework
 
 Primary focus is authoritative online games. It also covers backend/platform services when they are part of the same product.
 
-Complements `system-multiplayer.md` (network topology, protocol design, sync mechanics) with server-side architecture guidance.
+Complements `system-multiplayer.md` (topology, session shape, sync model, client/server logic split) and `system-network-protocol.md` (message design, serialization, heartbeat, reconnect) with server-side architecture guidance.
 
 ---
 

@@ -46,6 +46,8 @@ When designing game architecture, read the relevant `references/` documents base
 | Evolution & extensibility review | `references/evolution.md` |
 | Performance optimization needed | `references/performance-optimization.md` |
 | Multiplayer support needed | `references/system-multiplayer.md` |
+| Network protocol / connection design needed | `references/system-network-protocol.md` |
+| Server topology / runtime ownership needed | `references/system-server.md` |
 
 - For physical architecture design, see the Physical Architecture References table below.
 - For system-specific design, see the System-Specific References table below.
@@ -70,7 +72,9 @@ When designing game architecture, read the relevant `references/` documents base
 | Action Combat System (HitBox, Damage, Melee, Projectiles) | `references/system-action-combat.md` |
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
-| Multiplayer System (Client-Server, Sync Models, Distributed Server, AOI, Communication) | `references/system-multiplayer.md` |
+| Multiplayer System (Topology, Session Model, Sync Models, AOI, Anti-Cheat) | `references/system-multiplayer.md` |
+| Network Protocol System (Message Design, Serialization, Req/Resp/Notify, Heartbeat, Reconnect) | `references/system-network-protocol.md` |
+| Game Server System (Ownership, Process Roles, Deployment, Persistence, Framework Families) | `references/system-server.md` |
 | Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
