@@ -2,7 +2,7 @@
 
 Reference for multiplayer gameplay architecture. This document is scoped to gameplay-facing decisions: topology, session shape, sync model, client/server responsibility, AOI, and genre fit.
 
-It does not own detailed server process decomposition, deployment, storage, or recovery policy. Read `system-server.md` for server architecture. Read `system-network-protocol.md` for protocol design, serialization, heartbeat, and reconnect rules.
+It does not own detailed server process decomposition, deployment, storage, or recovery policy. Read `multiplayer-server.md` for server architecture. Read `multiplayer-protocol.md` for protocol design, serialization, heartbeat, and reconnect rules.
 
 ---
 
@@ -201,5 +201,5 @@ Rules:
 
 ## 9. What To Read Next
 
-- Read `system-server.md` for process roles, deployment profile, ownership, persistence, and framework family guidance.
-- Read `system-network-protocol.md` for message design, serialization, request/response rules, heartbeat, reconnect, and replication policy.
+- Read `multiplayer-server.md` for process roles, deployment profile, ownership, persistence, and framework family guidance.
+- Read `multiplayer-protocol.md` for message design, serialization, request/response rules, heartbeat, reconnect, and replication policy.

@@ -2,7 +2,7 @@
 
 Reference for the client/server boundary of online games. This document owns message shapes, protocol naming, serialization, request-response patterns, server push, heartbeat, reconnect, idempotency, and replication policy.
 
-Use `system-multiplayer.md` for gameplay-side topology and sync model selection. Use `system-server.md` for service topology, ownership, deployment, persistence, and recovery policy.
+Use `multiplayer-architecture.md` for gameplay-side topology and sync model selection. Use `multiplayer-server.md` for service topology, ownership, deployment, persistence, and recovery policy.
 
 ---
 
@@ -249,5 +249,5 @@ For web/API multiplayer or meta systems:
 
 ## 12. What To Read Next
 
-- Read `system-multiplayer.md` for topology choice, sync model, AOI, and genre fit.
-- Read `system-server.md` for process roles, deployment, ownership, persistence, and recovery.
+- Read `multiplayer-architecture.md` for topology choice, sync model, AOI, and genre fit.
+- Read `multiplayer-server.md` for process roles, deployment, ownership, persistence, and recovery.
