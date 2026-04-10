@@ -87,7 +87,7 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | Room server build playbook | `references/multiplayer-implementation-room.md` | Build a concrete small-to-medium room-based realtime server with join flow, room ownership, settlement, reconnect |
 | Encounter server build playbook | `references/multiplayer-implementation-encounter.md` | Build a concrete turn-based or combat-workflow server with checkpointing, idempotent actions, settlement |
 | Persistent world server build playbook | `references/multiplayer-implementation-world.md` | Build a concrete AOI world server with region ownership, transfer, location registry, reconnect |
-
+| Deterministic sync, lockstep, and rollback | `references/multiplayer-deterministic-sync.md` | Design deterministic input-sync architectures, frame pipelines, rollback, replay, and desync handling |
 ---
 
 ## Paradigm Selection Guide
