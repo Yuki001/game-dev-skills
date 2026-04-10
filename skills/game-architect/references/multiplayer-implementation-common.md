@@ -60,117 +60,26 @@ Typical shared components:
 Not every project needs all of them as separate processes. Most small projects start with several of these combined in one process.
 
 ---
-
-## 4. Reference Infrastructure Structure
-
-Use a concrete shared structure like this as the default base:
-
-```text
-server/
-  bootstrap/
-    AppHost
-    ConfigLoader
-    DependencyBuilder
-  infra/
-    auth/
-      AuthController
-      TokenIssuer
-      TokenVerifier
-      AccountAuthService
-    gateway/
-      GatewayServer
-      ConnectionSession
-      SessionManager
-      HeartbeatMonitor
-      RouteDispatcher
-      PacketDecoder
-      PacketEncoder
-      ConnectionLimiter
-    connector/
-      WsConnector
-      TcpConnector
-      HttpConnector
-      RpcConnector
-    discovery/
-      ServiceRegistry
-      OwnerLocator
-      HealthReporter
-    messaging/
-      EventPublisher
-      OutboxPublisher
-      QueueConsumerHost
-    observability/
-      RequestLogger
-      MetricsCollector
-      TraceContextPropagator
-      AdminQueryService
-  persistence/
-    db/
-      DbClientManager
-      DbConnectionPool
-      UnitOfWork
-      MigrationRunner
-    cache/
-      CacheClient
-      SessionCache
-      LocationCache
-      RateLimitCache
-    repository/
-      PlayerRepository
-      SessionRepository
-      AuditLogRepository
-  services/
-    player/
-      PlayerApplicationService
-```
-
-The important point is not the exact names. The point is to keep transport, auth, persistence, discovery, and business modules visibly separate.
-
-### Core Object Relations
-
-Use these associations as the default baseline:
-
-- `GatewayServer` owns many `ConnectionSession`
-- `ConnectionSession` is created and removed by `SessionManager`
-- `SessionManager` depends on `TokenVerifier`, `SessionCache`, and `OwnerLocator`
-- `RouteDispatcher` depends on `OwnerLocator` and one or more `RpcConnector`
-- `DbClientManager` owns one `DbConnectionPool` per logical database
-- repositories depend on `DbClientManager`, not on raw driver code scattered through handlers
-- `EventPublisher` publishes only after `UnitOfWork` commit or via `OutboxPublisher`
-- `MetricsCollector` and `RequestLogger` are cross-cutting and should be injected, not hard-coded
-
-### Login Request Reference Chain
-
-Use a concrete chain like this:
-
-1. `WsConnector` accepts socket and creates `ConnectionSession`.
-2. `PacketDecoder` parses `Login_Req`.
-3. `GatewayServer` forwards to `AuthController`.
-4. `AuthController` calls `AccountAuthService`.
-5. `AccountAuthService` loads account from `PlayerRepository`.
-6. `TokenIssuer` signs access token and resume token.
-7. `SessionManager` stores live session and writes fast lookup to `SessionCache`.
-8. `GatewayServer` returns `Login_Resp`.
-
-This is the level of concreteness shared infra should aim for.
-
----
-## 5. Auth Service
+## 4. Auth Service
 
 Use a concrete auth module like this:
 
 ```text
-infra/auth/
-  AuthController
-  AuthApplicationService
-  AccountCredentialVerifier
-  PlatformTicketVerifier
-  AccountRepository
-  BanPolicyService
-  TokenIssuer
-  TokenVerifier
-  RefreshTokenStore
-  LoginAuditLogger
+server/
+  infra/
+    auth/
+      AuthController
+      AuthApplicationService
+      AccountCredentialVerifier
+      PlatformTicketVerifier
+      BanPolicyService
+      TokenIssuer
+      TokenVerifier
+      RefreshTokenStore
+      LoginAuditLogger
+  persistence/
+    repository/
+      AccountRepository
 ```
 
 ### Main Class Responsibilities
@@ -267,7 +176,7 @@ TokenVerifier.VerifyAccessToken()
 
 ---
 
-## 6. Gateway And Connector
+## 5. Gateway And Connector
 
 ### Gateway Responsibilities
 
@@ -281,6 +190,29 @@ TokenVerifier.VerifyAccessToken()
 ### Reference Class Split
 
 Use a gateway structure like this:
+
+```text
+server/
+  infra/
+    gateway/
+      GatewayServer
+      ConnectionSession
+      SessionManager
+      HeartbeatMonitor
+      RouteDispatcher
+      PacketDecoder
+      PacketEncoder
+      ConnectionLimiter
+      GatewayAdminService
+    connector/
+      WsConnector
+      TcpConnector
+      HttpConnector
+      RpcConnector
+  infra/
+    discovery/
+      OwnerLocator
+```
 
 - `GatewayServer`: top-level server runtime, owns connectors and request pipeline
 - `ConnectionSession`: one live connection, stores `sessionId`, `playerId`, `connectionId`, heartbeat state
@@ -343,7 +275,7 @@ Typical connector types:
 
 ---
 
-## 7. API Service
+## 6. API Service
 
 ### Use For
 
@@ -351,6 +283,55 @@ Typical connector types:
 - inventory, quests, shop, mail, social systems
 - encounter or battle APIs when the runtime is RPC-first
 - admin and ops endpoints
+
+### Reference Class Split
+
+Add API modules like this when the project needs a stateless request/response entry:
+
+```text
+server/
+  api/
+    controller/
+      PlayerController
+      InventoryController
+      MailController
+      AdminController
+    application/
+      PlayerApplicationService
+      InventoryApplicationService
+      MailApplicationService
+    dto/
+      request/
+      response/
+    middleware/
+      ApiAuthMiddleware
+      ApiRateLimitMiddleware
+      RequestContextMiddleware
+```
+
+- `PlayerController` / `InventoryController`: transport-facing request handlers
+- `PlayerApplicationService` / `InventoryApplicationService`: one complete application operation
+- `dto/request` and `dto/response`: transport contract objects
+- `ApiAuthMiddleware`: token verification at entry
+- `ApiRateLimitMiddleware`: rate limit and overload protection
+- `RequestContextMiddleware`: attach trace id, request id, player id, locale, version
+
+### Concrete Object Relations
+
+- controller depends on one application service
+- middleware runs before controller
+- application service depends on repository, cache, and owned domain services
+- controller should not depend on raw DB client or queue client directly
+
+### Concrete Request Chain
+
+1. `HttpConnector` receives request.
+2. `ApiAuthMiddleware` verifies token.
+3. `ApiRateLimitMiddleware` checks quota.
+4. `RequestContextMiddleware` builds request context.
+5. controller validates request DTO.
+6. application service executes use case.
+7. controller returns response DTO.
 
 ### Build Rules
 
@@ -363,7 +344,7 @@ Do not let API controllers become the real game logic layer.
 
 ---
 
-## 8. Database Layer
+## 7. Database Layer
 
 ### Responsibilities
 
@@ -376,6 +357,21 @@ Do not let API controllers become the real game logic layer.
 ### Reference Class Split
 
 Use a DB layer like this:
+
+```text
+server/
+  persistence/
+    db/
+      DbClientManager
+      DbConnectionPool
+      UnitOfWork
+      MigrationRunner
+      SqlHealthProbe
+    repository/
+      PlayerRepository
+      MailRepository
+      AuditLogRepository
+```
 
 - `DbClientManager`: owns named database clients and pool configuration
 - `DbConnectionPool`: wraps driver pool settings and metrics
@@ -432,7 +428,7 @@ Never let transport handler call raw SQL directly.
 
 ---
 
-## 9. Cache Layer
+## 8. Cache Layer
 
 ### Use For
 
@@ -445,6 +441,18 @@ Never let transport handler call raw SQL directly.
 ### Reference Class Split
 
 Use typed cache wrappers instead of generic stringly-typed access everywhere:
+
+```text
+server/
+  persistence/
+    cache/
+      CacheClient
+      SessionCache
+      PlayerSnapshotCache
+      OwnerLocationCache
+      RateLimitCache
+      ReservationCache
+```
 
 - `SessionCache`
 - `PlayerSnapshotCache`
@@ -476,7 +484,7 @@ Make each wrapper own key format, ttl, serialization, and fallback behavior.
 
 ---
 
-## 10. Service Discovery And Registry
+## 9. Service Discovery And Registry
 
 ### Use For
 
@@ -486,6 +494,17 @@ Make each wrapper own key format, ttl, serialization, and fallback behavior.
 - track live process presence and health
 
 ### Reference Class Split
+
+```text
+server/
+  infra/
+    discovery/
+      ServiceRegistry
+      OwnerLocator
+      LocationRegistryWriter
+      RegistrySyncJob
+      HealthReporter
+```
 
 - `ServiceRegistry`: service instance list and health state
 - `OwnerLocator`: room, encounter, or region current owner lookup
@@ -514,7 +533,7 @@ Use `OwnerLocator` from routing code. Do not let routing code parse registry sto
 
 ---
 
-## 11. Message Bus And Async Work
+## 10. Message Bus And Async Work
 
 ### Use For
 
@@ -524,6 +543,17 @@ Use `OwnerLocator` from routing code. Do not let routing code parse registry sto
 - email, mail, notification, and out-of-band jobs
 
 ### Reference Class Split
+
+```text
+server/
+  infra/
+    messaging/
+      EventPublisher
+      OutboxPublisher
+      QueueConsumerHost
+      SettlementRetryConsumer
+      AuditEventConsumer
+```
 
 - `EventPublisher`: publish domain events from application layer
 - `OutboxPublisher`: flush durable outbox rows to message bus
@@ -551,9 +581,50 @@ Use `OwnerLocator` from routing code. Do not let routing code parse registry sto
 
 ---
 
-## 12. Config, Secrets, And Feature Flags
+## 11. Config, Secrets, And Feature Flags
 
 ### Config Rules
+
+### Reference Class Split
+
+Add config-related modules like this when the project has multiple environments, runtime flags, or operational tuning:
+
+```text
+server/
+  bootstrap/
+    ConfigLoader
+    ConfigValidator
+  infra/
+    config/
+      ServerConfig
+      DbConfig
+      GatewayConfig
+      FeatureFlagProvider
+      SecretProvider
+      RuntimeConfigRefresher
+```
+
+- `ConfigLoader`: load config files, env vars, and startup arguments
+- `ConfigValidator`: fail fast on invalid or incomplete startup config
+- `ServerConfig` / `DbConfig` / `GatewayConfig`: typed config objects
+- `FeatureFlagProvider`: runtime read for rollout switches
+- `SecretProvider`: access tokens, DB passwords, signing keys
+- `RuntimeConfigRefresher`: refresh safe runtime config where supported
+
+### Concrete Object Relations
+
+- `AppHost` depends on `ConfigLoader` and `ConfigValidator` during startup
+- services depend on typed config objects, not on raw global maps
+- `FeatureFlagProvider` is read by application services or middleware
+- `SecretProvider` is used by bootstrap and sensitive infra modules only
+
+### Concrete Startup Chain
+
+1. `ConfigLoader` loads base config and environment overrides.
+2. `ConfigValidator` validates required keys and value ranges.
+3. `SecretProvider` resolves secret values.
+4. `AppHost` constructs DB, gateway, cache, and service dependencies from typed config.
+5. readiness starts only after config validation succeeds.
 
 - separate static config from runtime-editable config
 - define environment-specific config explicitly
@@ -573,7 +644,7 @@ Use `OwnerLocator` from routing code. Do not let routing code parse registry sto
 
 ---
 
-## 13. Observability And Operations
+## 12. Observability And Operations
 
 ### Minimum Required Signals
 
@@ -587,12 +658,80 @@ Use `OwnerLocator` from routing code. Do not let routing code parse registry sto
 
 ### Reference Utility Classes
 
+```text
+server/
+  infra/
+    observability/
+      RequestLogger
+      MetricsCollector
+      TraceContextPropagator
+      SlowQueryLogger
+      AdminQueryService
+      HealthCheckController
+```
+
 - `RequestLogger`
 - `MetricsCollector`
 - `TraceContextPropagator`
 - `SlowQueryLogger`
 - `AdminQueryService`
 - `HealthCheckController`
+
+### Suggested Module Layout
+
+Add observability modules like this when the project reaches shared-service operation stage:
+
+```text
+server/
+  infra/
+    observability/
+      logging/
+        RequestLogger
+        SecurityEventLogger
+        SlowQueryLogger
+      metrics/
+        MetricsCollector
+        GatewayMetrics
+        DbMetrics
+        CacheMetrics
+      tracing/
+        TraceContextPropagator
+        TraceSpanFactory
+      admin/
+        AdminQueryService
+        RuntimeInspector
+      health/
+        HealthCheckController
+        ReadinessProbe
+        LivenessProbe
+```
+
+### Concrete Object Relations
+
+- `GatewayServer`, controllers, and application services emit metrics through `MetricsCollector`
+- DB and cache clients report pool and error signals through `DbMetrics` and `CacheMetrics`
+- `TraceContextPropagator` attaches trace ids to request context before business handlers run
+- `AdminQueryService` reads from session manager, owner locator, repositories, and runtime inspectors
+- `HealthCheckController` queries `ReadinessProbe` and `LivenessProbe`
+
+### Concrete Observation Chain
+
+Use a real request instrumentation chain like this:
+
+1. connector creates request context and trace id
+2. `TraceContextPropagator` attaches trace metadata
+3. `RequestLogger` records request start
+4. business handler executes
+5. `MetricsCollector` records latency, result code, and dependency timings
+6. `RequestLogger` records request end
+7. if DB is slow, `SlowQueryLogger` records query warning
+
+### Concrete Admin Query Chain
+
+1. admin request enters `AdminQueryService`
+2. service checks `AdminAuthGuard`
+3. service queries `SessionManager`, `OwnerLocator`, and target runtime inspector
+4. service returns one inspection payload such as session info, room info, encounter info, or region ownership
 
 ### Logging Rules
 
@@ -619,7 +758,7 @@ Strongly recommended:
 
 ---
 
-## 14. Security And Abuse Protection
+## 13. Security And Abuse Protection
 
 Minimum baseline:
 
@@ -630,48 +769,100 @@ Minimum baseline:
 - auth expiry and signature validation
 - admin endpoint isolation
 
-Never assume only game clients will call your endpoints correctly.
+### Reference Class Split
 
----
-
-## 15. Code Organization
-
-Suggested shared infrastructure layout:
+Add security modules like this when the server is exposed to public traffic:
 
 ```text
 server/
   infra/
-    auth/
-    gateway/
-    connector/
-    config/
-    discovery/
-    messaging/
-    observability/
     security/
-  persistence/
-    db/
-    cache/
-    repository/
-    migration/
-  services/
-    player/
-    room/
-    encounter/
-    scene/
+      IpRateLimiter
+      AccountRateLimiter
+      PacketSizeGuard
+      ReplayProtectionService
+      AdminAuthGuard
+      SignatureValidator
+      AbuseAuditLogger
 ```
 
-Recommended rule:
+- `IpRateLimiter`: connection and request quota by IP
+- `AccountRateLimiter`: quota by account or player id
+- `PacketSizeGuard`: payload size and malformed packet rejection
+- `ReplayProtectionService`: reject duplicate or replayed high-risk requests
+- `AdminAuthGuard`: stronger auth for admin endpoints
+- `SignatureValidator`: signature, nonce, timestamp validation where required
+- `AbuseAuditLogger`: security event logging
 
-- infrastructure code under `infra/`
-- persistence concerns under `persistence/`
-- gameplay or business owners under `services/`
+### Concrete Object Relations
 
-Do not bury db pool, auth token, or routing code inside gameplay modules.
+- gateway and API middleware depend on rate limiters and packet guards
+- high-risk mutation handlers depend on `ReplayProtectionService`
+- admin controllers depend on `AdminAuthGuard`
+- all security incidents should flow into `AbuseAuditLogger`
+
+### Concrete Protection Chain
+
+1. connector receives packet or request.
+2. `PacketSizeGuard` rejects malformed or oversized payload.
+3. `IpRateLimiter` checks source quota.
+4. `AccountRateLimiter` checks authenticated identity quota if available.
+5. `SignatureValidator` verifies signed requests where needed.
+6. `ReplayProtectionService` rejects duplicate mutation token or nonce.
+7. handler executes only after all checks pass.
+
+Never assume only game clients will call your endpoints correctly.
 
 ---
 
-## 16. Concrete Integration Example
+## 14. Code Organization
+
+Use code organization as a composition rule, not as one giant fixed tree.
+
+### Composition Pattern
+
+When a project adds one common component, place it in one of these roots:
+
+```text
+server/
+  bootstrap/
+  infra/
+  persistence/
+  api/
+  services/
+```
+
+Use the roots like this:
+
+- `bootstrap/`: startup, dependency building, config load, process host
+- `infra/`: auth, gateway, connector, discovery, messaging, observability, security
+- `persistence/`: db, cache, repositories, migration
+- `api/`: request/response controller layer and middleware
+- `services/`: owned business or gameplay modules such as player, room, encounter, scene
+
+### Concrete Placement Rules
+
+- add `TokenIssuer` under `infra/auth/`, not under `services/player/`
+- add `DbConnectionPool` under `persistence/db/`, not inside repository or controller folders
+- add `OwnerLocator` under `infra/discovery/`, not inside gateway routing code
+- add `RequestLogger` under `infra/observability/`, not duplicated per service
+- add `InventoryApplicationService` under `api/application/` or `services/player/` depending on whether it is transport orchestration or owned domain logic
+
+### Concrete Dependency Direction
+
+Keep dependencies one-way:
+
+1. `bootstrap` can depend on everything needed for startup wiring
+2. `infra` can depend on config and low-level utilities
+3. `api` can depend on `infra`, `persistence`, and `services`
+4. `services` can depend on `persistence` and selected `infra` abstractions
+5. `persistence` should not depend on `api`
+
+If `services` depend on controller code, or repositories depend on gateway code, the organization is already wrong.
+
+---
+
+## 15. Concrete Integration Example
 
 Use a real shared request chain like this for a normal player API:
 
@@ -690,25 +881,109 @@ If a document cannot be mapped onto a chain like this, it is still too abstract.
 
 ---
 
-## 17. Build Order
+## 16. Build Order
 
-Recommended implementation order for shared infrastructure:
+Use a staged build order like this:
 
-1. config and startup validation
-2. logging and metrics
-3. db layer with pool, timeout, and migration policy
-4. auth and token verification
-5. gateway or api connector
-6. cache for session/location hot paths
-7. discovery or location registry
-8. queue or bus for async work
-9. admin and operational tooling
+### Stage 1: Process Bootstrap
 
-Build the simplest usable infra first. Do not start with distributed messaging if a single service call is enough.
+Add:
+
+```text
+bootstrap/
+  AppHost
+  ConfigLoader
+  ConfigValidator
+```
+
+Goal:
+
+- process can start with validated config
+- readiness can fail fast on broken config
+
+### Stage 2: Persistence Baseline
+
+Add:
+
+```text
+persistence/
+  db/
+    DbClientManager
+    DbConnectionPool
+    MigrationRunner
+  repository/
+    PlayerRepository
+```
+
+Goal:
+
+- one service can read and write durable state safely
+- DB pool, timeout, and migration behavior are visible
+
+### Stage 3: Auth And Session Entry
+
+Add:
+
+```text
+infra/auth/
+infra/gateway/
+infra/connector/
+```
+
+Goal:
+
+- client or API request can authenticate and bind session
+
+### Stage 4: Basic Observability
+
+Add:
+
+```text
+infra/observability/
+  logging/
+  metrics/
+```
+
+Goal:
+
+- every critical request has logs and latency metrics
+
+### Stage 5: Performance And Routing Helpers
+
+Add:
+
+```text
+persistence/cache/
+infra/discovery/
+```
+
+Goal:
+
+- hot session or owner lookups stop hammering DB
+- routing can find current owner or service location
+
+### Stage 6: Async And Ops Tooling
+
+Add:
+
+```text
+infra/messaging/
+infra/observability/admin/
+infra/security/
+```
+
+Goal:
+
+- async follow-up work is decoupled
+- admin inspection and abuse protection are available
+
+### Build Order Rule
+
+Do not add queue, distributed registry, or advanced security plumbing before one authenticated request can go end to end with logging and durable storage.
 
 ---
 
-## 18. Review Checklist
+## 17. Review Checklist
 
 Before calling the infrastructure design ready, verify:
 

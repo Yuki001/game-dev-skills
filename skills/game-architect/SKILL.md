@@ -48,8 +48,10 @@ When designing game architecture, read the relevant `references/` documents base
 | Multiplayer support needed | `references/multiplayer-overview.md` |
 
 - For physical architecture design, see the Physical Architecture References table below.
-- For multiplayer system design, see the Multiplayer References table below.
 - For system-specific design, see the System-Specific References table below.
+- For multiplayer system design, see the Multiplayer References table below.
+
+Note : Only read the multiplayer references when multiplayer is needed.
 
 ### Physical Architecture References
 
@@ -58,14 +60,6 @@ When designing game architecture, read the relevant `references/` documents base
 | Project structure & file organization | `references/project-structure.md` |
 | Data formats, processing, custom formats, bundles, metadata | `references/data-files.md` |
 | Asset conventions & pipeline | `references/asset-conventions.md` |
-
-### Multiplayer References
-
-| Focus | Reference | Use When |
-|------|------|------|
-| Multiplayer overview | `references/multiplayer-overview.md` | Decide client/server responsibility, authority split, and gameplay sync style |
-| Multiplayer protocol and connection | `references/multiplayer-protocol.md` | Design messages, serialization, Req/Resp/Notify, heartbeat, reconnect |
-| Multiplayer server architecture | `references/multiplayer-server-architecture.md` | Design ownership boundaries, process roles, deployment, persistence, recovery |
 
 ### System-Specific References
 
@@ -81,6 +75,18 @@ When designing game architecture, read the relevant `references/` documents base
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
 | Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
+
+### Multiplayer References
+
+| Focus | Reference | Use When |
+|------|------|------|
+| Multiplayer overview | `references/multiplayer-overview.md` | Decide client/server responsibility, authority split, and gameplay sync style |
+| Multiplayer protocol and connection | `references/multiplayer-protocol.md` | Design messages, serialization, Req/Resp/Notify, heartbeat, reconnect |
+| Multiplayer server architecture | `references/multiplayer-server-architecture.md` | Design ownership boundaries, process roles, deployment, persistence, recovery |
+| Common server components and services | `references/multiplayer-implementation-common.md` | Build shared infrastructure such as auth, gateway, connector, db, cache, discovery, queue, observability |
+| Room server build playbook | `references/multiplayer-implementation-room.md` | Build a concrete small-to-medium room-based realtime server with join flow, room ownership, settlement, reconnect |
+| Encounter server build playbook | `references/multiplayer-implementation-encounter.md` | Build a concrete turn-based or combat-workflow server with checkpointing, idempotent actions, settlement |
+| Persistent world server build playbook | `references/multiplayer-implementation-world.md` | Build a concrete AOI world server with region ownership, transfer, location registry, reconnect |
 
 ---
 
