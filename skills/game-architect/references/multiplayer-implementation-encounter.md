@@ -1,411 +1,283 @@
-# Encounter And Turn-Based Server Build Playbook
+# Encounter And Turn-Based Server Template
 
-Build guide for server-authoritative combat or progression flows where the main runtime owner is a short-lived encounter, battle, or workflow instance rather than a room with long-lived membership.
+Template for server-authoritative combat or progression flows where the runtime owner is a short-lived encounter, battle, or workflow instance rather than a room with long-lived membership.
 
-Use this document for PvE battle services, async PvP turns, card combat, roguelike encounters, and phase-driven battle workflows.
-
-Use `multiplayer-server-architecture.md` for the runtime model comparison. Use `multiplayer-protocol.md` for RPC, notify, and idempotency rules.
+Use this for PvE battles, async PvP turns, card combat, roguelike encounters, and phase-driven battle workflows. Use `multiplayer-server-architecture.md` for runtime-model tradeoffs and `multiplayer-protocol.md` for RPC, notify, and idempotency rules.
 
 ---
 
-## 1. Target Shape
+## 1. Fit
 
-Default first-production shape:
+Default shape:
 
 - Runtime model: **encounter/combat service**
 - Ownership unit: **encounter**
 - Transport model: **API/RPC first**, optional realtime notify
-- Deployment: **gateway or API + player/encounter service + DB**
-- Scaling rule: **one encounter owned by one process at a time**
+- Live state writer: **encounter service**
+- Durable state writer: **player service**
 
-Use this shape when:
+Use this template when:
 
 - actions are ordered and authoritative
 - the system needs buffs, cooldowns, scripted phases, or turn logic
-- realtime room presence is not the core product requirement
-- persistence and recovery matter more than 20 Hz broadcast
+- realtime room presence is not the main product requirement
+- persistence and recovery matter more than high-frequency broadcast
+
+Do not use this as the primary template for:
+
+- shared visible movement with long-lived room membership
+- MMO scene runtime or world-scale AOI
+- per-frame realtime synchronization as the main loop
+- event-sourcing-only design unless replay or audit is a hard requirement
+
+If the product mostly needs live shared presence, use the room template instead.
 
 ---
 
-## 2. Non-Goals
-
-Do not overbuild first version:
-
-- no permanent room membership model
-- no generic MMO scene runtime
-- no per-frame realtime sync loop
-- no distributed transaction between encounter and player inventory
-- no event-sourcing-only architecture unless replay/audit is a hard requirement
-
-If the game mostly needs visible shared movement and live broadcast, use the room build playbook instead.
-
----
-
-## 3. Minimal Topology
+## 2. Core Topology
 
 Recommended nodes:
 
 - **API/Gateway**: auth, request entry, rate limit, routing
-- **Encounter Service**: encounter creation, phase progression, action validation, result generation
+- **Encounter Service**: encounter creation, action validation, phase progression, result generation
 - **Player Service**: durable player/meta state, rewards, inventory, quests
-- **DB/Cache**: encounter snapshot, player data, idempotency tables, optional action log
-- **Notify Channel**: optional push for battle updates if clients stay connected
+- **DB/Cache**: encounter snapshot, player data, idempotency table, optional action log
+- **Notify Channel**: optional push for battle updates when clients stay connected
 
 Default deployment:
 
-- common light-combat version: API + player service + encounter logic in one process
+- light-combat version: API + player service + encounter logic in one process
 - scale version: encounter service separated from player service
 
-This is a common and valid default for card battle, async combat, roguelike encounter, and other battle workflows where:
+Hard boundary:
 
-- encounter state is short-lived
-- combat concurrency is moderate
-- most requests are still player-centric
-- reward settlement and encounter progression are tightly coupled
+- player-facing API handlers do not directly execute battle rules
 
-Split encounter from player service only when one of these becomes true:
+Split encounter from player service only when:
 
-- encounter CPU cost is much higher than normal player/meta requests
-- one battle can hold a process busy for too long
-- checkpoint/recovery logic becomes operationally separate from player APIs
-- the team needs independent scaling or deployment for combat logic
-
-Do not let player API handlers directly execute battle rules.
+- encounter CPU cost is materially higher than normal player/meta requests
+- one battle can block process capacity for too long
+- checkpoint or recovery operations become operationally separate
+- combat logic needs its own scaling or release cadence
 
 ---
 
-## 4. Reference Runtime Structure
+## 3. Reference Runtime Structure
 
-Use a concrete encounter service structure like this:
+Use a runtime split like this as the default reference:
 
 ```text
-server/
-  api/
-    EncounterController
-    EncounterRouteService
-  encounter/
-    EncounterApplicationService
-    EncounterRepository
-    EncounterRuntimeFactory
-    EncounterRuntime
-    TurnResolver
-    EffectPipeline
-    BattleAiResolver
-    RewardPreviewBuilder
-    EncounterRecoveryService
-    EncounterSettlementCoordinator
-  player/
-    PlayerFacade
-    RewardCommitService
+api/
+  EncounterController
+encounter/
+  EncounterApplicationService
+  EncounterRepository
+  EncounterRuntime
+  TurnResolver
+  EffectPipeline
+  BattleAiResolver
+  EncounterRecoveryService
+  EncounterSettlementCoordinator
+player/
+  PlayerFacade
 ```
 
-### Main Class Responsibilities
+Key responsibilities:
 
-- `EncounterController`: RPC or HTTP handler for open, submit action, surrender, resume
-- `EncounterApplicationService`: application-layer coordinator for encounter commands
-- `EncounterRepository`: save/load snapshot and optional action log
-- `EncounterRuntime`: aggregate root holding battle state
+- `EncounterApplicationService`: application-layer coordinator for open, submit, resume, surrender
+- `EncounterRepository`: snapshot persistence and optional action log
+- `EncounterRuntime`: authoritative battle aggregate root
 - `TurnResolver`: phase and turn progression
-- `EffectPipeline`: buffs, triggers, passive effects, dot/hot, cleanup
-- `BattleAiResolver`: npc or enemy action resolution
-- `EncounterRecoveryService`: load last good snapshot and rebuild runtime
-- `EncounterSettlementCoordinator`: commit final result into player service
-- `PlayerFacade`: typed entry to player data and settlement operations
+- `EffectPipeline`: buffs, triggers, passive effects, cleanup
+- `BattleAiResolver`: enemy or npc action resolution
+- `EncounterRecoveryService`: load and rebuild resumable battle state
+- `EncounterSettlementCoordinator`: commit final result through player service
 
-### Main Object Relations
+Dependency direction:
 
-- `EncounterApplicationService` loads one `EncounterRuntime`
-- `EncounterRuntime` delegates turn logic to `TurnResolver`
-- `TurnResolver` uses `EffectPipeline` and `BattleAiResolver`
-- `EncounterSettlementCoordinator` depends on `EncounterRepository` and `PlayerFacade`
-
-### Concrete Open Chain
-
-1. `EncounterController.OpenEncounter()` validates session.
-2. `EncounterApplicationService.Open()` checks reusable active encounter.
-3. `EncounterRuntimeFactory.Create()` builds `EncounterRuntime`.
-4. `EncounterRepository.SaveCreateSnapshot()` persists initial state.
-5. `RewardPreviewBuilder` optionally builds initial ui data.
-6. controller returns `Encounter_Open_Resp`.
+- controller -> encounter application service
+- encounter runtime -> turn resolver
+- turn resolver -> effect pipeline + ai resolver
+- settlement -> player facade
+- player service never depends on encounter runtime internals
 
 ---
 
-## 5. Ownership Rules
+## 4. Ownership And Persistence Rules
 
 Hard rules:
 
 - one encounter instance owns all writes to encounter state
-- player service owns all durable player state writes
-- when player and encounter are deployed in the same process, keep them as separate modules with separate ownership rules
-- encounter service may read player stats/loadout snapshot, but must not directly mutate inventory or currency
-- every combat action must carry `actionId` or sequence
-- encounter completion must commit through one settlement path
+- player service owns all durable player-state writes
+- merged deployment still keeps player and encounter as separate modules
+- encounter service may read player stats or loadout snapshot, but does not directly mutate inventory or currency
+- every combat action carries `actionId` or sequence
+- encounter completion commits through one settlement path
 
 Recommended keys:
 
-- encounter key: `encounterId`
-- player key: `playerId`
-- action idempotency key: `encounterId + actionId`
-- settlement key: `encounterId` or `battleResultId`
-
----
-
-## 6. Standard Request Flows
-
-### Encounter Open
-
-1. Client calls `Encounter_Open` or equivalent RPC.
-2. API validates session and feature access.
-3. Encounter service checks whether a reusable active encounter already exists.
-4. If not, encounter service creates encounter state from stage config, player loadout, and seed data.
-5. Encounter service stores initial snapshot or create record.
-6. Service returns initial battle view and encounter token.
-
-Default rule:
-
-- opening an encounter should be idempotent for the same active run if design requires resume
-
-### Submit Action
-
-1. Client sends `Battle_SubmitAction` with `encounterId` and `actionId`.
-2. API validates session and routes to encounter service.
-3. Encounter service checks ownership, turn/phase legality, and idempotency.
-4. Encounter service applies authoritative logic.
-5. Encounter service updates in-memory or persisted encounter state.
-6. Encounter service returns action result, deltas, and next phase info.
-7. Optional notify channel pushes battle update to other viewers or party members.
-
-This is the critical flow. It must be deterministic enough for recovery, but does not need lockstep unless the product truly requires it.
-
-### Turn Or Phase Advance
-
-1. Encounter service detects end of action window or turn.
-2. Service resolves AI, status effects, queued triggers, and scripted events.
-3. Service persists checkpoint at phase or turn boundary if recovery matters.
-4. Service returns authoritative next turn state.
-
-Checkpoint at turn boundaries is usually the best value-for-cost default.
-
-### Encounter Complete
-
-1. Encounter reaches success, fail, surrender, or timeout.
-2. Encounter service computes result and reward intent.
-3. Service sends one settlement request to player service.
-4. Player service validates duplicate completion and writes durable rewards.
-5. Player service returns settlement confirmation.
-6. Encounter service marks encounter complete and no longer accepts actions.
-7. Client receives final result.
-
-### Resume
-
-1. Client reopens the same encounter.
-2. Encounter service loads active snapshot.
-3. Service verifies encounter status is resumable.
-4. Service returns latest authoritative state.
-
-Prefer resume-by-snapshot instead of replaying the full action log unless audit/replay is a product feature.
-
----
-
-## 7. Concrete Action Execution Chain
-
-Use a concrete action path like this:
-
-1. `EncounterController.SubmitAction()` receives `encounterId` and `actionId`.
-2. `EncounterApplicationService.SubmitAction()` loads `EncounterRuntime`.
-3. `EncounterRuntime.ValidateAction()` checks phase, actor, cooldown, and idempotency.
-4. `TurnResolver.ApplyPlayerAction()` mutates battle state.
-5. `EffectPipeline.ResolveAfterAction()` runs triggered effects.
-6. `BattleAiResolver.ResolveIfNeeded()` runs enemy step.
-7. `EncounterRepository.SaveTurnSnapshot()` persists checkpoint.
-8. `EncounterSettlementCoordinator.TryComplete()` checks terminal state.
-9. controller returns authoritative result payload.
-
-Suggested method split:
-
-```text
-EncounterApplicationService.Open()
-EncounterApplicationService.SubmitAction()
-EncounterApplicationService.Resume()
-EncounterRuntime.ValidateAction()
-TurnResolver.ApplyPlayerAction()
-TurnResolver.AdvanceTurn()
-EffectPipeline.ResolveTriggeredEffects()
-EncounterSettlementCoordinator.CommitResult()
-```
-
----
-
-## 8. State And Persistence
+- `encounterId`
+- `playerId`
+- `actionId`
+- `encounterId + actionId`
+- `battleResultId`
 
 Separate these states:
 
-- **Encounter runtime state**: turn order, hp, buffs, skill cooldowns, scripted phase variables, RNG seed
-- **Player durable state**: inventory, account progression, quest progress, rewards
-- **Battle audit state**: encounter create record, action log, result record
+- **encounter runtime state**: turn order, hp, buffs, cooldowns, scripted variables, rng seed
+- **player durable state**: inventory, account progression, quest progress, rewards
+- **audit or recovery state**: create record, checkpoint snapshot, action log, result record
 
-Recommended first real production policy:
+Recommended persistence policy:
 
 - persist encounter on create
-- persist at each turn or phase boundary
+- persist at each turn or phase boundary when recovery matters
 - persist final result before or together with settlement request
 - persist action log only when audit, anti-cheat review, or replay matters
 
-What to persist inside encounter snapshot:
-
-- encounter version
-- current phase/turn
-- unit states
-- pending effects
-- RNG seed or reproducible state
-- timeout data
-
-Do not store only visual delta if the encounter must resume after restart.
+If encounter must resume after restart, snapshot must contain authoritative runtime state, not only visual delta.
 
 ---
 
-## 9. Failure Rules
+## 5. Standard Flows
+
+### Encounter Open
+
+Default open flow:
+
+1. client calls `Encounter_Open` or equivalent RPC
+2. API validates session and feature access
+3. encounter service checks for an existing reusable active encounter
+4. if needed, service creates encounter state from config, player loadout, and seed data
+5. service stores initial snapshot or create record
+6. service returns initial battle view and encounter token
+
+Rule:
+
+- opening should be idempotent for the same active run when resume is supported
+
+### Submit Action
+
+Default action flow:
+
+1. client sends `Battle_SubmitAction` with `encounterId` and `actionId`
+2. API validates session and routes to encounter service
+3. encounter validates ownership, turn or phase legality, and idempotency
+4. turn resolver applies authoritative logic
+5. effect pipeline resolves triggered effects
+6. ai resolver runs follow-up step if needed
+7. service persists checkpoint at action, phase, or turn boundary as designed
+8. service returns authoritative result, delta, and next-phase info
+
+Rule:
+
+- design for deterministic recovery, but do not force lockstep unless the product actually requires it
+
+### Phase Or Turn Advance
+
+Default advance flow:
+
+1. service detects end of action window or turn
+2. service resolves queued triggers, status effects, scripted events, and AI
+3. service persists boundary checkpoint if recovery matters
+4. service returns next authoritative turn state
+
+Recommended default:
+
+- checkpoint at turn boundaries for best value-to-cost ratio
+
+### Encounter Complete
+
+Default completion flow:
+
+1. encounter reaches success, fail, surrender, or timeout
+2. service computes result and reward intent
+3. settlement coordinator sends one request to player service
+4. player service applies durable write idempotently
+5. encounter is marked complete and stops accepting actions
+6. client receives final result
+
+### Resume
+
+Default resume flow:
+
+1. client reopens the same encounter
+2. service loads active snapshot
+3. service verifies encounter is resumable
+4. service returns latest authoritative state
+
+Recommended default:
+
+- prefer resume-by-snapshot instead of replaying full action log unless replay is a product feature
+
+---
+
+## 6. Failure And Recovery
 
 Default safety rules:
 
-- repeated `SubmitAction` with same `actionId` must not apply twice
-- encounter service crash should recover from the last checkpoint or mark the encounter failed explicitly
-- settlement retries must be safe by `encounterId`
-- once encounter is in `completing` or `completed`, new actions must be rejected
-- timeout must resolve encounter into a known terminal state
+- repeated `SubmitAction` with the same `actionId` must not apply twice
+- encounter crash recovers from the last valid checkpoint or fails explicitly
+- settlement retries are safe by `encounterId` or result ID
+- once encounter enters `completing` or `completed`, new actions are rejected
+- timeout resolves encounter into a known terminal state
 
 Typical failure handling:
 
-- API timeout before execution known: client may retry with same `actionId`
-- action executed but response lost: service returns same logical result on retry
-- player service down during completion: encounter moves to `settlement_pending`
-- corrupted snapshot: encounter is failed and compensated according to product rule
+- request timeout before execution known: client retries with same `actionId`
+- action executed but response lost: service returns the same logical result on retry
+- player service unavailable during completion: encounter moves to `settlement_pending`
+- corrupted snapshot: encounter fails and compensates by product rule
+
+Good first-production defaults:
+
+- no replay-driven recovery
+- no full event-sourcing requirement
+- explicit checkpoint policy before launch
 
 ---
 
-## 10. Code Skeleton
-
-Suggested project layout:
-
-```text
-server/
-  api/
-    auth/
-    rpc/
-  encounter/
-    encounter_api/
-    encounter_runtime/
-    turn_engine/
-    effect_system/
-    ai/
-    encounter_repository/
-    encounter_recovery/
-  player/
-    profile/
-    inventory/
-    quest/
-    reward/
-  protocol/
-    api/
-    notify/
-  persistence/
-    db/
-    cache/
-    idempotency/
-```
-
-If player and encounter are merged into one process, keep the module boundary explicit:
-
-```text
-server/
-  api/
-  player/
-  encounter/
-  protocol/
-  persistence/
-```
-
-Responsibility split:
-
-- `encounter_api`: request validation and handler entry
-- `turn_engine`: authoritative turn/phase progression
-- `effect_system`: buffs, triggers, status, passive resolution
-- `encounter_repository`: snapshot read/write and action log storage
-- `encounter_recovery`: resume and checkpoint loading
-
-Do not mix settlement writes into combat resolution code paths.
-
----
-
-## 11. Build Order
+## 7. Minimal Build Order
 
 Recommended implementation order:
 
-1. Player service and encounter modules separated inside one process
-2. Encounter create/open
-3. One action submission loop with idempotency
-4. Turn/phase progression
-5. Encounter snapshot persistence
-6. Completion and settlement to player service
-7. Resume after reconnect or server restart
-8. Metrics, logs, admin inspection tools
-9. Split encounter into an independent service only if load and ownership pressure justify it
+1. separate player and encounter modules inside one process
+2. encounter create or open
+3. one action submission loop with idempotency
+4. turn or phase progression
+5. encounter snapshot persistence
+6. completion and settlement to player service
+7. resume after reconnect or server restart
+8. metrics, logs, admin inspection tools
+9. split encounter into an independent service only if load and ownership pressure justify it
 
-Do not split player and encounter into different services on day one if the actual runtime pressure does not require it.
-
----
-
-## 12. Deployment Evolution
-
-Recommended evolution path:
-
-1. start with `player + encounter` in one process
-2. keep separate modules, repositories, and ownership rules inside that process
-3. measure combat CPU time, action latency, checkpoint cost, and settlement contention
-4. split encounter into its own service only after those pressures are visible
-
-This gives the team lower operational cost early while keeping a clean extraction path later.
-
-Typical sign that merging is still fine:
-
-- encounter open and submit action are just another branch of player-facing API traffic
-- battle state stays small
-- combat result writes are simple and local
-- one process can absorb both traffic patterns without noisy-neighbor issues
-
-Typical sign that splitting is overdue:
-
-- encounter simulation dominates CPU
-- battle persistence becomes operationally heavy
-- one player's combat spikes affect unrelated player APIs
-- combat and player modules need different release cadence
+Do not split player and encounter into separate services on day one unless actual runtime pressure requires it.
 
 ---
 
-## 13. Framework Fit In Practice
+## 8. Framework Fit
 
-This server shape maps well to these framework families:
+This template fits best with:
 
-- **backend platform with RPC/service APIs**: especially suitable when player-facing backend APIs and lightweight encounters live in the same service boundary
-- **typed RPC framework with optional realtime push**: good when typed contracts matter and clustering is provided elsewhere
-- **custom service or lightweight framework**: often best when encounter rules are complex but live broadcast is minimal
+- **backend platform with RPC or service APIs** when encounter and player APIs are closely coupled
+- **typed RPC framework with optional realtime push** when typed contracts matter and clustering is solved elsewhere
+- **custom lightweight service** when encounter rules are rich but live broadcast is limited
 
-Practical rule:
+Rule of thumb:
 
-- if the encounter is basically a transactional workflow with rich rules, build it as a stateful module first
-- if player data and encounter progression are tightly coupled, colocating them in one service is a normal starting point
-- if you need long-lived member presence and continuous shared simulation, it is not an encounter service anymore
+- if the encounter is mainly a transactional workflow with rich rules, build it as a stateful module first
+- if the product needs long-lived member presence and continuous shared simulation, this is no longer an encounter service
 
 ---
 
-## 14. Review Checklist
+## 9. Review Checklist
 
 Before calling the design ready, verify:
 
 - encounter ownership is single-writer
 - every action has idempotency
-- turn boundary checkpoint policy is explicit
+- turn-boundary checkpoint policy is explicit
 - settlement path is single and durable
 - merged deployment still keeps player and encounter module boundaries clear
-- crash/retry behavior is written down
+- crash and retry behavior is written down
 - resume is based on authoritative snapshot, not client memory
