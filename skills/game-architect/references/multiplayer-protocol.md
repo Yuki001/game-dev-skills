@@ -38,18 +38,11 @@ Rules:
 
 ### Naming Conventions
 
-Use stable module-based names.
+Keep protocol names module-based and business-oriented.
 
-Recommended pattern:
-
-`{System}_{Action}_{Suffix}`
-
-Common suffixes:
-
-- `Req`
-- `Resp`
-- `Notify`
-- `Event`
+- Message protocol: `{System}_{Action}_{Suffix}`
+- RPC protocol: `{System}.{Method}` or `{System}/{Method}`
+- Common suffixes: `Req`, `Resp`, `Notify`, `Event`
 
 Examples:
 
@@ -57,18 +50,18 @@ Examples:
 Item_List_Req
 Item_List_Resp
 Item_Change_Notify
-Move_Req
-Skill_Cast_Req
-Skill_Cast_Resp
-State_Sync_Notify
+Move_Path_Req
+State_Delta_Notify
+Quest.ClaimReward
+Battle.SubmitTurn
 ```
 
 Rules:
 
-- Group by system, not by transport.
-- Keep action names semantic and domain-specific.
-- Separate client-requested actions from server-pushed updates.
-- Keep naming consistent across modules.
+- Group by system, not by transport layer.
+- Use domain actions such as `ClaimReward`, `SubmitTurn`, `MovePath`; avoid vague names such as `DoAction` or `Handle`.
+- Separate client requests from server pushes in naming.
+- Keep one naming style per protocol family and use it consistently.
 
 ---
 
@@ -107,65 +100,23 @@ Rules:
 
 ### RPC Interface Design
 
-RPC is useful for typed request/response APIs, backend-style gameplay services, and short-connection systems. It is less suitable as the only abstraction for high-frequency room sync.
+RPC fits typed request/response APIs and low-frequency gameplay services. Do not use RPC as the only abstraction for high-frequency room sync.
 
-Use RPC for:
+Good RPC cases:
 
 - login, auth, account binding
-- player data queries and mutations
-- turn submission
-- encounter or battle step progression
-- system open, list, get, claim, upgrade, compose
+- system open, list, get, claim, upgrade
+- turn submission or one-step battle actions
+- player-data queries and mutations
 
-Do not use one generic RPC style for everything. Distinguish:
+Keep the RPC surface small:
 
-- **query RPC**: no mutation, returns full result or page data
-- **command RPC**: performs authoritative mutation
-- **open/init RPC**: returns initial module snapshot
-- **action RPC**: one gameplay step, often followed by delta or notify
+- one RPC should represent one complete business action
+- mutation RPC returns direct result; wider room effects go through `Notify` or state sync
+- do not expose repository or raw DB structure as RPC
+- when mutation changes player state, `Resp` can attach `playerDelta`
 
-#### RPC Naming
-
-Recommended naming styles:
-
-- `{System}.{Method}`
-- `{System}/{Method}`
-
-Examples:
-
-```text
-Player.GetProfile
-Item.List
-Item.Use
-Quest.ClaimReward
-Battle.SubmitTurn
-System.Open
-```
-
-Rules:
-
-- method name should describe business meaning, not transport behavior
-- do not mix `GetData`, `DoAction`, `HandleXxx` style names in one API set
-- query and mutation methods should be visually distinguishable
-- one method should map to one stable business capability
-
-#### RPC Request And Response Shape
-
-Recommended request fields:
-
-- auth/session context
-- request payload
-- request ID or sequence when deduplication matters
-- client version or feature flag when compatibility matters
-
-Recommended response fields:
-
-- result payload
-- stable error code
-- attached player delta when the method mutates player state
-- server time when client cache or timer display depends on it
-
-Example shape:
+Example:
 
 ```text
 Quest.ClaimRewardReq {
@@ -179,28 +130,6 @@ Quest.ClaimRewardResp {
   playerDelta
 }
 ```
-
-#### RPC Boundary Rules
-
-- RPC handler should express one complete business action, not expose internal repository operations
-- RPC should not return raw DB model shape directly to client
-- one mutation RPC should produce one clear authoritative result
-- when mutation causes broad runtime changes, RPC response can stay small and let notify/state sync carry the shared result
-- system open RPC can return module-level full snapshot, but later updates should prefer delta or notify
-
-#### RPC And Notify Coordination
-
-Use this default split:
-
-- requester gets direct `Resp`
-- other affected clients get `Notify` or state sync
-- requester may also receive the same notify if client state handling needs one unified path
-
-Typical examples:
-
-- `Item.Use` -> requester gets `Resp + playerDelta`
-- `Battle.SubmitTurn` -> requester gets `Resp`; turn result goes by battle notify or state sync
-- `System.Open` -> requester gets module full snapshot; later changes go through delta/notify
 
 ### Short-Connection API Patterns
 
@@ -361,6 +290,8 @@ View_Leave_Notify {
 ```
 
 ### Path Moving Protocol
+
+Use this protocol shape for long-path movement where the client needs an authoritative path plus runtime correction. For short-distance movement, prefer a simpler direct move request with position or state sync instead of a full path lifecycle.
 
 Path moving usually has two different protocol shapes:
 

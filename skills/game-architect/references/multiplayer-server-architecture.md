@@ -150,6 +150,7 @@ Once ownership is clear, choose the minimum deployment topology that can host it
 Start from the smallest profile that fits. Split processes only when one of these becomes true:
 
 - One role has a clearly different scaling curve.
+- One role has a pressure bottleneck.
 - One role needs separate failure isolation.
 - One role needs independent deployment or ownership by another team.
 - One role creates contention because its writes should be isolated.

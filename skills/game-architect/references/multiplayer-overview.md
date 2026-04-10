@@ -2,7 +2,7 @@
 
 Reference for multiplayer gameplay architecture. This document is scoped to gameplay-side logic distribution: what belongs on client, what belongs on server, what must be authoritative, and what synchronization style each subsystem should use.
 
-It does not own server process topology, deployment, persistence, recovery, or framework selection. Read `multiplayer-server-architecture.md` for server architecture. Read `multiplayer-server-implementation.md` for framework skeleton, runtime patterns, and implementation structure. Read `multiplayer-protocol.md` for protocol design, serialization, heartbeat, reconnect, and sync transport rules.
+It does not own server process topology, deployment, persistence, recovery, or framework selection. Read `multiplayer-server-architecture.md` for server architecture, server-side module boundaries, and lifecycle design. Read `multiplayer-protocol.md` for protocol design, serialization, heartbeat, reconnect, and sync transport rules.
 
 ---
 
@@ -133,5 +133,4 @@ Make these choices per subsystem. For example, local movement may use prediction
 ## 10. What To Read Next
 
 - Read `multiplayer-server-architecture.md` once a subsystem is confirmed to live on the server and needs ownership, process role, deployment, persistence, or recovery design.
-- Read `multiplayer-server-implementation.md` once server responsibilities are clear and you need framework skeleton, lifecycle, runtime patterns, or implementation order.
 - Read `multiplayer-protocol.md` for message design, request/response rules, heartbeat, reconnect, and concrete sync transport rules.
