@@ -1,0 +1,44 @@
+roles:
+  designer:
+    owns:
+      - design/gdd/game.md
+      - design/gdd/systems-index.md
+      - design/gdd/*.md
+  artist:
+    owns:
+      - design/art/art-direction.md
+      - design/art/*-art.md
+      - production/milestone-*/art-prompts.md
+  planner:
+    owns:
+      - production/milestone.md
+      - production/milestone-*/tasks.md
+  programmer:
+    owns:
+      - production/milestone-*/tech.md
+      - src/
+      - tests/
+
+workflows:
+  steps:
+    - skill: /gat-design
+      args: "[hint] or [system-name]"
+      output:
+        - design/gdd/game.md
+        - design/gdd/systems-index.md
+        - design/gdd/<system>.md
+        - design/art/art-direction.md
+        - design/art/<system>-art.md
+    - skill: /gat-milestone
+      output:
+        - production/milestone.md
+        - production/milestone-*/
+    - skill: /gat-plan
+      output:
+        - production/milestone-*/tasks.md
+        - production/milestone-*/tech.md
+        - production/milestone-*/art-prompts.md
+    - skill: /gat-implement
+      output:
+        - src/**
+        - tests/**
