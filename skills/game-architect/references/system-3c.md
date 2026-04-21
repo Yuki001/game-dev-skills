@@ -125,7 +125,7 @@ Ray hits can be handled in three ways depending on context:
 - Record the hit point and normal without modifying position or velocity.
 - Used to set collision flags (`collision_floor`, `collision_wall`, etc.), trigger gameplay events (landing sound, damage zone), or feed data to other systems (IK foot placement, grounding check).
 
-> Raycast can be combined with a physics body (or trigger area) for better results — e.g. using a trigger to detect overlap candidates before casting rays. In hybrid setups, raycasts remain the primary source of truth for collision resolution.
+> Raycast can be combined with a collision body (or trigger area) for better results — e.g. using a trigger to detect overlap candidates before casting rays. In hybrid setups, raycasts remain the primary source of truth for collision resolution.
 
 **Examples:**
 
@@ -151,13 +151,13 @@ Ray hits can be handled in three ways depending on context:
 - Each wheel casts one ray straight down for suspension compression → spring force up, damper against vertical velocity.
 - Side rays extend horizontally from the body (left/right, front/rear corners) to detect wall contact for scraping and preventing the body from clipping into walls.
 - Additional forward/rear rays detect head-on collisions and bumper impacts.
-- These rays work together with the vehicle's physics body (typically a box or convex hull) to form the complete collision system — the body handles broad contact, rays provide precise per-wheel and per-side feedback.
+- These rays work together with the vehicle's collision body (typically a box or convex hull) to form the complete collision system — the body handles broad contact, rays provide precise per-wheel and per-side feedback.
 
 ---
 
 **Impl 2 — Capsule + MoveAndSlide**
 
-Use the engine's physics body and move and slide algorithm. 
+Use the engine's kinematic physics body and move and slide algorithm. 
 
 **Two common sub-approaches:**
 
@@ -178,7 +178,7 @@ Benefit: a corner hit never produces a diagonal push-out. The character hugs wal
 - Flags (`is_on_floor()`, `is_on_ceiling()`, `is_on_wall()`) are set from the normals collected across all slide iterations that tick.
 - **Snap to floor**: An additional downward shape cast after movement keeps the character glued to slopes and stairs without bouncing.
 
-> Capsule is the most common physics body for characters (smooth sliding, minimal snagging). Other shapes are valid depending on context: box for top-down games, sphere for rolling objects. Complex characters can use a shape list (multiple shapes combined) to better approximate the body volume.
+> Capsule is the most common kinematic physics body for characters (smooth sliding, minimal snagging). Other shapes are valid depending on context: box for top-down games, sphere for rolling objects. Complex characters can use a shape list (multiple shapes combined) to better approximate the body volume.
 
 ### Collision Flags
 
