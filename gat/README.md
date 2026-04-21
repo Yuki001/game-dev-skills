@@ -1,6 +1,6 @@
 # Simplified Game Agents
 
-A minimal Claude Code workflow for game development, simplified from [Claude-Code-Game-Studios](../Claude-Code-Game-Studios).
+A minimal Claude Code workflow for game development, simplified from [Claude-Code-Game-Studios](https://github.com/Donchitos/Claude-Code-Game-Studios).
 
 ## Background
 
