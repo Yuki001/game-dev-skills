@@ -19,10 +19,6 @@ When used with a workflow skill (e.g., OpenSpec, SpecKit) or in the plan mode of
 - **During requirements/spec phases**: Consult the Paradigm Selection Guide and System-Specific References to inform architectural decisions
 - **During design/planning phases**: Use the Reference Lookup Guide below to read relevant `references/` documents
 
-### Standalone
-
-A lightweight `workflow-standalone.md` is also available as a self-contained design pipeline if needed.
-
 ### Knowledge Mode (Query)
 
 When user requests to query knowledge for game architecture, this skill provides a reference lookup guide to relevant `references/` documents based on the task.

@@ -22,10 +22,6 @@ When used with a workflow skill (e.g., OpenSpec, SpecKit) or in the plan mode of
 - **During design/planning phases**: Use the Feature List to look up all relevant `references/` documents for each feature
 - **Key rule**: For each identified feature, read ALL reference files listed — do not select just one
 
-### Standalone
-
-A lightweight `workflow-standalone.md` is also available as a self-contained design pipeline if needed.
-
 ### Knowledge Mode (Query)
 
 When user requests to query knowledge for animation shaders, this skill provides preset styles and feature-to-reference mappings based on the task.
