@@ -67,7 +67,7 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | UI & Modules (Modules Management, MVC/MVP/MVVM, UI Management, Data Binding, Reactive) | `references/system-ui.md` |
 | Skill System (Attribute, Skill, Buff) | `references/system-skill.md` |
 | Action Combat System (HitBox, Damage, Melee, Projectiles) | `references/system-action-combat.md` |
-| Camera, Character & Controller 3C (Controller Types, Physics, Camera, Actor States) | `references/system-3c.md` |
+| Camera, Character & Controller 3C (PlayerController, Physics, Camera, Actor States) | `references/system-3c.md` |
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
 | Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
