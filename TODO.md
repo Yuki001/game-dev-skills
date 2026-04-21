@@ -1,7 +1,7 @@
 # TODO list
 
 ## Game Architect Skill
-- system-3c.md : 3C (Character,Controller,Camera) systems for gameplay.
+- [x] system-3c.md : 3C (Character,Controller,Camera) systems for gameplay.
 - [x] system-mod.md : Frameworks for easy extend game content (mod & dlc) support.
 - [x] system-game-ai.md : For gameplay AI frameworks (enemy, npc, etc.)
 - [x] data-and-files.md : Focus on data storage, configuration, art resources, and project file structures.
