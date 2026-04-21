@@ -28,9 +28,9 @@ Use these defaults unless requirements clearly say otherwise:
 
 | Runtime Model | Best Fit | Core Ownership Unit | Typical Server Shape |
 |:---|:---|:---|:---|
-| **Room-based realtime** | Match-based games, lobbies, instanced sessions | Room or match | Room process/service with matchmaking and state sync |
+| **Room-based realtime** | Match-based games, lobbies, room-owned instanced sessions | Room or match | Room process/service with matchmaking and state sync |
 | **Encounter/combat service** | Stateful PvE flows, turn-based combat, lightweight battle instances | Encounter, battle, or workflow instance | Stateful service instance driven by API/service calls |
-| **Scene/world realtime** | Persistent worlds, region simulation, AOI-heavy games | Scene, region, or entity shard | Scene services with routing and handoff |
+| **Scene/world realtime** | Persistent worlds, region simulation, AOI-heavy games, scene-owned instances | Scene, region, scene instance, or entity shard | Scene services with routing and handoff |
 | **Backend/platform** | Turn-based, idle, social, economy-heavy games | Player, request, or domain service | API services backed by storage |
 | **Hybrid** | Most commercial online games | Room/scene + player/meta service | Realtime runtime plus backend platform |
 
@@ -43,6 +43,7 @@ Use these defaults unless requirements clearly say otherwise:
 | Turn-based or async multiplayer | Backend/platform service | Realtime-first stack unless match authority is required |
 | Session-based competitive game | Room-based realtime with separate player/meta service | Full BaaS as the only runtime |
 | Persistent world with AOI | Scene/world runtime with region ownership | Pure room model as the core world architecture |
+| Dungeon or raid copy with AOI and scene-object lifecycle | Scene/world runtime with instance ownership | Plain room model if spatial ownership is central |
 | One small team, fast shipping | Single process or simple room cluster | Full service decomposition |
 | Platform with multiple game modes | Dedicated gameplay runtime plus backend platform | One framework forced onto every subsystem |
 
@@ -70,7 +71,7 @@ Clear ownership is the core design decision. Most other server decisions follow 
 | **Player** | Inventory, currency, quests, progression, profile | Meta systems and account-bound state | Cross-player transactions and global coordination |
 | **Room** | Match simulation, combat, temporary session state | Session games | Crash loses in-memory match state if not checkpointed |
 | **Encounter** | Battle state machine, turn order, scripted PvE flow, short-lived combat state | Lightweight combat services and turn workflows | Easy to under-design persistence, idempotency, and recovery |
-| **Scene/Region** | Spatial simulation, AOI, world entities | MMO and persistent worlds | Transfer/handoff complexity |
+| **Scene/Region** | Spatial simulation, AOI, world entities, scene-owned instances | MMO worlds, instanced dungeons, private scene copies | Transfer/handoff complexity |
 | **Entity/Actor** | One entity's mutable state and message mailbox | High-fidelity simulation, migratable ownership | Higher message-routing complexity |
 | **Service/Domain** | Guilds, mail, auction, leaderboard, economy | Cross-session systems | Can become bottleneck if boundaries are vague |
 
@@ -227,6 +228,31 @@ Best for persistent worlds, region-based worlds, heavy AOI, or migrating entity 
 - How region boundaries trigger transfer
 - Where global services stop and scene ownership begins
 - How entity identity survives migration
+
+### Instance Server As A Scene/World Variant
+
+Use a scene/world-style instance server when a dungeon, raid, mission map, or private shard is temporary but still keeps scene ownership semantics.
+
+**Core characteristics:**
+
+- Instance lifecycle is temporary, but the runtime owner is still a scene, scene copy, or region inside that copy.
+- AOI or visibility filtering is part of the core runtime contract.
+- The scene may contain spawned world entities, patrol AI, triggers, destructibles, gatherables, or local world timers.
+- Reconnect is expected to restore players back into the same scene copy with scene-local state intact.
+- The copy may have subregions, streaming chunks, or local handoff rules.
+
+**Important decisions:**
+
+- Whether the instance should be modeled as scene-owned or room-owned
+- What key owns the copy: `instanceId`, `partyId`, `raidId`, `runId`, or activity-specific ID
+- Whether reconnect must return to the same live scene copy or fall back to restart/checkpoint recovery
+- Whether the copy contains subregions or local transfer rules
+- When the instance is disposed: completion, timeout, empty-instance, or explicit owner action
+
+Rule of thumb:
+
+- if the instance behaves like a temporary world, model it as scene/world runtime
+- if it behaves like a temporary match, model it as room runtime
 
 ### Backend/Platform Runtime
 
@@ -409,6 +435,7 @@ This section maps requirement shapes to framework families. It is intentionally 
 ### Keywords To Map To Architecture
 
 - **"room", "lobby", "seat reservation", "match instance", "auto-dispose"** -> room-based realtime
+- **"dungeon instance", "raid copy", "private scene", "AOI instance", "scene-local state"** -> scene/world runtime, usually instance-shaped
 - **"battle workflow", "turn flow", "phase progression", "encounter state", "PVE combat service"** -> encounter/combat service
 - **"storage", "leaderboard", "social", "friends", "tournament", "backend APIs"** -> backend/platform
 - **"AOI", "region transfer", "entity location", "actor mailbox", "world shard"** -> actor/ECS or scene/world runtime
@@ -466,4 +493,3 @@ This section is about how game logic is organized inside a chosen framework or s
 | **Hot reload friendliness** | Plugin system, data-logic separation |
 | **Strong typing across network boundary** | Interface contract |
 | **Explicit ownership modeling** | Data-logic separation, hierarchical composition |
-

@@ -279,7 +279,6 @@ This template fits best with:
 
 - **actor or location runtime** when migration, AOI, and entity ownership are core concerns
 - **distributed scene-service framework** when route-based or service-tree runtime is the main problem
-- **room frameworks** only for instances inside a world, not for the persistent world itself
 
 Rule of thumb:
 
@@ -297,3 +296,107 @@ Before calling the design ready, verify:
 - transfer protocol is explicit and retry-safe
 - player durable state is not written by scene runtime directly
 - recovery policy is defined for region crash and reconnect
+
+---
+
+## 10. Instance Server Variant
+
+An **instance server** is a scene-shaped runtime variant that borrows the ownership model of this template while keeping a more temporary lifecycle.
+
+It is similar to a room because:
+
+- membership is usually bounded to one party, team, raid group, or mission run
+- the runtime is often created on demand and disposed after completion or inactivity
+- one process commonly owns one instance at a time
+
+It should still be treated as a **scene/world-style owner**, not just a room with a map, when:
+
+- the instance keeps authoritative spatial simulation, AOI, or visibility filtering
+- the scene contains spawned world entities, patrol AI, triggers, destructibles, gatherables, or local world timers
+- the runtime must preserve scene-local state across reconnect, short migration, or partial team separation
+- the instance may contain subregions, streaming chunks, or local handoff rules inside the same copy
+
+Use the instance-server variant when:
+
+- each party gets its own dungeon, raid, mission map, housing plot, or private shard
+- the copy is temporary, but the simulation is still scene-centric
+- gameplay depends on spatial ownership, spawn systems, encounter placement, and world-object lifecycle
+
+Prefer the room template instead when:
+
+- the map is mostly a backdrop for match rules
+- players are modeled primarily as room slots or seats
+- there is little or no AOI, spatial ownership, or scene-object lifecycle
+- settlement matters more than scene persistence
+
+Prefer the persistent-world form of this template instead when:
+
+- players from different parties share one long-lived world copy
+- cross-region transfer between active world owners is a core requirement
+- the runtime must survive well beyond one activity or party session
+
+### Topology Additions
+
+Recommended additions on top of the base world topology:
+
+- **Instance Entry / Match Service**: party validation, instance creation request, entry token, destination selection
+- **Instance Directory**: `instanceId -> scene host` and instance metadata lookup
+- **InstanceLifecycleService**: create, warm, retire, and dispose scene instances
+
+Recommended deployment variant:
+
+- one instance copy maps to one `instanceId`
+- one scene process commonly owns one active instance or a small set of instances
+- entry service or match service decides whether to create, reuse, or retire the instance
+- location registry tracks `playerId -> worldId/instanceId/regionId`
+- DB/cache stores instance metadata and optional run checkpoint data
+
+### Ownership And State Additions
+
+Additional keys:
+
+- `instanceId`
+
+Additional ownership rule:
+
+- one `instanceId` owns one isolated scene copy, and `regionId` is local to that copy
+
+Additional state class:
+
+- **instance lifecycle state**: owner party or run ID, creation reason, expire policy, completion state, lock flags
+
+### Instance Entry Flow
+
+Default instance-entry flow:
+
+1. party, raid, mission, or activity service decides the target `instanceId`
+2. entry service validates membership, lock state, progress rule, and capacity
+3. scene host creates the scene copy if it does not already exist
+4. instance directory publishes `instanceId -> scene host`
+5. location registry updates player destination to `worldId/instanceId/regionId`
+6. gateway routes the client to the target scene owner
+7. scene service builds the player entity and sends the instance snapshot
+
+Rule:
+
+- create instance identity first, then admit players into the scene copy
+
+### Reconnect And Recovery
+
+Instance-specific reconnect and recovery rules:
+
+- restore players into the same `instanceId` when the run is still valid; otherwise fall back to activity-specific recovery rules
+- instance disposal must be driven by explicit completion, timeout, or empty-instance policy
+- reconnect must validate that the `instanceId` is still active and still owned by the same run or party
+- if the instance has expired, recovery must choose between restart, checkpoint resume, or safe return to public world
+- instance-local objects are recovered from instance snapshot or run checkpoint, not from unrelated room settlement logic
+
+### Review Checklist
+
+Before calling an instance-server design ready, verify:
+
+- `instanceId` ownership is explicit
+- entry and admission rules are explicit
+- reconnect returns to the correct `instanceId` or uses a declared fallback
+- disposal policy is explicit
+- scene-local objects and checkpoints are separated from room settlement concepts
