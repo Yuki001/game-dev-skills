@@ -162,10 +162,13 @@ Use the engine's physics body and move and slide algorithm.
 **Two common sub-approaches:**
 
 *2-Pass (Axis-Separated) — common in custom engines and 2D platformers:*
-1. **X pass**: Translate body by `(velocity.x * delta, 0)`. On collision, zero out `velocity.x` and set `collision_left` or `collision_right`.
-2. **Y pass**: Translate body by `(0, velocity.y * delta)`. On collision, zero out `velocity.y` and set `collision_floor` or `collision_ceiling`.
+1. **X probe**: Cast along `(velocity.x * delta, 0)` without moving. Compute `fix_x_delta` — the actual X distance to the hit point (or full X if no hit). If hit, zero out `velocity.x` and set `collision_left` or `collision_right`.
+2. **Y probe**: Cast along `(fix_x_delta, velocity.y * delta)` without moving. Compute `fix_y_delta`. If hit, zero out `velocity.y` and set `collision_floor` or `collision_ceiling`.
+3. **Apply**: Move body once by `(fix_x_delta, fix_y_delta)`.
 
 Benefit: a corner hit never produces a diagonal push-out. The character hugs walls and floors cleanly. Jumping into a wall corner doesn't kill vertical momentum.
+
+> Also applicable to 3D platformers: pass 1 probes the movement plane (XZ), pass 2 probes the vertical axis (Y).
 
 *Iterative sweep (Godot `move_and_slide`):*
 - Performs a shape cast along the full velocity vector.
