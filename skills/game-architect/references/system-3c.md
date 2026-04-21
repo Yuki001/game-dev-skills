@@ -225,6 +225,62 @@ After all slide iterations, Godot inspects the collected collision normals:
 
 A separate short downward shape cast (not the movement pass) is used for gameplay logic — jump eligibility, coyote time timer, landing event — because the movement-derived floor flag can flicker on slopes or during the first frame of a jump. This dedicated cast is more stable and can be tuned independently of movement resolution.
 
+### Moving Curve
+
+The moving curve describes how velocity changes shape over time — on any axis. Input is only the trigger (pressed / released); the curve determines the actual velocity trajectory. It is the primary lever for game feel: "floaty", "snappy", and "weighty" are almost entirely curve differences, not top-speed differences.
+
+**ADSR analogy:**
+Borrowed from audio envelope design, the four phases map naturally to character movement:
+- **Attack**: Time to reach max speed from rest when input is held.
+- **Decay**: Optional speed reduction after a burst (e.g. sprint peak → sustained run speed).
+- **Sustain**: The steady-state speed while input is held.
+- **Release**: Time to decelerate to zero after input is released.
+
+**Parameters:**
+- `acceleration`: Rate of velocity increase per second toward `max_speed`.
+- `deceleration`: Rate of velocity decrease per second when input is released. Usually higher than acceleration for responsive stopping.
+- `max_speed`: The sustain velocity cap.
+- `friction` (alternative to deceleration): Multiply velocity by `(1 - friction) ^ delta` each tick for an exponential decay curve instead of linear.
+
+**Implementation approaches:**
+
+*Linear (constant acceleration):*
+```
+velocity += input_dir * acceleration * delta
+velocity = clamp(velocity, -max_speed, max_speed)
+if no input: velocity = move_toward(velocity, 0, deceleration * delta)
+```
+Simple and predictable. Attack and Release are straight lines.
+
+*Exponential (friction-based):*
+```
+velocity += input_dir * acceleration * delta
+velocity *= pow(1 - friction, delta)   # or lerp(velocity, target, t)
+```
+Produces a smooth asymptotic curve — fast initial response, soft landing at max speed and at stop. Feels more organic; common in top-down and vehicle controllers.
+
+*Curve asset (designer-controlled):*
+- Store an AnimationCurve / Bezier that maps `time_held` → `speed_multiplier`.
+- Sample the curve each tick to get the current speed factor.
+- Allows arbitrary shapes (e.g. a dip after a dash, a ramp-up for heavy characters) without code changes.
+
+> The Release curve (deceleration) is often more impactful on feel than the Attack curve. A fast stop feels responsive; a slow stop feels slippery. Tune them independently.
+
+**Vertical axis (jump arc):**
+
+The same curve concept applies to vertical velocity. Input (jump button) is the trigger; gravity values shape the arc:
+- `jump_gravity`: Applied while rising — controls how quickly the peak is reached.
+- `fall_gravity`: Applied while falling (typically 1.5–2× higher) — controls how fast the character drops. Higher = snappier, less floaty.
+- `max_fall_speed`: Clamps the Release phase of the vertical curve to prevent tunneling and give a terminal-velocity feel.
+- `jump_cut`: On button release during ascent, multiply upward velocity by a cut factor — shortens the Attack phase for variable arc height.
+
+**Air control:**
+
+Horizontal Moving Curve parameters are often reduced in the air to produce a "committed" feel:
+- `air_acceleration` < `ground_acceleration`: Character can still steer but with less authority.
+- `air_deceleration` ≈ 0 or very low: No friction in the air — horizontal momentum is mostly preserved (Mario-style).
+- Tuning the ratio `air_acceleration / ground_acceleration` is the main dial between "floaty drift" and "full air control".
+
 ### Jumping & Falling
 
 **Jump initiation:**
