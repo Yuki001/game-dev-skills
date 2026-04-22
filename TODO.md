@@ -12,6 +12,6 @@
     - hot update & patch
     - remote assets via cdn download
     - installer & launcher
-- system-pcg.md : Focus on program generated contents in game (dungeons, levels, roguelike maps, etc).
+- [x] system-pcg.md : Focus on program generated contents in game (dungeons, levels, roguelike maps, etc).
 - Add more details to basic documents.
 - Add game type specific documents (action, platformer, rpg, fps, slg, etc.).
