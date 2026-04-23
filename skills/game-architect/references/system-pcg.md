@@ -71,12 +71,12 @@ Navigate a space of possibilities via fitness evaluation (soft constraints) or s
 
 ### Technique Selection
 
-| Technique | Constraints | Guarantees | Applicability |
-|:---|:---|:---|:---|
-| **Evolutionary / Genetic Algorithms** | Soft (fitness function) | None — best found so far | Maps, rules, weapons, tracks |
-| **Genetic Programming** | Soft (fitness function) | None — best found so far | Terrain functions, expression trees |
-| **Answer Set Programming (ASP)** | Hard (Boolean/SAT) | Globally valid or no solution | Playable dungeons, puzzle levels |
-| **Wave Function Collapse (WFC) / CSP** | Local adjacency (hard) | Local consistency; may deadlock | Tile-based levels, textures, maps |
+| Technique | Constraints | Guarantees | Applicability | Key Concepts |
+|:---|:---|:---|:---|:---|
+| **Evolutionary / Genetic Algorithms** | Soft (fitness function) | None — best found so far | Maps, rules, weapons, tracks | Genome = parameter vector or structure; Selection → Crossover → Mutation → Evaluate |
+| **Genetic Programming** | Soft (fitness function) | None — best found so far | Terrain functions, expression trees | Genome = executable expression tree; subtree crossover and node mutation |
+| **Answer Set Programming (ASP)** | Hard (Boolean/SAT) | Globally valid or no solution | Playable dungeons, puzzle levels | Rules as logical predicates; DPLL+CDCL solver; UNSAT if no solution exists |
+| **Wave Function Collapse (WFC) / CSP** | Local adjacency (hard) | Local consistency; may deadlock | Tile-based levels, textures, maps | Collapse minimum-entropy cell; propagate arc consistency; backtrack on contradiction |
 
 ### Implementation Notes
 
@@ -174,9 +174,8 @@ Procedurally generating the rules and mechanics of games themselves, rather than
 
 | Technique | Applicability | Key Concepts |
 |:---|:---|:---|
-| **Rule Encoding + Search** | Board games, card games | Encode rules as genome; evolve toward balance/fun fitness |
+| **Rule Encoding + Evolutionary Search** | Board games, card games, novel mechanics | Encode rules as genome; evolve toward balance/fun fitness via mutation/crossover; simulation-based fitness measures win-rate parity, game length, decision complexity |
 | **Rule DSL** | Game rule prototyping & generation | Declarative language describing game objects, rules, interactions; supports automated variant generation |
-| **Evolutionary Game Design** | Discovering novel mechanics | Mutation/crossover on rule sets; simulation-based fitness |
 
 ### Implementation Notes
 
@@ -194,13 +193,13 @@ Extract patterns from examples rather than writing explicit rules.
 
 | Technique | Applicability | Key Concepts |
 |:---|:---|:---|
-| **PCGML (CNN / Sliding Window)** | Tile-based level generation | Train on existing levels; predict local tile probabilities |
+| **CNN / Sliding Window** | Tile-based level generation | Train on existing levels; predict local tile probabilities |
 | **Neuroevolution (CPPN / NEAT)** | Abstract shapes, weapon stats | Evolve neural network topology and weights; CPPN encodes spatial patterns |
 | **N-gram Models** | Text, names, simple sequences | Lightweight; fast training on small corpora |
 
 ### Implementation Notes
 
-- **PCGML**: Extract sliding-window patches from training levels; train CNN/MLP to predict center tile given neighborhood. Can train on a single example level. Output is probabilistic — combine with post-processing validation for playability guarantees.
+- **CNN / Sliding Window**: Extract sliding-window patches from training levels; train CNN/MLP to predict center tile given neighborhood. Can train on a single example level. Output is probabilistic — combine with post-processing validation for playability guarantees.
 - **CPPN**: Neural network mapping `(x, y, distance, angle) → output value`; encodes spatial symmetry. **NEAT** evolves both weights and topology via speciation and complexification.
 - **Generating Level Generators**: Instead of generating levels directly, evolve/learn the *parameters and rules of a generator*. Fitness evaluates the distribution of outputs (expressivity, average quality, failure rate) over N runs.
 
@@ -216,7 +215,7 @@ Integrate human feedback — from players or designers — into the generation l
 |:---|:---|:---|
 | **Experience-Driven PCG** | Adaptive difficulty, personalized levels | Model player skill/emotion; generate content targeting desired experience |
 | **AI Director** | Pacing, dynamic event spawning | Real-time stress/intensity monitoring; spawn enemies/loot to maintain target curve |
-| **Mixed-Initiative (CAD/HDA)** | Designer-assisted generation | Human sketches intent; algorithm fills detail |
+| **Mixed-Initiative** | Designer-assisted generation | Human sketches intent; algorithm fills detail (sketch-based, suggestion-based, or constraint-based) |
 | **Implicit UGC / Action-Driven** | Player footprint → world alteration | Translate gameplay actions into persistent world changes |
 
 ### Implementation Notes
