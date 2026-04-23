@@ -71,7 +71,7 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | Narrative System (Dialogue, Cutscenes, Story Flow) | `references/system-narrative.md` |
 | Game AI System (Movement, Pathfinding, Decision Making, Tactical) | `references/system-game-ai.md` |
 | Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
-| Procedural Content Generation (PCG) (Dungeon, Level, Terrain, Roguelike, WFC, Noise, Grammar, Simulation) | `references/system-pcg.md` |
+| Procedural Content Generation (PCG) (World/Level Generation, Roguelike, Noise, Simulation) | `references/system-pcg.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
 
 ### Multiplayer References
