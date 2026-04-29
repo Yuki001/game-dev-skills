@@ -91,7 +91,8 @@ SteamSDK, GooglePlaySDK, HuaweiSDK  →  implement IChannelSDK
 **Version-based**
 - A global version number for the whole game, e.g., 1.0.0, 1.0.1, 1.0.2, etc.
 - Maintain an accumulating list of patch packs per version increment.
-- Extends: Each bundle/pack can carry its own version independently.
+- Compare versions to get the diff list (patch files).
+- Extension: Each bundle/pack can carry its own version independently.
 
 **File list + hash (MD5 / SHA-1)**
 - List of `{path, hash, size}` entries.
@@ -117,8 +118,10 @@ Choose one of the following strategies:
 - Benefit: no server dependency for diff logic; fast calculation.
 
 **Server-side calculation**
-- Client sends its local metadata to a service; service returns a file list that contains pre-packed diff archives.
-- Service caches diff packs by unique filename on CDN — subsequent clients with the same base version reuse the cached pack without re-packing.
+- Client sends its local metadata to a service; service compares it with the latest metadata and computes the diff list.
+- Service packs the diff list into one or more archives with unique filename — identical diff lists are packed only once and reused.
+- Service returns the archive file list; client downloads and unpacks them.
+- Archives are cached by unique filename on CDN — subsequent clients with the same base version reuse the cached pack without re-packing.
 - Benefit: faster download for common version gaps (one compressed pack vs. many small files).
 
 ### Applying the Diff
