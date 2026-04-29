@@ -116,6 +116,7 @@ Choose one of the following strategies:
 - Client downloads remote metadata, computes diff list locally, downloads each changed file.
 - Use CDN cache-busting URLs (see §4) to ensure fresh files.
 - Benefit: no server dependency for diff logic; fast calculation.
+- Extension: to avoid performance issues from many small files, pre-pack assets into static bundles and compare at bundle granularity instead of individual files.
 
 **Server-side calculation**
 - Client sends its local metadata to a service; service compares it with the latest metadata and computes the diff list.
