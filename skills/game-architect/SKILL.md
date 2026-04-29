@@ -56,6 +56,7 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | Project structure & file organization | `references/project-structure.md` |
 | Data formats, processing, custom formats, bundles, metadata | `references/data-files.md` |
 | Asset conventions & pipeline | `references/asset-conventions.md` |
+| Distribution, packaging, hot update, CDN, deployment | `references/distribution.md` |
 
 ### System-Specific References
 
