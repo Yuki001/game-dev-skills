@@ -13,9 +13,9 @@
 
 ## Systems Enumeration
 
-| Order | System | Category | Priority | Layer | Depends On | Status | GDD | Art Doc |
-|-------|--------|----------|----------|-------|------------|--------|-----|---------|
-| 1 | movement | Core | MVP | Foundation | none | Planned | design/gdd/movement.md | design/art/movement-art.md |
+| Order | System | Category | Priority | Layer | Depends On | Status | GDD | Art Doc | Content Data |
+|-------|--------|----------|----------|-------|------------|--------|-----|---------|--------------|
+| 1 | movement | Core | MVP | Foundation | none | Planned | design/gdd/movement.md | design/art/movement-art.md | — |
 
 ## Category Guide
 
@@ -77,6 +77,7 @@
 | MVP systems | [N] |
 | System GDDs written | [N] |
 | System art docs written | [N] |
+| Content data docs written | [N] |
 
 ## Open Questions
 

@@ -4,7 +4,7 @@ This repository defines a minimal Claude Code workflow for game development.
 
 ## Team
 
-- `designer` owns `design/gdd/game.md`, `design/gdd/systems-index.md`, and system GDD files
+- `designer` owns `design/gdd/game.md`, `design/gdd/systems-index.md`, system GDD files, and `design/content/*-data.md` content documents
 - `planner` owns `production/milestone.md` and milestone production folders
 - `programmer` owns milestone `tech.md` files plus `src/` and `tests/`
 - `artist` owns `design/art/art-direction.md`, system art docs, and milestone `art-prompts.md` files
@@ -19,6 +19,7 @@ This repository defines a minimal Claude Code workflow for game development.
 - Prefer updating existing files over creating parallel variants
 - Keep the game overview separate from the per-system documents
 - Use `.claude/docs/templates/design/*` and `.claude/docs/templates/plan/*` as the canonical scaffolds
+- System GDDs define rules and data structures; `design/content/<system>-data.md` fills specific instances
 - Preserve template metadata and source-reference sections unless a section is truly not applicable
 - Track system order in `design/gdd/systems-index.md`
 - Plan milestones before creating milestone-level documents

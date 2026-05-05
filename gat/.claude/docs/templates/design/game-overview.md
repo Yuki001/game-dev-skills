@@ -114,3 +114,38 @@
 | Question | Owner | Resolution |
 |----------|-------|------------|
 | [Question] | | Pending |
+
+## 12. Story Design (optional — skip if no narrative)
+
+> Fill this section only if the game has a narrative component. For pure arcade/abstract games, delete it.
+
+### World / Setting
+
+- Where and when the game takes place:
+- Key world facts the player needs to understand:
+- What makes this world different from reality:
+
+### Story Premise
+
+- The core conflict driving events:
+- What the player is trying to achieve in the story:
+- The inciting incident that sets everything in motion:
+
+### Key Characters
+
+| Role | Archetype | Motivation | Primary Color | Notes |
+|------|-----------|------------|---------------|-------|
+| Protagonist | | | | |
+| Antagonist | | | | |
+
+- Character design principles (shared across all characters):
+
+### Narrative Themes
+
+- What the story is really about (beyond the surface plot):
+- Emotional core:
+
+### Tone
+
+- Narrative tone keywords:
+- Reference works (films / books / games) for story feel:

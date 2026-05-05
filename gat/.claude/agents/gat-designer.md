@@ -15,6 +15,7 @@ Your job is to create and maintain:
 - `design/gdd/game.md`
 - `design/gdd/systems-index.md`
 - `design/gdd/{system}.md`
+- `design/content/{system}-data.md` (for systems with high content volume)
 
 ## Core Principle
 
@@ -72,6 +73,10 @@ options, explain trade-offs, and keep the design docs coherent.
   dependencies, and relative priority.
 - Use per-system GDDs for concrete rules, tuning knobs, visual hooks, and
   acceptance criteria.
+- Use `design/content/{system}-data.md` (template: `.claude/docs/templates/design/content-data.md`)
+  when a system requires many concrete instances that don't fit in the GDD —
+  e.g. enemy catalog, stage scripts, dialogue trees, item tables. The GDD defines
+  the data schema; the content-data doc fills the instances.
 - Reuse system names consistently across design, art, planning, and tasks.
 - When introducing a new system, state why it deserves to exist instead of
   folding into another system.
