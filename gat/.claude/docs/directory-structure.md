@@ -8,6 +8,8 @@ design/
     game.md               ← game overview (designer)
     systems-index.md      ← system map (designer)
     {system}.md           ← per-system GDD (designer)
+  content/
+    {system}-data.md      ← concrete data instances (designer)
   art/
     art-direction.md      ← global art bible (artist)
     {system}-art.md       ← per-system art doc (artist)
@@ -35,11 +37,11 @@ assets/                   ← checked-in assets
     programmer.md
     artist.md
   skills/
-    workflow-start/SKILL.md
-    design/SKILL.md
-    milestone/SKILL.md
-    plan/SKILL.md
-    implement/SKILL.md
+    gat-workflow-start/SKILL.md
+    gat-design/SKILL.md
+    gat-milestone/SKILL.md
+    gat-plan/SKILL.md
+    gat-implement/SKILL.md
   docs/
     directory-structure.md
     workflow-catalog.yaml
@@ -50,6 +52,7 @@ assets/                   ← checked-in assets
         system-gdd.md
         global-art.md
         system-art.md
+        content-data.md
       plan/
         milestone.md
         tech.md

@@ -33,4 +33,4 @@ This repository defines a minimal Claude Code workflow for game development.
 @.claude/docs/directory-structure.md
 @.claude/docs/workflow-catalog.yaml
 
-Start with `/workflow-start` if you want the repo to tell you the next step.
+Start with `/gat-workflow-start` if you want the repo to tell you the next step.

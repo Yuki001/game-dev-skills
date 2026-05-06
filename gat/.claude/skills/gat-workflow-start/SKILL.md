@@ -20,9 +20,8 @@ Check for these files:
 - `design/art/art-direction.md`
 - `design/art/*-art.md`
 - `production/milestone.md`
-- `production/milestone-*/plan.md`
-- `production/milestone-*/tech.md`
 - `production/milestone-*/tasks.md`
+- `production/milestone-*/tech.md`
 - `production/milestone-*/art-prompts.md`
 
 Also inspect whether any milestone `tasks.md` contains `Status: Ready`.
@@ -38,7 +37,7 @@ Report a short factual summary:
 - Number of system art docs
 - Milestone plan present or missing
 - Number of milestone directories
-- Whether a milestone `plan.md` exists
+- Whether a milestone `tasks.md` exists
 - Whether a milestone `tech.md` exists
 - Whether a ready task exists
 - Whether any milestone art prompt pack exists

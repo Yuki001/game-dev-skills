@@ -4,6 +4,7 @@ roles:
       - design/gdd/game.md
       - design/gdd/systems-index.md
       - design/gdd/*.md
+      - design/content/*-data.md
   artist:
     owns:
       - design/art/art-direction.md
@@ -27,6 +28,7 @@ workflows:
         - design/gdd/game.md
         - design/gdd/systems-index.md
         - design/gdd/<system>.md
+        - design/content/<system>-data.md
         - design/art/art-direction.md
         - design/art/<system>-art.md
     - skill: /gat-milestone

@@ -45,6 +45,7 @@ design/
   gdd/game.md
   gdd/systems-index.md
   gdd/{system}.md
+  content/{system}-data.md
   art/art-direction.md
   art/{system}-art.md
 production/

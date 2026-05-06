@@ -8,7 +8,7 @@
 - Milestone Name:
 - Milestone Directory:
 - Source Milestone Roadmap: `production/milestone.md`
-- Source Milestone Plan: `production/milestone-xx-name/plan.md`
+- Source Milestone Tasks: `production/milestone-xx-name/tasks.md`
 
 ## 1. Technical Overview
 
