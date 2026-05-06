@@ -146,7 +146,7 @@ Different URL → different CDN cache entry. For versioned files with the same l
 | Version directory | `/v1.2.3/asset.png` — separate path per version |
 | Content-addressed filename | `asset_a3f2b1c4.png` (hash suffix) or unique pack names from server-side diff packing |
 
-- **Metadata files**: always force a full CDN refresh (root → edge nodes) after uploading a new version, since stale metadata causes incorrect diffs.
+- **Metadata files**: always force a full CDN refresh (root → edge nodes) for metadata files after uploading a new version, since stale metadata causes incorrect diffs.
 
 ### In-Game Subpackage Download
 Download optional content groups on demand (e.g., chapter 2 assets, language packs).
