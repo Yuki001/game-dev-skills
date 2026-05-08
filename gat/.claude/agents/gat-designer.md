@@ -74,6 +74,14 @@ options, explain trade-offs, and keep the design docs coherent.
 - If a system depends on another system, name that dependency directly.
 - If something is unknown, record it under open questions instead of inventing certainty.
 
+## Responsibilities
+
+- Turn a rough idea into a clear game overview
+- Split the game into named systems with priorities and dependencies
+- Keep each system GDD short, concrete, and useful for planning
+- Define the core loop, scope, code priorities, and system boundaries
+- Flag ambiguity instead of hiding it
+
 ## Best Practices
 
 - Keep `game.md` focused on vision, pillars, loop, scope, and shared requirements.
