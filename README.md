@@ -9,6 +9,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [animation-shader](./skills/animation-shader/SKILL.md) | Used for creating anime-style shaders. |
 | [game-architect](./skills/game-architect/SKILL.md) | Comprehensive guide for game project architecture, requirement analysis, and logic design. |
 | [game-agent-team](./gat/README.md) | Simplified Game Agent Team — a minimal document-driven workflow (design → milestone → plan → implement) using four roles and five skills. |
+| [gpt-image](./skills/gpt-image/skill.md) | Simplified image generation skill for drawing, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
 
 ---
 
@@ -21,3 +22,4 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [animation-shader](./skills/animation-shader/SKILL.md) | 用于二次元 shader 创建。 |
 | [game-architect](./skills/game-architect/SKILL.md) | 全面的游戏项目架构指南，涵盖需求分析与逻辑设计。 |
 | [game-agent-team](./gat/README.md) | 简化版游戏 Agent 团队——以文档驱动的极简工作流（设计→里程碑→计划→实现），包含四个角色和五个技能。 |
+| [gpt-image](./skills/gpt-image/skill.md) | 简化后的画图用 skill，改编自 [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill)。 |
