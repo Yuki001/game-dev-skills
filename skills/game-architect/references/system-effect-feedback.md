@@ -35,21 +35,33 @@ For prototypes or very small scopes, direct inline feedback calls are acceptable
 
 ## 2. Core Structure
 
-### Event-to-Feedback Mapping
+### Architecture Overview
 
-Gameplay events map to one or more feedback instances. Three mapping approaches, in order of sophistication:
+The feedback layer flows through three concepts:
 
-| Approach | Mechanism | When to Use |
+```
+Gameplay Event ──→ Feedback Routine ──→ Feedback Instances
+      │                                    │
+      └──── Feedback Context ──────────────┘
+           (position, intensity, actors...)
+```
+
+- **Gameplay Event**: a semantic signal from gameplay code — `"HitReceived"`, `"Landing"`, `"Death"`. The sender knows *what happened*; it does not know what feedbacks will play.
+- **Feedback Routine**: the pre-configured mapping from an event to a set of feedback entries. Defines *what to play* and with what parameters. Can be implemented as hardcoded code, a data table, or a script.
+- **Feedback Context**: the runtime data payload carried from gameplay event to routine — position, direction, intensity (0–1), source/target actor references. The routine uses these as input parameters for its entries.
+- **Feedback Instance**: a single running feedback (one ScreenShake, one SFX, one FloatingText). Created from a routine entry, drawn from an object pool, played, then recycled. Each instance has its own independent lifecycle.
+
+### Routine Forms
+
+A routine can be defined in three ways:
+
+| Form | Where the Routine Lives | When to Use |
 |:---|:---|:---|
-| **Code Registration** | Direct calls: `Feedback.Play("HitReceived", context)` | Prototypes, simple games, high-frequency paths |
-| **Data Table** | Designer-authored mapping table (Event → Feedback List + Parameters) | Content-heavy games, designer ownership of feedback |
-| **Script-Driven** | External scripts or node graphs wire events to feedback bundles | Complex visual scripting pipelines |
+| **Hardcoded** | Source code | Prototypes, simple feedback sets, high-frequency combat paths |
+| **Data Table** | Config (JSON, Excel, CSV) — designer-authored | Content-heavy games, iteration without code changes |
+| **Script-Driven** | External script (Lua, DSL) or node graph — hot-reloadable | Visual scripting, rapid tuning without recompilation |
 
-High-frequency feedback (combat hit reactions) benefits from direct code paths to avoid event bus overhead. Low-frequency feedback (UI interactions, menu transitions) can use event-based indirection.
-
-### Feedback Handler Routine
-
-**How the mapping resolves at runtime**: the event name (`"HitReceived"`) is resolved to concrete feedback types by a separately configured **feedback routine** — the caller says *what happened*, the routine defines *what to play*. `FeedbackContext` carries runtime gameplay data; the routine uses it as input parameters. Example routine (data-driven style):
+Example of a DSL routine:
 
 ```
 Routine "HitReceived" {
@@ -62,11 +74,7 @@ Routine "HitReceived" {
 
 ### Routine Composition
 
-A routine is a **container** of one or more feedback entries. Each entry specifies a feedback type and its parameters. When a routine is triggered:
-
-1. The routine's entries are resolved into individual **feedback instances**.
-2. Instances from the same routine may run in parallel (the default) or in a configured sequence (see §9.1).
-3. Each instance has its own independent lifecycle, managed by the feedback layer.
+A routine is a **container** of one or more feedback entries. When triggered, each entry resolves into an individual **feedback instance**.
 
 ```
 Routine "HitReceived"          ← one routine (container)
@@ -75,6 +83,8 @@ Routine "HitReceived"          ← one routine (container)
     ├── SFX         (entry)    → creates an SFX instance
     └── FloatingText(entry)    → creates a FloatingText instance
 ```
+
+Instances from the same routine run in parallel by default, or in a configured sequence (see §9.1). Each instance has its own independent lifecycle, managed by the feedback layer.
 
 ### Feedback Instance Lifecycle
 
@@ -115,9 +125,9 @@ This is particularly critical on mobile and during combat-heavy moments (many on
 
 ### How Gameplay Systems Trigger Feedback
 
-Two patterns:
+Three patterns:
 
-**Direct invocation** (high-frequency, combat paths):
+**Hardcoded** (high-frequency, combat paths):
 ```
 feedbackLayer.Play("HitReceived", new FeedbackContext {
     position = hitPoint,
@@ -137,7 +147,14 @@ EventBus.Emit(new HitReceivedEvent(...));
 feedbackLayer.Subscribe<HitReceivedEvent>(OnHitReceived);
 ```
 
-Prefer direct invocation for combat and skill hot paths; prefer events for UI, quest, and narrative feedback.
+**Table-driven** (routine name resolved via config lookup):
+```
+routineName = EnemyConfig.GetRoutine(damageType)   // e.g. "fire" → "FireHitFeedback"
+context.intensity = EnemyConfig.GetHitIntensity(damageType)
+feedbackLayer.Play(routineName, context)
+```
+
+Prefer hardcoded for combat and skill hot paths; event-driven for UI, quest, and narrative; table-driven for data-heavy configurations such as combat entities (enemies, bosses, etc.).
 
 ### FeedbackContext
 
