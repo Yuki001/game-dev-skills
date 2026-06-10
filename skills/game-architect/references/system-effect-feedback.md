@@ -60,13 +60,31 @@ Routine "HitReceived" {
 }
 ```
 
+### Routine Composition
+
+A routine is a **container** of one or more feedback entries. Each entry specifies a feedback type and its parameters. When a routine is triggered:
+
+1. The routine's entries are resolved into individual **feedback instances**.
+2. Instances from the same routine may run in parallel (the default) or in a configured sequence (see §9.1).
+3. Each instance has its own independent lifecycle, managed by the feedback layer.
+
+```
+Routine "HitReceived"          ← one routine (container)
+    ├── ScreenShake (entry)    → creates a ScreenShake instance
+    ├── HitFlash    (entry)    → creates a HitFlash instance
+    ├── SFX         (entry)    → creates an SFX instance
+    └── FloatingText(entry)    → creates a FloatingText instance
+```
+
 ### Feedback Instance Lifecycle
+
+Each concrete feedback type follows the same lifecycle:
 
 ```
 Create → Play → [Stop/Interrupt] → Recycle
 ```
 
-- **Create**: Initialize from `FeedbackContext` (position, direction, intensity, actor references). Pooled instances are reused; new instances are allocated only when the pool is exhausted.
+- **Create**: Initialize from the routine entry's parameters combined with `FeedbackContext` (position, direction, intensity, actor references). Pooled instances are reused; new instances are allocated only when the pool is exhausted.
 - **Play**: Start playback. Can be synchronous (one-shot) or asynchronous (duration-based).
 - **Stop/Interrupt**: Prematurely terminate by higher-priority feedback or actor destruction.
 - **Recycle**: Return to pool, reset all mutable state.
