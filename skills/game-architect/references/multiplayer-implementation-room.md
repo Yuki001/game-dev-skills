@@ -1,259 +1,138 @@
-# Room-Based Multiplayer Server Template
+# Room Runtime Implementation Playbook
 
-Template for small to medium realtime multiplayer games where one room or match is the authoritative runtime owner.
+Runtime-specific playbook for small to medium realtime games where one room or match is the authoritative live-state owner.
 
-Use this for lobby games, party games, room card games, small action matches, and instanced co-op or PvP. Use `multiplayer-server-architecture.md` for topology tradeoffs and `multiplayer-protocol.md` for protocol rules.
+Use `multiplayer-server-architecture.md` for architecture decisions, `multiplayer-implementation-common.md` for shared infrastructure, and `multiplayer-protocol.md` for message and reconnect protocol rules.
 
 ---
 
-## 1. Fit
+## 1. Purpose And Fit
+
+Use this playbook for lobby games, party games, room card games, small action matches, and instanced co-op or PvP where temporary match state is owned by a room runtime.
 
 Default shape:
 
 - Runtime model: **room-based realtime**
-- Ownership unit: **room**
-- Live state writer: **room service**
-- Durable state writer: **player service**
-- Scaling rule: **one room pinned to one process**
+- Ownership unit: **room or match**
+- Live state writer: **room runtime**
+- Durable state writer: **player/meta service**
+- Scaling rule: **one active room owner at a time**
 
-Use this template when:
-
-- 2-50 players share one temporary match state
-- match state can stay in memory during play
-- fairness matters more than client freedom
-- scaling is done by adding room hosts, not splitting one match
-
-Do not use this as the primary template for:
-
-- world-scale AOI or cross-room simulation
-- actor migration between room hosts
-- mid-match host transfer as a first-class feature
-- distributed writes across room runtime and durable player state
+Do not use this as the primary template for world-scale AOI, region handoff, actor migration, or long-lived spatial simulation.
 
 ---
 
-## 2. Core Topology
+## 2. Key Objects
 
-Recommended nodes:
-
-- **Gateway**: connection, auth validation, session binding, routing, heartbeat
-- **Matchmaker**: queue, seat reservation, room assignment
-- **Room Service**: authoritative room state, simulation, broadcast
-- **Player Service**: durable player state, rewards, rank, progression
-- **DB/Cache**: persistent player/meta storage and optional reservation cache
-
-Default deployment:
-
-- small project: gateway + matchmaker + room in one process, player service separate
-- medium project: gateway/matchmaker separate from room hosts, player service separate
-
-Hard boundary:
-
-- gateway routes gameplay but does not own gameplay state
+| Object | Owns | Talks To | Must Not Do |
+|:---|:---|:---|:---|
+| `RoomHostService` | create, locate, retire, and dispose room runtimes | matchmaker, gateway, room directory | own durable player/meta state |
+| `RoomRuntime` | authoritative match state and lifecycle | command handler, simulation, reconnect, settlement | write inventory, currency, rank, or account state directly |
+| `PlayerSlot` | room-local player state, seat, readiness, connection binding | room runtime, reconnect service | become durable player profile |
+| `RoomCommandHandler` | transport-facing room command entry | gateway, room runtime, simulation engine | mutate state before validation |
+| `SimulationEngine` | authoritative rule execution | room runtime, command handler | trust client result state |
+| `BroadcastBuilder` | response, notify, delta, and filtered fan-out payloads | room runtime, gateway | reveal private state or send before mutation is complete |
+| `ReconnectService` | resume token, slot rebinding, snapshot rebuild | gateway, room runtime, session manager | recreate room authority from client memory |
+| `SettlementCoordinator` | terminal result commit request | room runtime, player service | write durable rewards directly or commit twice |
+| `RoomReservationService` | reservation ID, capacity hold, join expiry | matchmaker, room runtime | create player-side effects |
 
 ---
 
-## 3. Reference Runtime Structure
+## 3. Core Flows
 
-Use a runtime split like this as the default reference:
+### Join
 
-```text
-gateway/
-  GatewaySessionHandler
-  RoomRouteDispatcher
-matchmaker/
-  MatchmakingService
-  RoomReservationService
-room/
-  RoomDirectory
-  RoomHostService
-  RoomRuntime
-  PlayerSlot
-  RoomCommandHandler
-  SimulationEngine
-  BroadcastBuilder
-  ReconnectService
-  SettlementCoordinator
-player/
-  PlayerServiceClient
-```
-
-Key responsibilities:
-
-- `RoomHostService`: create, locate, dispose `RoomRuntime`
-- `RoomRuntime`: authoritative room aggregate root
-- `PlayerSlot`: one player's room-local runtime state
-- `RoomCommandHandler`: transport-facing command entry
-- `SimulationEngine`: rule execution on authoritative state
-- `BroadcastBuilder`: convert state changes into `Resp`, `Notify`, or deltas
-- `ReconnectService`: resume binding and rebuild client view
-- `SettlementCoordinator`: commit match result to durable systems
-
-Dependency direction:
-
-- gateway -> room routing
-- room handler -> room runtime + simulation + broadcast
-- settlement -> player service client
-- player service never depends on room runtime internals
-
----
-
-## 4. Ownership And State Rules
-
-Hard rules:
-
-- `RoomService` is the only writer of live match state
-- `PlayerService` is the only writer of durable player state
-- `Matchmaker` may reserve seats but does not create player-side effects
-- room logic may read player snapshot data at join time but does not write inventory, currency, ranking, or progression directly
-- room end settlement is a request to `PlayerService`, not a direct DB write from room code
-
-Recommended keys:
-
-- `roomId`
-- `playerId`
-- `sessionId`
-- `reservationId`
-- `actionId`
-- `matchId`
-
-Keep these states separate:
-
-- **room in-memory state**: position, turn state, buffs, timers, seats
-- **player durable state**: inventory, rank, quests, progression, currency
-- **optional recovery state**: reservation, reconnect token, checkpoint, settlement audit
-
----
-
-## 5. Standard Flows
-
-### Matchmaking And Join
-
-Default safe flow:
-
-1. client requests matchmaking
+1. client requests matchmaking or direct room entry
 2. matchmaker chooses or creates `roomId`
 3. reservation service returns `reservationId + expireAt`
-4. gateway routes join request to the target room host
+4. gateway routes join to the current room owner
 5. room validates reservation, membership, duplicate join, and version
-6. room creates `PlayerSlot`
+6. room creates or rebinds `PlayerSlot`
 7. room sends initial snapshot and optional join notify
 
-Use reservation-based two-phase join by default. It prevents last-slot races and simplifies reconnect.
+Use reservation-based join by default when capacity, seats, or last-slot races matter.
 
 ### Gameplay Action
 
-Default action path:
-
-1. client sends command such as `Move_Req` or `Battle_SubmitAction_Req`
-2. gateway validates session and routes to bound room
-3. room validates player, phase, legality, cooldown, and `actionId`
+1. client sends command with `roomId`, `playerId`, and `actionId` where needed
+2. gateway validates session and routes to the room owner
+3. room validates player, phase, legality, cooldown, and duplicate action
 4. simulation mutates authoritative room state
-5. broadcast layer produces response, notify, or delta
-6. gateway sends authoritative result to affected players
+5. broadcast builder creates response, notify, or delta for affected targets
+6. gateway sends authoritative result
 
-Rule:
-
-- complete authoritative mutation before emitting broadcast
-
-### Settlement
-
-Default settlement path:
-
-1. room reaches terminal state
-2. room computes result and reward intent
-3. settlement coordinator sends one request to `PlayerService`
-4. `PlayerService` applies idempotent write keyed by `matchId` or settlement ID
-5. room sends final settlement response to clients
-6. room disposes after ack or timeout
-
-Rule:
-
-- room never writes durable reward or ranking data directly
+Complete authoritative mutation before emitting broadcast.
 
 ### Reconnect
 
-Default reconnect path:
-
 1. client reconnects with resume token
-2. gateway validates reconnect window and room binding
-3. room rebinds session to existing `PlayerSlot`
+2. gateway validates session and reconnect window
+3. room rebinds new connection to existing `PlayerSlot`
 4. room sends full snapshot or catch-up delta
 5. old connection is invalidated
 
-Recommended default:
+Prefer a full room snapshot on resume unless replay is a product requirement.
 
-- preserve slot for a short reconnect window
-- prefer full room snapshot on resume unless replay is a product requirement
+### Settlement
+
+1. room reaches terminal state
+2. room computes result and reward intent
+3. settlement coordinator sends one idempotent request to player/meta service
+4. player/meta service writes durable result by `matchId` or settlement ID
+5. room sends final result and disposes after ack or timeout policy
+
+Room runtime never writes durable reward, rank, or inventory state directly.
 
 ---
 
-## 6. Failure And Recovery
+## 4. Failure Rules
 
 Write these rules explicitly before implementation:
 
 - gateway disconnect does not end the match immediately
-- room host crash loses in-memory room unless checkpointing exists
-- duplicate action requests are handled by `actionId`
+- room host crash loses in-memory room state unless checkpointing exists
+- duplicate action requests are handled by `actionId` when actions are retryable
 - settlement is idempotent by `matchId` or settlement ID
-- if `PlayerService` is unavailable, room moves to `settlement_pending` instead of granting rewards twice
-- abandoned rooms must time out and dispose
+- if player/meta service is unavailable, room moves to `settlement_pending` or declared failure state
+- abandoned rooms time out and dispose
+- private state is filtered before send, not hidden only by client UI
 
 Good first-production defaults:
 
 - no mid-match checkpoint
 - no host-crash recovery
 - no replay-based reconnect
-- compensate only if the product stakes require it
-
-Add explicit persistence only when justified:
-
-- round-end checkpoint
-- turn-end checkpoint
-- authoritative input log
+- compensate only if product stakes require it
 
 ---
 
-## 7. Minimal Build Order
+## 5. Minimal Build Order
 
-Recommended implementation order:
+Recommended order:
 
-1. session bind and auth rejection
-2. matchmaking reservation and room join
-3. in-memory room lifecycle: create, join, leave, dispose
+1. session bind and auth rejection through common gateway infrastructure
+2. in-memory room lifecycle: create, join, leave, dispose
+3. reservation-based join when seats or capacity matter
 4. one minimal gameplay action loop
-5. room broadcast or state sync
+5. response/notify or state-delta broadcast
 6. reconnect in a short timeout window
-7. settlement to player service
-8. metrics, logging, and admin tools
-9. optional checkpoint or recovery
+7. settlement to player/meta service
+8. logs, metrics, room inspection, and forced close
+9. optional checkpoint or recovery only when justified
 
-Do not build replay, observers, bots, rating variants, or tournament support before one room can run end to end.
-
----
-
-## 8. Framework Fit
-
-This template fits best with:
-
-- **room-based realtime framework** when room lifecycle is the core runtime problem
-- **backend platform with authoritative match support** when backend services are equally important
-- **typed realtime communication framework** only if ownership, settlement, and persistence are designed elsewhere
-
-Rule of thumb:
-
-- if the framework solves transport only, you still need this room ownership template
+Do not build replay, observers, bots, rating variants, tournament support, or dynamic room migration before one room can run end to end.
 
 ---
 
-## 9. Review Checklist
+## 6. Review Checklist
 
-Before calling the design ready, verify:
+Before calling a room design ready, verify:
 
-- one room has one authoritative writer
+- one room has one active authoritative writer
 - durable player writes never happen inside room runtime code
-- join flow uses reservation, not blind direct join
+- join flow uses reservation when capacity races matter
 - reconnect policy is explicit
-- settlement is idempotent
+- settlement is idempotent and single-path
 - crash behavior is declared, not implied
-- build order can produce a runnable vertical slice early
+- private state is filtered before send
+- build order produces a runnable vertical slice early
