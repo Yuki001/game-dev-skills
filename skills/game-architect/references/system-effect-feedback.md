@@ -17,7 +17,7 @@ The feedback layer sits between gameplay systems (combat, skill, 3C, narrative, 
 ### Core Principles
 
 - **Decoupling**: Gameplay systems emit semantic events without knowing how they are rendered. The feedback layer subscribes and translates. A `OnHeavyHit` event may trigger shake + flash + SFX + haptics — the combat system doesn't know or care.
-- **Degradable**: Feedback can be simplified or skipped under performance pressure without affecting gameplay correctness. A missed screen shake is better than a missed attack registration.
+- **Degradable**: Feedback can be simplified or skipped under performance pressure without affecting gameplay correctness. A missed screen shake is better than a missed attack registration. Not all feedback is equally optional; priority and fallback rules belong in throttling/degradation policy.
 - **Centralized Configuration**: Feedback parameters (duration, intensity, decay curves) live in the feedback layer, not scattered across gameplay code. Designers tune feedback without touching combat logic.
 - **Engine-Agnostic**: Interfaces and structure don't bind to a specific engine API. `SpawnVFX` not `PlayUnityParticleSystem`.
 
@@ -84,7 +84,7 @@ Routine "HitReceived"          ← one routine (container)
     └── FloatingText(entry)    → creates a FloatingText instance
 ```
 
-Instances from the same routine run in parallel by default, or in a configured sequence (see §9.1). Each instance has its own independent lifecycle, managed by the feedback layer.
+Instances from the same routine run in parallel by default, or in a configured sequence (see §9). Each instance has its own independent lifecycle, managed by the feedback layer.
 
 ### Feedback Instance Lifecycle
 
@@ -94,14 +94,14 @@ Each concrete feedback type follows the same lifecycle:
 Create → Play → [Stop/Interrupt] → Recycle
 ```
 
-- **Create**: Initialize from the routine entry's parameters combined with `FeedbackContext` (position, direction, intensity, actor references). Pooled instances are reused; new instances are allocated only when the pool is exhausted.
+- **Create**: Initialize from the routine entry's parameters combined with `FeedbackContext` (position, direction, intensity, actor references). Pooled instances are reused when available.
 - **Play**: Start playback. Can be synchronous (one-shot) or asynchronous (duration-based).
 - **Stop/Interrupt**: Prematurely terminate by higher-priority feedback or actor destruction.
-- **Recycle**: Return to pool, reset all mutable state.
+- **Recycle**: Return to pool and reset mutable state.
 
 ### Priority & Merge Strategy
 
-Each feedback type has a default priority. On conflict (same type triggered simultaneously on the same target), one of four strategies applies:
+Each feedback type has a default priority and conflict scope: global, per-camera, per-actor, per-renderer, per-audio-channel, or per-device. On conflict inside that scope, one of four strategies applies:
 
 | Strategy | Behavior | Example Use |
 |:---|:---|:---|
@@ -113,9 +113,10 @@ Each feedback type has a default priority. On conflict (same type triggered simu
 ### Global Throttling
 
 A global manager caps total concurrent feedback instances. When the cap is hit, culling follows this order:
-1. Distance: furthest from camera/player first
-2. Priority: lowest priority feedback first
-3. Age: oldest feedback first (fairness within same tier)
+1. Essential tier: preserve gameplay-readable cues before cosmetic feedback
+2. Priority: lowest priority feedback first within the same tier
+3. Distance: furthest from camera/player first within the same priority
+4. Age: oldest feedback first within the same tier
 
 This is particularly critical on mobile and during combat-heavy moments (many on-screen hits).
 
@@ -169,6 +170,10 @@ A common data structure passed from gameplay to feedback layer:
 | `TargetActor` | Actor ref (nullable) | Victim/receiver for attachment |
 | `SourceType` | enum | Damage type or interaction category — influences feedback selection (fire hits get different VFX than physical hits) |
 | `Tags` | string set | Arbitrary tags for filtering and routing |
+
+Delayed or pooled instances should snapshot needed values or keep weak/validated actor handles, not assume actor references stay valid.
+
+Use typed context extensions for domain-specific selection data such as attack form, surface type, material, force, hit stun, or knockback; do not overload string tags for every high-value parameter.
 
 ---
 
@@ -236,7 +241,7 @@ UI note: animate scale, color, opacity, or overlay transforms; avoid animating l
 
 | Feedback Type | Use When | Key Parameters | Lifecycle / Merge | Pitfalls / Must Decide |
 |:---|:---|:---|:---|:---|
-| **Hit-stop / freeze frame** | Short impact emphasis | duration 30-80ms, time scale, restore curve, minimum gap | Restart, ignore stronger/weaker, or never-extend policy | Exclude audio, UI, input polling, and network; avoid freeze-lock on rapid hits |
+| **Hit-stop / freeze frame** | Short impact emphasis | duration 30-80ms, time scale, restore curve, minimum gap | Restart with stronger, ignore weaker, or fixed-window no-extend policy | Exclude audio, UI, input polling, and network; avoid freeze-lock on rapid hits |
 | **Slow motion / time scale** | Sustained dramatic slowdown | target time scale, transition duration, sustain duration | Minimum-wins or last-wins stack policy | Overuse weakens feel; cooldown/DOT timers may need unscaled delta |
 
 ### Time Channel Isolation
@@ -250,6 +255,8 @@ UI note: animate scale, color, opacity, or overlay transforms; avoid animating l
 | Input polling | Do not freeze | Usually unscaled | Preserve input buffer feel |
 | Network processing | Do not freeze | Unscaled | Avoid sync delay |
 
+Networked or rollback games must decide whether time feedback is cosmetic-local or authoritative; do not let local hit-stop silently change simulation, prediction, cooldown, or replication timelines.
+
 ---
 
 ## 8. Audio & Haptic Feedback
@@ -262,7 +269,7 @@ UI note: animate scale, color, opacity, or overlay transforms; avoid animating l
 | **Haptics / vibration** | Hit, recoil, impact, confirmation, tension | amplitude, frequency, duration, modulation curve | Highest-amplitude wins or weighted blend | Provide disable toggle; cap continuous duration; test on real hardware |
 | **No-haptic platform** | Device lacks support | none | Graceful no-op | Never treat missing haptics as error |
 
-Sync note: for impact-heavy events, play SFX just before freeze or on the freeze frame while audio remains unscaled.
+Sync note: for impact-heavy events, play SFX just before freeze or on the freeze frame while audio remains unscaled. Also define mixer headroom, cooldowns, ducking, and platform haptic capability/user-setting checks for repeated high-priority feedback.
 
 ---
 
@@ -270,9 +277,11 @@ Sync note: for impact-heavy events, play SFX just before freeze or on the freeze
 
 | Composition Type | Use When | Key Parameters | Lifecycle / Merge | Pitfalls / Must Decide |
 |:---|:---|:---|:---|:---|
-| **Sequence** | Feedback must happen in ordered steps | entries, delay mode, delay value, interrupt behavior | Starts entries by offset; can cascade-stop or let current entries finish | Every entry needs timeout; validate actor before each entry |
-| **Parallel group** | Multiple channels should fire as one logical bundle | entries, group priority, degradation policy | Starts together; entries inherit or override group priority | Define essential vs optional entries under throttling |
-| **Global priority / throttling** | Feedback budget must survive combat spikes | per-type cap, global cap, priority, distance, age | Cull at spawn time by distance, priority, then age | Avoid per-frame global culling; use squared distance |
+| **Sequence** | Feedback must happen in ordered steps | entries, delay mode, delay value, interrupt behavior | Starts entries by offset; can cascade-stop or let current entries finish | Every entry needs timeout; validate actor before each entry; stop propagates to active children |
+| **Parallel group** | Multiple channels should fire as one logical bundle | entries, group priority, degradation policy | Starts together; entries inherit or override group priority | Define essential vs optional entries; log skipped/failed entries; clean up when owner is destroyed |
+| **Global priority / throttling** | Feedback budget must survive combat spikes | per-type cap, global cap, priority, distance, age | Cull by essential tier, priority, distance, then age at spawn time | Pool exhaustion follows budget policy: skip, reuse, degrade, or allocate only if tier allows; avoid per-frame global culling; use squared distance |
+
+Timing-dependent feedback, such as hit-stop before shake or delayed floating text, should be authored as a sequence instead of relying on parallel start. Stop or interrupt must propagate to child particles, audio, tweens, coroutines, material overrides, callbacks, and subscriptions before recycle.
 
 Example heavy-hit sequence:
 
