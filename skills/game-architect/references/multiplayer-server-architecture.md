@@ -31,7 +31,7 @@ Runtime Model
 
 ## 1. Runtime Model Decision
 
-Define runtime model terminology here only. Later sections should reference these names instead of re-explaining them.
+Define runtime model terminology here only. Later sections should reference these names instead of re-explaining them. Hybrid means ownership separation first; it does not require separate deployable services at the start.
 
 | Runtime Model | Best Fit | Core Ownership Unit | Typical Server Shape | Must Decide |
 |:---|:---|:---|:---|:---|
@@ -95,7 +95,7 @@ Start from the smallest profile that fits. Split processes only when one of thes
 
 ## 3. Process Topology
 
-Process topology is a first-class decision extracted from real server framework shapes. It decides how logical roles are hosted, routed, and scaled; it does not redefine runtime models.
+Process topology is a first-class decision extracted from real server framework shapes. It decides how logical roles are hosted, routed, and scaled; it does not redefine runtime models. Default to a single-process or modular monolith shape unless routing, migration, isolation, scale, or team-ownership pressure already exists.
 
 | Pattern | Structure | Best For | Tradeoff | Must Decide |
 |:---|:---|:---|:---|:---|
@@ -118,7 +118,7 @@ Process topology is a first-class decision extracted from real server framework 
 
 ## 4. Communication, Sync, And Recovery
 
-These tables capture communication decisions without repeating runtime model definitions.
+These tables capture communication decisions without repeating runtime model definitions. Also state the client trust boundary, server validation responsibility, and minimum observability signals such as logs, metrics, correlation IDs, and crash/replay evidence.
 
 ### Dispatch Patterns
 
@@ -139,7 +139,7 @@ These tables capture communication decisions without repeating runtime model def
 | **Turn/phase response sync** | Encounter services and turn workflows | Simple authoritative progression | Less suitable for high-frequency realtime state | Request idempotency, phase validation, response snapshot shape |
 | **Snapshot + AOI filtering** | Persistent worlds and ECS/entity sync | Strong world modeling | Higher complexity and bandwidth | AOI range, interest set, priority, ownership/property/role filters |
 | **Lockstep / deterministic input sync** | Fighting, RTS, deterministic subsystems | Low bandwidth, fairness | Determinism and recovery are hard | Deterministic RNG/math, input schedule, state hash, rollback/replay policy |
-| **Replicated Scene Object Properties** | Stable scene object state | Simple to use | Limited control | Use for stable properties; use event/RPC messages for one-shot actions |
+| **Property replication** | Stable object state | Simple to use | Limited control | Use for stable properties; use event/RPC messages for one-shot actions |
 
 ### Rate And Recovery Decisions
 
@@ -200,7 +200,7 @@ This is not a new decision step. Use it only after the workflow above has alread
 
 | Previous Decisions Point To | Framework Family To Evaluate | Verify Before Choosing |
 |:---|:---|:---|
-| Room runtime + room-pinned topology + class-extension lifecycle | **Room-based realtime framework** | Durable player/meta services, join reservation, reconnect, and disposal are covered or custom-built |
+| Room runtime + class-extension lifecycle | **Room-based realtime framework** | Durable player/meta services, join reservation, reconnect, and disposal are covered or custom-built |
 | Backend/platform runtime + homogeneous API topology + plugin hooks | **Backend platform / BaaS** | Authoritative realtime gameplay is unnecessary or handled elsewhere |
 | Encounter runtime + request/response dispatch + idempotent turn workflow | **Stateful workflow / encounter service stack** | Duplicate actions, checkpointing, and reward commits are explicit |
 | Scene/world runtime + actor/location topology + data-logic separation | **Actor/ECS runtime** | AOI, location registry, migration, persistence bridge, and reconnect are explicit |
