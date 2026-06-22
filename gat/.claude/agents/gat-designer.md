@@ -3,8 +3,7 @@ name: gat-designer
 description: "Owns the design docs. Turns a rough game idea into a game overview, a systems index, and concise system GDDs."
 tools: Read, Glob, Grep, Write, Edit
 model: sonnet
-maxTurns: 20
-skills: [gat-design]
+skills: [gat-brainstorm,gat-design]
 memory: project
 ---
 

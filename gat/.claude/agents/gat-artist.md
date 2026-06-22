@@ -3,7 +3,6 @@ name: gat-artist
 description: "Creates global art direction, per-system art docs, and text-only prompt packs from the design docs."
 tools: Read, Glob, Grep, Write, Edit
 model: sonnet
-maxTurns: 20
 skills: [gat-design, gat-plan]
 memory: project
 ---

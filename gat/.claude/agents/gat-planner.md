@@ -3,7 +3,6 @@ name: gat-planner
 description: "Plans milestones, then converts each milestone into a concise tasks.md execution document."
 tools: Read, Glob, Grep, Write, Edit
 model: sonnet
-maxTurns: 20
 skills: [gat-milestone, gat-plan]
 memory: project
 ---

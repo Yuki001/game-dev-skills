@@ -3,7 +3,6 @@ name: gat-programmer
 description: "Writes milestone tech docs and implements one task at a time from the plan. Writes code and tests, then updates task status."
 tools: Read, Glob, Grep, Write, Edit, Bash
 model: sonnet
-maxTurns: 20
 skills: [gat-plan, gat-implement]
 memory: project
 ---
