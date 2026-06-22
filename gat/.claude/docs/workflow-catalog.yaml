@@ -22,11 +22,14 @@ roles:
 
 workflows:
   steps:
-    - skill: /gat-design
-      args: "[hint] or [system-name]"
+    - skill: /gat-brainstorm
+      args: "[hint] or discuss"
       output:
         - design/gdd/game.md
         - design/gdd/systems-index.md
+    - skill: /gat-design
+      args: "[system-name]"
+      output:
         - design/gdd/<system>.md
         - design/content/<system>-data.md
         - design/art/art-direction.md

@@ -11,7 +11,7 @@ This repository defines a minimal Claude Code workflow for game development.
 
 ## Main Flow
 
-`/gat-design [hint] -> /gat-milestone -> /gat-plan -> /gat-implement`
+`/gat-brainstorm [hint] -> /gat-design -> /gat-milestone -> /gat-plan -> /gat-implement`
 
 ## Working Rules
 

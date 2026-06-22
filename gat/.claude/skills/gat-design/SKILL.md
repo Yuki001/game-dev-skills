@@ -1,115 +1,62 @@
 ---
 name: gat-design
-description: "Run the full design pipeline with brainstorm wizard, or add one missing system."
-argument-hint: "[<hint> | <system-name>]"
+description: "Continue the design pipeline after brainstorm, or add one missing system GDD with art."
+argument-hint: "[<system-name>]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
 ---
 
 # Design
 
-This skill writes all design and art documents.
+This skill writes all design and art documents. For the initial concept interview,
+it delegates to `/gat-brainstorm`.
 
 ## Phase 1: Resolve Mode
 
 Check existing files:
 
-- If `design/gdd/game.md` missing → Mode: `wizard`
+- If `design/gdd/game.md` missing → hand off: tell the user to run `/gat-brainstorm [hint]` first. Stop.
 - If argument matches a system name in `systems-index.md` → Mode: `system`
-- If `game.md` exists and at least one system in `systems-index.md` lacks a GDD → Mode: `continue`
-- If `game.md` exists and all systems have GDDs → report design is complete, stop
 
-Treat any non-system-name argument as a concept hint passed into the wizard.
+With `game.md` present, assess completeness:
 
-## Phase 2: Wizard
+- `systems-index.md` missing → Mode: `continue`
+- `design/art/art-direction.md` missing → Mode: `continue`
+- Any system in `systems-index.md` lacks a GDD → Mode: `continue`
+- Any system in `systems-index.md` lacks an art doc → Mode: `continue`
+- All of the above are present → report design is complete, stop
 
-Skip this phase if Mode is `continue` or `system`.
-
-### Step 1 — Core Concept
-
-If a concept hint was provided, first spawn `gat-designer` to extract what is already answered from the hint:
-
-- genre / style
-- core player verb
-- target feeling
-- rough scope
-
-Then use `AskUserQuestion` to ask only the questions the hint did not answer. If the hint answered all four, skip Step 1 entirely and proceed to Step 2.
-
-### Step 2 — Concept Direction
-
-Spawn `gat-designer` to generate 2-3 short concept directions (3-5 sentences each) based on Step 1 answers.
-
-Use `AskUserQuestion`:
-
-- "Which direction resonates most, or describe your own?"
-- Options: present the 2-3 directions as options plus "Describe my own"
-
-### Step 3 — System Scope
-
-Spawn `gat-designer` to propose a system list with brief rationale for each, based on the chosen direction.
-
-Use `AskUserQuestion` (multiSelect):
-
-- "Which systems should be in scope?"
-- List the proposed systems as options
-
-Then use a second `AskUserQuestion`:
-
-- "Any systems to add that are missing? (leave blank to continue)"
-
-### Step 4 — Confirm Before Writing
-
-Show a one-paragraph summary: chosen direction + confirmed system list.
-
-Use `AskUserQuestion`:
-
-- "Ready to write the design docs?" 
-- Options: `Yes, write them (Recommended)` / `Let me adjust something`
-
-If user wants to adjust, loop back to the relevant step.
-
-## Phase 3: Execute
+## Phase 2: Execute
 
 Read templates:
 
-- `.claude/docs/templates/design/game-overview.md`
-- `.claude/docs/templates/design/systems-index.md`
 - `.claude/docs/templates/design/system-gdd.md`
 - `.claude/docs/templates/design/global-art.md`
 - `.claude/docs/templates/design/system-art.md`
 - `.claude/docs/templates/design/content-data.md`
 
-### Wizard or Continue mode
+### Continue mode
 
-**If Mode is `wizard`:** execute Steps 1-5 below in order.
-**If Mode is `continue`:** skip Steps 1-2, go directly to Step 3.
-
-**Step 1** — Spawn `gat-designer` to write `design/gdd/game.md` and `design/gdd/systems-index.md`:
-
-- Pass wizard answers (direction, confirmed system list)
-- Pass templates
-- Instruction: write both files in one pass
-
-**Step 2** — Spawn `gat-artist` to write `design/art/art-direction.md`:
+**Step 1** — If `design/art/art-direction.md` is missing, spawn `gat-artist` to write it:
 
 - Pass `game.md`, global-art template
-- Pass existing `art-direction.md` if present
 
-**Ask after Step 2 complete** - After step 2 complete, Let user confirm changes:
+Skip this step if `art-direction.md` already exists.
+
+**Ask after Step 1 complete** — Let user confirm changes:
 
 Use `AskUserQuestion`:
 
 - "Do you want to change the design docs? Or continue to next step?"
 - Options: `Yes, continue to next step` / `Let me adjust something`
 
-**Step 3** — For each system in `systems-index.md` lacking a GDD, in order:
+**Step 2** — For each system in `systems-index.md` lacking a GDD, in order:
 
 Spawn `gat-designer` → `design/gdd/<system>.md`:
 - Pass `game.md`, `systems-index.md`, system-gdd template
 - Pass existing system GDD if present
 
-**Step 4 — Content Fill** (for systems with high content volume)
+**Step 3 — Content Fill** (for systems with high content volume)
 
 For each system whose system GDD is complete AND which requires substantial content data, spawn `gat-designer` to write `design/content/<system>-data.md`:
 
@@ -121,7 +68,7 @@ A system needs a content-data doc when its GDD defines data structures that need
 
 Systems that are purely mechanical (e.g. `input`, `tbs-scoring`) typically do NOT need content-data docs — their parameters fit within the GDD itself.
 
-**Step 5** — For each system in `systems-index.md` lacking an art doc, in order:
+**Step 4** — For each system in `systems-index.md` lacking an art doc, in order:
 
 Spawn `gat-artist` → `design/art/<system>-art.md`:
 - Pass `game.md`, `art-direction.md`, the system GDD, the content-data doc (if it exists), system-art template
@@ -136,9 +83,11 @@ Require `design/gdd/game.md` and `design/gdd/systems-index.md`.
 
 **Step 2** — If the system needs content data, spawn `gat-designer` → `design/content/<system>-data.md`
 
-**Step 3** — Spawn `gat-artist` → `design/art/<system>-art.md` (pass GDD + content-data if exists)
+**Step 3** — Spawn `gat-artist` → `design/art/<system>-art.md`:
+- Pass `game.md`, `art-direction.md`, the system GDD, the content-data doc (if it exists), system-art template
+- Pass existing system art doc if present
 
-## Phase 4: Review
+## Phase 3: Review
 
 Summarize what was created or updated.
 

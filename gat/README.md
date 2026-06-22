@@ -4,7 +4,7 @@ A minimal Claude Code workflow for game development, simplified from [Claude-Cod
 
 ## Background
 
-Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential document pipeline: four roles, five skills, and a linear flow from concept to code.
+Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential document pipeline: four roles, six skills, and a linear flow from concept to code.
 
 What was removed: director tier, phase gates, ADR system, engine-specific agents, hook automation, and team orchestration skills.
 
@@ -22,7 +22,8 @@ What was kept: the document-driven handoff chain that keeps code and art grounde
 | Skill | What it produces |
 |---|---|
 | `/gat-workflow-start` | inspects repo state, recommends next step |
-| `/gat-design [hint \| <system-name>]` | full pipeline: `game.md` + `systems-index.md` + `art-direction.md` + all system GDDs + art docs; or add one system |
+| `/gat-brainstorm [hint \| discuss]` | one-question-at-a-time designer interview → `game.md` + `systems-index.md`; or discussion-only |
+| `/gat-design [<system-name>]` | continues the design pipeline: `art-direction.md` + all system GDDs + art docs; or add one system |
 | `/gat-milestone` | `production/milestone.md` + milestone directories |
 | `/gat-plan [milestone]` | `tasks.md` + `tech.md` + `art-prompts.md` for one milestone |
 | `/gat-implement [milestone \| TASK-xxx]` | implements one ready task from `tasks.md` |
@@ -30,7 +31,8 @@ What was kept: the document-driven handoff chain that keeps code and art grounde
 ## Workflow
 
 ```
-/gat-design [hint]      ← full pipeline: game + systems + all GDDs + art docs
+/gat-brainstorm [hint]  ← interview → game.md + systems-index.md
+/gat-design             ← system GDDs + art docs
 /gat-milestone
 /gat-plan               ← repeat for each milestone
 /gat-implement          ← repeat until milestone is done
