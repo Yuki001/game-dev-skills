@@ -15,14 +15,10 @@ design/
     {system}-art.md       ← per-system art doc (artist)
 
 production/
-  milestone.md            ← milestone roadmap (planner)
-  milestone-01-name/
-    tasks.md              ← implementation task list (planner)
-    tech.md               ← milestone architecture (programmer)
-    art-prompts.md        ← text prompt pack (artist)
+  milestone.md            ← ordered milestone handoff roadmap (planner)
 
-src/                      ← game code (programmer)
-tests/                    ← tests (programmer)
+# Source code, tests, technical designs, task lists, and implementation artifacts
+# are owned by the downstream engineering workflow, not GAT.
 assets/                   ← checked-in assets
 ```
 
@@ -34,15 +30,12 @@ assets/                   ← checked-in assets
   agents/
     designer.md
     planner.md
-    programmer.md
     artist.md
   skills/
     gat-workflow-start/SKILL.md
     gat-brainstorm/SKILL.md
     gat-design/SKILL.md
     gat-milestone/SKILL.md
-    gat-plan/SKILL.md
-    gat-implement/SKILL.md
   docs/
     directory-structure.md
     workflow-catalog.yaml
@@ -56,14 +49,11 @@ assets/                   ← checked-in assets
         content-data.md
       plan/
         milestone.md
-        tech.md
-        tasks.md
-        art-prompts.md
 ```
 
 ## Mental Model
 
 1. `design/` defines the game.
-2. `production/` breaks it into milestone execution packets.
-3. `src/` and `tests/` realize one task at a time.
-4. `.claude/` defines how the agent team produces all of the above.
+2. `production/milestone.md` breaks it into ordered handoff stages.
+3. Downstream engineering workflows handle technical design, task breakdown, implementation, and verification.
+4. `.claude/` defines how the GAT agent team produces the pre-production docs.

@@ -4,18 +4,17 @@ A minimal Claude Code workflow for game development, simplified from [Claude-Cod
 
 ## Background
 
-Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential document pipeline: four roles, six skills, and a linear flow from concept to code.
+Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential pre-production document pipeline: three roles, four skills, and a linear flow from concept to milestone handoff.
 
 What was removed: director tier, phase gates, ADR system, engine-specific agents, hook automation, and team orchestration skills.
 
-What was kept: the document-driven handoff chain that keeps code and art grounded in the same game overview, system docs, and milestone plan.
+What was kept: the document-driven handoff chain that keeps downstream engineering grounded in the same game overview, system docs, art direction, and milestone plan.
 
 ## Roles
 
 - `gat-designer` — game overview, systems index, system GDDs, content data
-- `gat-planner` — milestone roadmap and task lists
-- `gat-programmer` — milestone tech architecture and code implementation
-- `gat-artist` — global art direction, system art docs, milestone prompt packs
+- `gat-planner` — ordered milestone handoff roadmap
+- `gat-artist` — global art direction and system art docs
 
 ## Skills
 
@@ -24,18 +23,15 @@ What was kept: the document-driven handoff chain that keeps code and art grounde
 | `/gat-workflow-start` | inspects repo state, recommends next step |
 | `/gat-brainstorm [hint \| discuss]` | one-question-at-a-time designer interview → `game.md` + `systems-index.md` + `art-direction.md`; or discussion-only |
 | `/gat-design [<system-name>]` | continues the design pipeline: all system GDDs + content data + system art docs; or add one system |
-| `/gat-milestone` | `production/milestone.md` + milestone directories |
-| `/gat-plan [milestone]` | `tasks.md` + `tech.md` + `art-prompts.md` for one milestone |
-| `/gat-implement [milestone \| TASK-xxx]` | implements one ready task from `tasks.md` |
+| `/gat-milestone` | ordered milestone handoff roadmap in `production/milestone.md` |
 
 ## Workflow
 
 ```
 /gat-brainstorm [hint]  ← interview → game.md + systems-index.md + art-direction.md
 /gat-design             ← system GDDs + content data + system art docs
-/gat-milestone
-/gat-plan               ← repeat for each milestone
-/gat-implement          ← repeat until milestone is done
+/gat-milestone          ← ordered milestone handoff roadmap
+# hand one milestone at a time to your downstream engineering workflow
 ```
 
 Run `/gat-workflow-start` at any point to get the recommended next step.
@@ -52,12 +48,7 @@ design/
   art/{system}-art.md
 production/
   milestone.md
-  milestone-01-name/
-    tasks.md
-    tech.md
-    art-prompts.md
-src/
-tests/
+# Technical design, task breakdown, implementation, and verification happen in a downstream engineering workflow.
 ```
 
 ## What This Repo Does Not Do
@@ -66,3 +57,4 @@ tests/
 - No binary art pipeline
 - No phase gates or director approval
 - No engine-specific tooling
+- No technical design, task breakdown, implementation, or verification workflow

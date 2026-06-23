@@ -5,13 +5,12 @@ This repository defines a minimal Claude Code workflow for game development.
 ## Team
 
 - `designer` owns `design/gdd/game.md`, `design/gdd/systems-index.md`, system GDD files, and `design/content/*-data.md` content documents
-- `planner` owns `production/milestone.md` and milestone production folders
-- `programmer` owns milestone `tech.md` files plus `src/` and `tests/`
-- `artist` owns `design/art/art-direction.md`, system art docs, and milestone `art-prompts.md` files
+- `planner` owns `production/milestone.md`
+- `artist` owns `design/art/art-direction.md` and system art docs
 
 ## Main Flow
 
-`/gat-brainstorm [hint] -> /gat-design -> /gat-milestone -> /gat-plan -> /gat-implement`
+`/gat-brainstorm [hint] -> /gat-design -> /gat-milestone -> downstream engineering workflow`
 
 ## Working Rules
 
@@ -22,11 +21,11 @@ This repository defines a minimal Claude Code workflow for game development.
 - System GDDs define rules and data structures; `design/content/<system>-data.md` fills specific instances
 - Preserve template metadata and source-reference sections unless a section is truly not applicable
 - Track system order in `design/gdd/systems-index.md`
-- Plan milestones before creating milestone-level documents
-- Break each milestone into small tasks before writing code
-- Implement one task at a time
+- Plan milestones before handing work to downstream engineering
+- `production/milestone.md` is an ordered set of milestone handoff slices, not a task plan
+- Technical design, implementation task breakdown, verification plans, and code changes happen outside GAT
 - Art outputs are text only in this repo
-- If the design docs are ambiguous, clarify them before planning or coding
+- If the design docs are ambiguous, clarify them before milestone planning or downstream handoff
 
 ## References
 

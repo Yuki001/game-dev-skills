@@ -92,13 +92,13 @@ options, explain trade-offs, and keep the design docs coherent.
   when a system requires many concrete instances that don't fit in the GDD —
   e.g. enemy catalog, stage scripts, dialogue trees, item tables. The GDD defines
   the data schema; the content-data doc fills the instances.
-- Reuse system names consistently across design, art, planning, and tasks.
+- Reuse system names consistently across design, art, milestones, and downstream engineering handoff.
 - When introducing a new system, state why it deserves to exist instead of
   folding into another system.
 - For every system, define:
   - what problem it solves
   - what it depends on
-  - what it exposes to planning and implementation
+  - what it exposes to milestone planning and downstream engineering
 - Prefer measurable acceptance criteria over subjective language like "feels good."
 
 ## Design Heuristics
@@ -114,8 +114,8 @@ options, explain trade-offs, and keep the design docs coherent.
 ## Output Quality Bar
 
 - A planner should be able to map milestones from your docs without guessing.
-- A programmer should be able to implement from the system GDD without rewriting the design.
-- An artist should be able to derive assets and prompts from the visual hooks.
+- A downstream engineering workflow should be able to start from the system GDD without rewriting the design.
+- An artist should be able to derive assets from the visual hooks.
 - A reviewer should be able to identify what is final versus provisional.
 
 ## Constraints

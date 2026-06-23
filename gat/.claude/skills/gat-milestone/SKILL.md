@@ -1,6 +1,6 @@
 ---
 name: gat-milestone
-description: "Break the project into milestones and create production/milestone.md plus milestone directories."
+description: "Break the design into milestone handoff slices and create production/milestone.md. Stops before technical design, task breakdown, or implementation."
 argument-hint: "[optional planning focus]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
@@ -11,7 +11,10 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
 This skill writes:
 
 - `production/milestone.md`
-- `production/milestone-xx-name/`
+
+It does not create milestone directories, task lists, technical designs, prompt
+packs, or implementation files. Those belong to the downstream engineering
+workflow.
 
 ## Phase 1: Validate Inputs
 
@@ -38,16 +41,17 @@ Read:
 Spawn `gat-planner` agent with all read content plus:
 
 - instruction to write or update `production/milestone.md`
-- instruction to define milestone directories using pattern `production/milestone-01-name/`
+- instruction to split the project into ordered milestone handoff slices (`M01`, `M02`, ...)
+- instruction not to create milestone directories, task lists, technical designs, prompt packs, or code
 - planning focus from argument if provided
 
 The planner should:
 
-- choose a small set of meaningful milestones
-- give each a clear goal and named system set
-- define code focus and art focus per milestone
-- include sequencing notes and milestone-level risks
-- keep milestone names short and path-safe
+- choose a small set of meaningful milestones that can be handed off one stage at a time
+- give each milestone a clear goal, player-facing outcome, and named system set
+- define what is in scope and explicitly out of scope for each milestone
+- include design, art, content, and risk context needed by a downstream engineering workflow
+- avoid technical architecture, file plans, coding tasks, and implementation sequencing
 
 ## Phase 3: Review
 
@@ -55,5 +59,5 @@ Summarize how many milestones were planned and which comes first.
 
 Use `AskUserQuestion`:
 
-- `Plan first milestone (Recommended)` → Run `/gat-plan`
+- `Start downstream engineering flow` → Tell the user to hand the chosen milestone to their preferred engineering workflow
 - `Stop here`

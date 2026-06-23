@@ -20,11 +20,6 @@ Check for these files:
 - `design/art/art-direction.md`
 - `design/art/*-art.md`
 - `production/milestone.md`
-- `production/milestone-*/tasks.md`
-- `production/milestone-*/tech.md`
-- `production/milestone-*/art-prompts.md`
-
-Also inspect whether any milestone `tasks.md` contains `Status: Ready`.
 
 ## Phase 2: Summarize State
 
@@ -35,12 +30,7 @@ Report a short factual summary:
 - Number of system GDDs
 - Art direction present or missing
 - Number of system art docs
-- Milestone plan present or missing
-- Number of milestone directories
-- Whether a milestone `tasks.md` exists
-- Whether a milestone `tech.md` exists
-- Whether a ready task exists
-- Whether any milestone art prompt pack exists
+- Milestone handoff roadmap present or missing
 
 ## Phase 3: Route
 
@@ -52,12 +42,8 @@ Use this logic:
    recommend `/gat-design` to continue the pipeline
 3. If `production/milestone.md` is missing:
    recommend `/gat-milestone`
-4. If milestone directories exist but at least one lacks `tasks.md` or `tech.md`:
-   recommend `/gat-plan`
-5. If a ready task exists:
-   recommend `/gat-implement`
-6. Otherwise:
-   state that the workflow is set up and point to the next milestone artifact that is still missing
+4. Otherwise:
+   state that GAT pre-production is complete and tell the user to hand one milestone at a time to their downstream engineering workflow
 
 ## Phase 4: Hand Off
 

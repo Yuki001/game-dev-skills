@@ -12,38 +12,46 @@
 
 ## Milestone Order
 
-| Milestone ID | Name | Goal | Systems | Code Focus | Art Focus | Status | Directory |
-|--------------|------|------|---------|------------|-----------|--------|-----------|
-| M01 | Example | Playable core loop | movement, combat, hud | Player controller and combat flow | Core character and HUD prompts | Planned | production/milestone-01-example/ |
+| Milestone ID | Name | Handoff Goal | Player / Validation Outcome | Systems | Status |
+|--------------|------|--------------|-----------------------------|---------|--------|
+| M01 | Example | Establish playable core loop | Player can complete one satisfying loop | movement, combat, hud | Planned |
 
 ## Milestone Details
 
 ### M01 - Example
 
-- Goal:
+- Handoff goal:
 - Why this milestone exists:
-- Player-visible outcome:
+- Player-visible or validation outcome:
 - Systems in scope:
 - Systems intentionally out of scope:
-- Code scope:
-- Art scope:
+- Design docs to read:
+- Art docs to read:
+- Content data needed:
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
-- Exit criteria:
+- Acceptance boundary for downstream workflow:
+- Decisions downstream workflow may make:
+- Decisions that must come back to design:
+- Risks and unknowns:
 - Notes:
 
 ### M02 - [Milestone Name]
 
-- Goal:
+- Handoff goal:
 - Why this milestone exists:
-- Player-visible outcome:
+- Player-visible or validation outcome:
 - Systems in scope:
 - Systems intentionally out of scope:
-- Code scope:
-- Art scope:
+- Design docs to read:
+- Art docs to read:
+- Content data needed:
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
-- Exit criteria:
+- Acceptance boundary for downstream workflow:
+- Decisions downstream workflow may make:
+- Decisions that must come back to design:
+- Risks and unknowns:
 - Notes:
 
 ## Sequencing Notes
@@ -51,6 +59,7 @@
 - Why this order:
 - Cross-milestone dependencies:
 - First validation milestone:
+- Recommended first downstream engineering handoff:
 
 ## Milestone Risk Register
 
@@ -58,9 +67,18 @@
 |-----------|-----------|--------|------------|
 | M01 | [Risk] | | |
 
+## Downstream Engineering Handoff
+
+- Preferred handoff unit: one milestone at a time
+- Technical design owner: downstream engineering workflow
+- Task breakdown owner: downstream engineering workflow
+- Implementation owner: downstream engineering workflow
+- Verification owner: downstream engineering workflow
+
 ## Working Rules
 
-- Every milestone gets its own production folder
-- Code planning, tech planning, and art prompt generation all happen inside milestone folders
-- Each milestone should name the systems it draws from
-- Global design lives in `design/`
+- `production/milestone.md` is the final GAT production artifact.
+- Do not create milestone folders in this workflow.
+- Do not include technical architecture, file plans, implementation tasks, or test plans here.
+- Each milestone should name the systems and docs it draws from.
+- Global design lives in `design/`; implementation planning happens downstream.
