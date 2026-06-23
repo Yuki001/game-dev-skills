@@ -27,12 +27,12 @@ workflows:
       output:
         - design/gdd/game.md
         - design/gdd/systems-index.md
+        - design/art/art-direction.md
     - skill: /gat-design
       args: "[system-name]"
       output:
         - design/gdd/<system>.md
         - design/content/<system>-data.md
-        - design/art/art-direction.md
         - design/art/<system>-art.md
     - skill: /gat-milestone
       output:

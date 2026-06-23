@@ -38,6 +38,7 @@ assets/                   ← checked-in assets
     artist.md
   skills/
     gat-workflow-start/SKILL.md
+    gat-brainstorm/SKILL.md
     gat-design/SKILL.md
     gat-milestone/SKILL.md
     gat-plan/SKILL.md

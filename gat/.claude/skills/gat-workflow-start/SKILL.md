@@ -46,7 +46,7 @@ Report a short factual summary:
 
 Use this logic:
 
-1. If `design/gdd/game.md` is missing:
+1. If `design/gdd/game.md`, `design/gdd/systems-index.md`, or `design/art/art-direction.md` is missing:
    recommend `/gat-brainstorm` (with optional hint)
 2. If any system in `systems-index.md` lacks a GDD or art doc:
    recommend `/gat-design` to continue the pipeline

@@ -12,18 +12,18 @@ What was kept: the document-driven handoff chain that keeps code and art grounde
 
 ## Roles
 
-- `gat-designer` — game overview, systems index, system GDDs
+- `gat-designer` — game overview, systems index, system GDDs, content data
 - `gat-planner` — milestone roadmap and task lists
 - `gat-programmer` — milestone tech architecture and code implementation
-- `gat-artist` — art direction, system art docs, milestone prompt packs
+- `gat-artist` — global art direction, system art docs, milestone prompt packs
 
 ## Skills
 
 | Skill | What it produces |
 |---|---|
 | `/gat-workflow-start` | inspects repo state, recommends next step |
-| `/gat-brainstorm [hint \| discuss]` | one-question-at-a-time designer interview → `game.md` + `systems-index.md`; or discussion-only |
-| `/gat-design [<system-name>]` | continues the design pipeline: `art-direction.md` + all system GDDs + art docs; or add one system |
+| `/gat-brainstorm [hint \| discuss]` | one-question-at-a-time designer interview → `game.md` + `systems-index.md` + `art-direction.md`; or discussion-only |
+| `/gat-design [<system-name>]` | continues the design pipeline: all system GDDs + content data + system art docs; or add one system |
 | `/gat-milestone` | `production/milestone.md` + milestone directories |
 | `/gat-plan [milestone]` | `tasks.md` + `tech.md` + `art-prompts.md` for one milestone |
 | `/gat-implement [milestone \| TASK-xxx]` | implements one ready task from `tasks.md` |
@@ -31,8 +31,8 @@ What was kept: the document-driven handoff chain that keeps code and art grounde
 ## Workflow
 
 ```
-/gat-brainstorm [hint]  ← interview → game.md + systems-index.md
-/gat-design             ← system GDDs + art docs
+/gat-brainstorm [hint]  ← interview → game.md + systems-index.md + art-direction.md
+/gat-design             ← system GDDs + content data + system art docs
 /gat-milestone
 /gat-plan               ← repeat for each milestone
 /gat-implement          ← repeat until milestone is done

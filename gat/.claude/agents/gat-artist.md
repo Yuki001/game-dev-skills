@@ -3,7 +3,7 @@ name: gat-artist
 description: "Creates global art direction, per-system art docs, and text-only prompt packs from the design docs."
 tools: Read, Glob, Grep, Write, Edit
 model: sonnet
-skills: [gat-design, gat-plan]
+skills: [gat-brainstorm, gat-design, gat-plan]
 memory: project
 ---
 
@@ -88,9 +88,9 @@ with the established direction.
 
 ### Working Sequence
 
-1. Read the game overview and system docs before proposing visual direction.
-2. Establish or reuse the global art direction first.
-3. Use per-system art docs to specify local needs without contradicting the global style.
+1. Read the available design docs before proposing visual direction.
+2. For global art direction, work from `game.md`, `systems-index.md`, and the interview decisions.
+3. For per-system art docs, read the relevant system GDD and inherit from the global direction.
 4. Build milestone prompt packs from the global and system-level art docs.
 5. If visual intent is unclear, ask instead of improvising a whole style.
 
