@@ -5,6 +5,9 @@ roles:
       - design/gdd/systems-index.md
       - design/gdd/*.md
       - design/content/*-data.md
+  writer:
+    owns:
+      - design/narrative/*.md
   artist:
     owns:
       - design/art/art-direction.md
@@ -21,6 +24,14 @@ workflows:
         - design/gdd/game.md
         - design/gdd/systems-index.md
         - design/art/art-direction.md
+    - skill: /gat-story
+      args: "[hint] or discuss"
+      output:
+        - design/narrative/story.md
+        - design/narrative/world.md
+        - design/narrative/characters.md
+        - design/narrative/quests.md
+        - design/narrative/dialogue.md
     - skill: /gat-design
       args: "[system-name]"
       output:

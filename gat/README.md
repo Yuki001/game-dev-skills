@@ -4,7 +4,7 @@ A minimal Claude Code workflow for game development, simplified from [Claude-Cod
 
 ## Background
 
-Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential pre-production document pipeline: three roles, four skills, and a linear flow from concept to milestone handoff.
+Claude-Code-Game-Studios is a full game studio architecture with 48 agents, 68 skills, 12 hooks, and a three-tier director hierarchy. This project strips that down to the essential pre-production document pipeline: four roles, five skills, and a linear flow from concept to milestone handoff.
 
 What was removed: director tier, phase gates, ADR system, engine-specific agents, hook automation, and team orchestration skills.
 
@@ -13,6 +13,7 @@ What was kept: the document-driven handoff chain that keeps downstream engineeri
 ## Roles
 
 - `gat-designer` — game overview, systems index, system GDDs, content data
+- `gat-writer` — story, worldbuilding, characters, quests, dialogue, and narrative delivery docs
 - `gat-planner` — ordered milestone handoff roadmap
 - `gat-artist` — global art direction and system art docs
 
@@ -22,6 +23,7 @@ What was kept: the document-driven handoff chain that keeps downstream engineeri
 |---|---|
 | `/gat-workflow-start` | inspects repo state, recommends next step |
 | `/gat-brainstorm [hint \| discuss]` | one-question-at-a-time designer interview → `game.md` + `systems-index.md` + `art-direction.md`; or discussion-only |
+| `/gat-story [hint \| discuss]` | one-question-at-a-time writer interview → narrative docs under `design/narrative/`; or discussion-only |
 | `/gat-design [<system-name>]` | continues the design pipeline: all system GDDs + content data + system art docs; or add one system |
 | `/gat-milestone` | ordered milestone handoff roadmap in `production/milestone.md` |
 
@@ -29,8 +31,9 @@ What was kept: the document-driven handoff chain that keeps downstream engineeri
 
 ```
 /gat-brainstorm [hint]  ← interview → game.md + systems-index.md + art-direction.md
-/gat-design             ← system GDDs + content data + system art docs
-/gat-milestone          ← ordered milestone handoff roadmap
+/gat-story             ← story/world/characters/quests/dialogue docs when narrative matters
+/gat-design            ← system GDDs + content data + system art docs
+/gat-milestone         ← ordered milestone handoff roadmap
 # hand one milestone at a time to your downstream engineering workflow
 ```
 
@@ -44,6 +47,11 @@ design/
   gdd/systems-index.md
   gdd/{system}.md
   content/{system}-data.md
+  narrative/story.md
+  narrative/world.md
+  narrative/characters.md
+  narrative/quests.md
+  narrative/dialogue.md
   art/art-direction.md
   art/{system}-art.md
 production/

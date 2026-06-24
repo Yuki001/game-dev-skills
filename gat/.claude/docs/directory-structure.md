@@ -10,6 +10,12 @@ design/
     {system}.md           ← per-system GDD (designer)
   content/
     {system}-data.md      ← concrete data instances (designer)
+  narrative/
+    story.md              ← premise, themes, structure, delivery (writer)
+    world.md              ← setting, factions, locations, world rules (writer)
+    characters.md         ← cast, arcs, relationships, voices (writer)
+    quests.md             ← authored quest beats and consequences (writer)
+    dialogue.md           ← dialogue strategy, barks, samples, UI text (writer)
   art/
     art-direction.md      ← global art bible (artist)
     {system}-art.md       ← per-system art doc (artist)
@@ -28,12 +34,14 @@ assets/                   ← checked-in assets
 .claude/
   settings.json
   agents/
-    designer.md
-    planner.md
-    artist.md
+    gat-designer.md
+    gat-writer.md
+    gat-planner.md
+    gat-artist.md
   skills/
     gat-workflow-start/SKILL.md
     gat-brainstorm/SKILL.md
+    gat-story/SKILL.md
     gat-design/SKILL.md
     gat-milestone/SKILL.md
   docs/
@@ -44,16 +52,21 @@ assets/                   ← checked-in assets
         game-overview.md
         systems-index.md
         system-gdd.md
+        content-data.md
+        narrative-story.md
+        narrative-world.md
+        narrative-characters.md
+        narrative-quests.md
+        narrative-dialogue.md
         global-art.md
         system-art.md
-        content-data.md
       plan/
         milestone.md
 ```
 
 ## Mental Model
 
-1. `design/` defines the game.
+1. `design/` defines the game, including systems, content, narrative, and art direction.
 2. `production/milestone.md` breaks it into ordered handoff stages.
 3. Downstream engineering workflows handle technical design, task breakdown, implementation, and verification.
 4. `.claude/` defines how the GAT agent team produces the pre-production docs.

@@ -31,6 +31,8 @@ Read:
 - `design/gdd/game.md`
 - `design/gdd/systems-index.md`
 - all existing `design/gdd/*.md` except `game.md` and `systems-index.md`
+- all existing `design/content/*-data.md`
+- all existing `design/narrative/*.md`
 - `design/art/art-direction.md`
 - all existing `design/art/*-art.md`
 - `.claude/docs/templates/plan/milestone.md`
@@ -50,7 +52,7 @@ The planner should:
 - choose a small set of meaningful milestones that can be handed off one stage at a time
 - give each milestone a clear goal, player-facing outcome, and named system set
 - define what is in scope and explicitly out of scope for each milestone
-- include design, art, content, and risk context needed by a downstream engineering workflow
+- include design, art, narrative, content, and risk context needed by a downstream engineering workflow
 - avoid technical architecture, file plans, coding tasks, and implementation sequencing
 
 ## Phase 3: Review

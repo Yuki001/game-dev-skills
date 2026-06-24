@@ -17,6 +17,7 @@ Check for these files:
 - `design/gdd/game.md`
 - `design/gdd/systems-index.md`
 - `design/gdd/*.md` except `game.md` and `systems-index.md`
+- `design/narrative/*.md`
 - `design/art/art-direction.md`
 - `design/art/*-art.md`
 - `production/milestone.md`
@@ -28,6 +29,7 @@ Report a short factual summary:
 - Game overview present or missing
 - Systems index present or missing
 - Number of system GDDs
+- Number of narrative docs
 - Art direction present or missing
 - Number of system art docs
 - Milestone handoff roadmap present or missing
@@ -38,11 +40,13 @@ Use this logic:
 
 1. If `design/gdd/game.md`, `design/gdd/systems-index.md`, or `design/art/art-direction.md` is missing:
    recommend `/gat-brainstorm` (with optional hint)
-2. If any system in `systems-index.md` lacks a GDD or art doc:
+2. If the game overview or user goal indicates story, plot, lore, worldbuilding, characters, quests, dialogue, or authored narrative content matters, and no `design/narrative/story.md` exists:
+   recommend `/gat-story`
+3. If any system in `systems-index.md` lacks a GDD or art doc:
    recommend `/gat-design` to continue the pipeline
-3. If `production/milestone.md` is missing:
+4. If `production/milestone.md` is missing:
    recommend `/gat-milestone`
-4. Otherwise:
+5. Otherwise:
    state that GAT pre-production is complete and tell the user to hand one milestone at a time to their downstream engineering workflow
 
 ## Phase 4: Hand Off

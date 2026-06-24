@@ -115,9 +115,9 @@
 |----------|-------|------------|
 | [Question] | | Pending |
 
-## 12. Story Design (optional — skip if no narrative)
+## 12. Story Design Summary (optional — detailed narrative lives in `design/narrative/`)
 
-> Fill this section only if the game has a narrative component. For pure arcade/abstract games, delete it.
+> Fill this section only if the game has a narrative component. Keep it as a short summary; use `/gat-story` for full story, world, character, quest, and dialogue docs. For pure arcade/abstract games, delete it.
 
 ### World / Setting
 

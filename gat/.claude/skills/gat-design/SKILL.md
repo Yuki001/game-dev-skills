@@ -10,7 +10,9 @@ allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
 
 This skill writes system-level design and art documents after `/gat-brainstorm`
 has established the game overview, systems index, and global art direction. For
-the initial concept interview, it delegates to `/gat-brainstorm`.
+story, worldbuilding, characters, quests, dialogue, or authored narrative content,
+delegate to `/gat-story`. For the initial concept interview, it delegates to
+`/gat-brainstorm`.
 
 ## Phase 1: Resolve Mode
 
@@ -33,6 +35,8 @@ Read templates:
 - `.claude/docs/templates/design/system-gdd.md`
 - `.claude/docs/templates/design/system-art.md`
 - `.claude/docs/templates/design/content-data.md`
+
+Also read existing `design/narrative/*.md` when present and pass relevant narrative context to spawned agents. Do not create or rewrite narrative docs here; use `/gat-story` for that.
 
 ### Continue mode
 

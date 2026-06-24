@@ -190,5 +190,6 @@ Suggest:
 Summarize what was created or discussed.
 
 If design docs were written, suggest next steps:
+- `/gat-story` if the game needs story, lore, worldbuilding, characters, quests, dialogue, or authored narrative content
 - `/gat-design` to continue the pipeline (system GDDs, content data, and system art docs)
 - `/gat-milestone` to break the game into milestones (only after all design docs are complete)

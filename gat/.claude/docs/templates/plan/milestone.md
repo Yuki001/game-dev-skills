@@ -27,6 +27,7 @@
 - Systems intentionally out of scope:
 - Design docs to read:
 - Art docs to read:
+- Narrative docs to read:
 - Content data needed:
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
@@ -45,6 +46,7 @@
 - Systems intentionally out of scope:
 - Design docs to read:
 - Art docs to read:
+- Narrative docs to read:
 - Content data needed:
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
