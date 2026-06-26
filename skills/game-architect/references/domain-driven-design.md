@@ -57,5 +57,15 @@ Transform domain models from high-level model layers into actual class designs t
     - **Facade Pattern**: Wrapper for module external interfaces.
     - **Command Pattern**: Encapsulates user requests.
 
+### Managing Dependencies on Global Objects
+Repositories and services are often module-wide shared facilities. Choose one access pattern deliberately:
+
+- **Singleton**: Each global object exposes its own instance, e.g. `ActorRepository.Instance`. Simple and direct, but dependencies are implicit and scattered.
+- **Service Locator**: A central global registry resolves repositories/services, e.g. `ServiceLocator.Get<ActorRepository>()`. Keywords: global registry, generic lookup, implicit dependency.
+- **Context**: Group and scope dependencies into multiple typed context objects by domain boundary, architecture layer, or runtime instance, e.g. `sceneContext.ActorRepository` or `playerContext.ItemRepository`. `sceneContext` is an object passed into other objects as a dependency. Keywords: multiple contexts, bounded context, scoped boundary, typed access, dependency passing, multi-instance isolation.
+- **Dependency Injection (DI)**: Dependencies are provided from outside through constructors/fields/properties. Keywords: explicit dependency graph, inversion of control, testability, composition root.
+
+> Use **Bounded Context** and **Layered Architecture** as the main decomposition guides for Context. Bounded Context splits dependencies by domain boundary; Layered Architecture splits dependencies by architectural layer such as infrastructure, domain, and application.
+
 ## Summary
 Derive the initial version of class design from the Domain Model Diagram using the patterns above.
