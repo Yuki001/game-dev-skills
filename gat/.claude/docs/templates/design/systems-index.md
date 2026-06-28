@@ -79,6 +79,8 @@
 | System art docs written | [N] |
 | Content data docs written | [N] |
 
+**Written GDDs ([N]/[N]):** list system names here
+
 ## Open Questions
 
 | Question | Owner | Resolution |
