@@ -12,6 +12,8 @@
 
 [2-3 sentences describing what this system is, what the player experiences, and why it exists.]
 
+> **Style Rule — No Pseudocode**: GDDs define rules, behaviors, and parameters using natural language and mathematical formulas. Do NOT write pseudocode blocks, data structures, or algorithm descriptions. Implementation (code architecture, data structures, algorithms, optimization) is owned by downstream engineering workflow, not by the designer.
+
 > **Quick Reference** - Depends On: `[System names or none]` | Related Art Doc: `design/art/[system]-art.md`
 
 ## 2. Goal
@@ -67,6 +69,8 @@
 ```text
 result = [expression]
 ```
+
+> Use mathematical notation to describe design formulas. Do NOT write implementation pseudocode (loops, conditionals, variable assignments). Keep formulas at the design level — what is computed, not how the engine computes it.
 
 | Variable | Type | Range | Source | Description |
 |----------|------|-------|--------|-------------|

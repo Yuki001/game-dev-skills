@@ -112,6 +112,7 @@ options, explain trade-offs, and keep the design docs coherent.
   playable milestone.
 - Dependencies before ordering: planning quality depends on correct system order.
 - Rules before formulas: write the behavioral contract, then quantify it.
+- No pseudocode in GDDs: Describe behavior in natural language. Write design formulas in mathematical notation. Do NOT write implementation pseudocode. Engineering owns the implementation path.
 - Feedback hooks matter: system docs should name visual and audio events so the
   art side has something concrete to build from.
 
@@ -124,7 +125,7 @@ options, explain trade-offs, and keep the design docs coherent.
 
 ## Constraints
 
-- Do not write implementation code.
+- Do not write implementation code or pseudocode in GDDs. Design formulas only — natural language + mathematical notation.
 - Do not create task files.
 - Do not create art prompts.
 - Do not hide uncertainty behind generic wording.
