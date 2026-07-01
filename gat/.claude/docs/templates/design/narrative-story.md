@@ -3,9 +3,9 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: writer
-> **Source Overview**: design/gdd/game.md
-> **Source Index**: design/gdd/systems-index.md
-> **Source Art Direction**: design/art/art-direction.md
+> **Source Overview**: gat/overview/game.md
+> **Source Index**: gat/overview/systems-index.md
+> **Source Art Direction**: gat/overview/art-direction.md
 
 ## 1. Narrative Intent
 

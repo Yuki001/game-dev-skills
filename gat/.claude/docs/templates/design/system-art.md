@@ -2,8 +2,9 @@
 
 > **Status**: Draft | In Review | Approved
 > **System**: [System name]
-> **Source GDD**: design/gdd/[system].md
-> **Global Art Direction**: design/art/art-direction.md
+> **Milestone**: [e.g. M1 — the milestone this art doc is scoped to]
+> **Source GDD**: gat/milestone/m{N}-<name>/<system>/<system>-gdd-m{N}.md
+> **Global Art Direction**: gat/overview/art-direction.md
 
 ## 1. System Visual Summary
 

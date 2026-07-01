@@ -5,8 +5,10 @@
 > **Priority**: MVP | Vertical Slice | Alpha | Later
 > **Layer**: Foundation | Core | Feature | Presentation
 > **Last Updated**: [Date]
-> **Source Overview**: design/gdd/game.md
-> **Source Index**: design/gdd/systems-index.md
+> **Milestone**: [e.g. M1 — fill with the milestone this GDD is scoped to]
+> **Source Overview**: gat/overview/game.md
+> **Source Index**: gat/overview/systems-index.md
+> **Milestone Brief**: gat/milestone/m{N}-<name>/m{N}-brief.md
 
 ## 1. Summary
 
@@ -14,7 +16,11 @@
 
 > **Style Rule — No Pseudocode**: GDDs define rules, behaviors, and parameters using natural language and mathematical formulas. Do NOT write pseudocode blocks, data structures, or algorithm descriptions. Implementation (code architecture, data structures, algorithms, optimization) is owned by downstream engineering workflow, not by the designer.
 
-> **Quick Reference** - Depends On: `[System names or none]` | Related Art Doc: `design/art/[system]-art.md`
+> **Quick Reference** - Depends On: `[System names or none]` | Related Art Doc: `gat/milestone/m{N}-<name>/<system>/<system>-art-m{N}.md`
+
+> **Scope note**: This GDD is scoped to the milestone named above. A later
+> milestone may redefine this system differently — additions, modifications, or
+> conflicts with an earlier milestone's version are legitimate iteration.
 
 ## 2. Goal
 

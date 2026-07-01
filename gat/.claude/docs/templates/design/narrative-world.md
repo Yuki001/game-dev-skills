@@ -3,9 +3,9 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: writer
-> **Source Story**: design/narrative/story.md
-> **Source Overview**: design/gdd/game.md
-> **Source Art Direction**: design/art/art-direction.md
+> **Source Story**: gat/narrative/story.md
+> **Source Overview**: gat/overview/game.md
+> **Source Art Direction**: gat/overview/art-direction.md
 
 ## 1. World Snapshot
 

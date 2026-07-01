@@ -3,9 +3,9 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: writer
-> **Source Story**: design/narrative/story.md
-> **Source Characters**: design/narrative/characters.md
-> **Source Quests**: design/narrative/quests.md
+> **Source Story**: gat/narrative/story.md
+> **Source Characters**: gat/narrative/characters.md
+> **Source Quests**: gat/narrative/quests.md
 
 ## 1. Dialogue Strategy
 

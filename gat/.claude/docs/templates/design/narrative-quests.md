@@ -3,10 +3,10 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: writer
-> **Source Story**: design/narrative/story.md
-> **Source World**: design/narrative/world.md
-> **Source Characters**: design/narrative/characters.md
-> **Source Index**: design/gdd/systems-index.md
+> **Source Story**: gat/narrative/story.md
+> **Source World**: gat/narrative/world.md
+> **Source Characters**: gat/narrative/characters.md
+> **Source Index**: gat/overview/systems-index.md
 
 ## 1. Quest Strategy
 

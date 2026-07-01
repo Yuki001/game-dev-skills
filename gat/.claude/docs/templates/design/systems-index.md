@@ -2,7 +2,7 @@
 
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
-> **Source Overview**: design/gdd/game.md
+> **Source Overview**: gat/overview/game.md
 
 ## Overview
 
@@ -11,11 +11,18 @@
 - Pillars most affected by system design:
 - Notes:
 
+> **Note on paths**: This index is the GLOBAL system registry. Per-system GDDs,
+> content-data, and art docs no longer live beside this file — they are written
+> per milestone under `gat/milestone/m{N}-<name>/<system>/` as
+> `<system>-gdd-m{N}.md`, `<system>-data-m{N}.md`, and `<system>-art-m{N}.md`.
+> The GDD/Art/Content Data columns below record which milestones have designed
+> each system, not a single global path.
+
 ## Systems Enumeration
 
-| Order | System | Category | Priority | Layer | Depends On | Status | GDD | Art Doc | Content Data |
-|-------|--------|----------|----------|-------|------------|--------|-----|---------|--------------|
-| 1 | movement | Core | MVP | Foundation | none | Planned | design/gdd/movement.md | design/art/movement-art.md | — |
+| Order | System | Category | Priority | Layer | Depends On | Status | Designed In Milestones | Notes |
+|-------|--------|----------|----------|-------|------------|--------|------------------------|-------|
+| 1 | movement | Core | MVP | Foundation | none | Planned | — | |
 
 ## Category Guide
 
@@ -69,17 +76,9 @@
 |--------|-----------|-----------------|------------|
 | [System] | Design / Tech / Scope | | |
 
-## Progress Tracker
-
-| Metric | Count |
-|--------|-------|
-| Total systems | [N] |
-| MVP systems | [N] |
-| System GDDs written | [N] |
-| System art docs written | [N] |
-| Content data docs written | [N] |
-
-**Written GDDs ([N]/[N]):** list system names here
+> **No global progress tracker here.** Per-system design progress is tracked in
+> each milestone's `m{N}-brief.md` (Progress Tracker section). This index is the
+> global system registry, not a progress dashboard.
 
 ## Open Questions
 

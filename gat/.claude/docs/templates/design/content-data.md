@@ -2,8 +2,9 @@
 
 > **Status**: Draft
 > **Last Updated**: [Date]
-> **Source GDD**: design/gdd/[system].md
-> **Source Index**: design/gdd/systems-index.md
+> **Milestone**: [e.g. M1 — the milestone this data is scoped to]
+> **Source GDD**: gat/milestone/m{N}-<name>/<system>/<system>-gdd-m{N}.md
+> **Source Index**: gat/overview/systems-index.md
 
 ## 1. Instance Catalog
 

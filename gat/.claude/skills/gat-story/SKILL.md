@@ -1,6 +1,6 @@
 ---
 name: gat-story
-description: "Develop game story and narrative through one-question-at-a-time writer interviews. Produces narrative docs under design/narrative/ or runs as discussion-only. Use when the user wants story, plot, lore, worldbuilding, characters, quests, dialogue, narrative tone, or authored story content for a GAT game."
+description: "Develop game story and narrative through one-question-at-a-time writer interviews. Produces narrative docs under gat/narrative/ or runs as discussion-only. Use when the user wants story, plot, lore, worldbuilding, characters, quests, dialogue, narrative tone, or authored story content for a GAT game."
 argument-hint: "[<hint> | discuss]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, Write, Edit, Agent, AskUserQuestion
@@ -16,20 +16,20 @@ Pick questions from the angle table below — follow the conversation, not a scr
 ## Phase 1: Resolve Mode
 
 - If argument is `discuss` → Mode: `discuss` (no files written, exploration only)
-- If argument is a hint or empty → Mode: `story` (produces narrative docs under `design/narrative/`)
+- If argument is a hint or empty → Mode: `story` (produces narrative docs under `gat/narrative/`)
 
 Check whether these files exist:
 
-- `design/gdd/game.md`
-- `design/gdd/systems-index.md`
-- `design/art/art-direction.md`
-- `design/narrative/story.md`
-- `design/narrative/world.md`
-- `design/narrative/characters.md`
-- `design/narrative/quests.md`
-- `design/narrative/dialogue.md`
+- `gat/overview/game.md`
+- `gat/overview/systems-index.md`
+- `gat/overview/art-direction.md`
+- `gat/narrative/story.md`
+- `gat/narrative/world.md`
+- `gat/narrative/characters.md`
+- `gat/narrative/quests.md`
+- `gat/narrative/dialogue.md`
 
-If foundational design docs exist, read them before asking questions that they
+If foundational overview docs exist, read them before asking questions that they
 already answer. If they are missing, proceed only with high-level narrative
 brainstorming and note that final narrative docs may need revision after
 `/gat-brainstorm` establishes the game overview and systems.
@@ -159,20 +159,20 @@ If yes, read the relevant templates:
 - `.claude/docs/templates/design/narrative-quests.md`
 - `.claude/docs/templates/design/narrative-dialogue.md`
 
-Spawn `gat-writer` to write the narrative docs under `design/narrative/`.
+Spawn `gat-writer` to write the narrative docs under `gat/narrative/`.
 
 Always write or update:
 
-- `design/narrative/story.md`
+- `gat/narrative/story.md`
 
 Write or update these only when the game needs them:
 
-- `design/narrative/world.md` for setting rules, factions, locations, culture, or environmental storytelling
-- `design/narrative/characters.md` for named cast, factions-as-characters, voice, arcs, or relationships
-- `design/narrative/quests.md` for authored missions, story objectives, progression beats, or branching consequences
-- `design/narrative/dialogue.md` for conversations, barks, VO, UI narrative text, or reusable voice rules
+- `gat/narrative/world.md` for setting rules, factions, locations, culture, or environmental storytelling
+- `gat/narrative/characters.md` for named cast, factions-as-characters, voice, arcs, or relationships
+- `gat/narrative/quests.md` for authored missions, story objectives, progression beats, or branching consequences
+- `gat/narrative/dialogue.md` for conversations, barks, VO, UI narrative text, or reusable voice rules
 
-Pass all interview answers, existing GDD/art/narrative files, and the selected
+Pass all interview answers, existing overview/narrative files, and the selected
 templates. Instruct the writer to preserve template metadata and source-reference
 sections, mark uncertain material as open questions, and keep outputs concise.
 
@@ -183,8 +183,7 @@ Summarize what was decided and what remains open. No files written.
 Suggest:
 
 - `/gat-story` (without `discuss`) to turn this discussion into narrative docs
-- `/gat-design` if story revealed missing gameplay systems
-- `/gat-milestone` only after design and narrative docs are ready for planning
+- `/gat-milestone` to plan milestone slices after overview (and narrative, if needed) are ready
 
 ## Phase 4: Hand Off
 
@@ -192,5 +191,5 @@ Summarize what was created or discussed.
 
 If narrative docs were written, suggest next steps:
 
-- `/gat-design` if story introduced or changed systems that need GDD coverage
-- `/gat-milestone` to break the game into milestones after design, art, and narrative docs are complete
+- `/gat-milestone` to plan milestone slices (milestone planning runs BEFORE per-system design; do NOT run `/gat-design` directly from here)
+- If story revealed or changed systems, update `gat/overview/systems-index.md` (via `/gat-brainstorm` or directly) before planning milestones

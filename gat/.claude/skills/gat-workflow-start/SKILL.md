@@ -1,6 +1,6 @@
 ---
 name: gat-workflow-start
-description: "Inspect the repo state and recommend the next step in the simplified workflow."
+description: "Inspect the repo state and show a status panel across all milestones, recommending the earliest actionable next step in the workflow."
 argument-hint: "[no arguments]"
 user-invocable: true
 allowed-tools: Read, Glob, Grep, AskUserQuestion
@@ -8,47 +8,83 @@ allowed-tools: Read, Glob, Grep, AskUserQuestion
 
 # Workflow Start
 
-This skill is the workflow router for the simplified project.
+This skill is the workflow router for the simplified project. Because
+milestones can be in progress at different stages at the same time, it outputs a
+status panel (not a single command) and recommends the earliest actionable step.
+
+Read only `gat/` paths. Do not read or consider legacy `design/` or `production/`
+paths.
 
 ## Phase 1: Inspect State
 
-Check for these files:
+Check for these files (all under `gat/`):
 
-- `design/gdd/game.md`
-- `design/gdd/systems-index.md`
-- `design/gdd/*.md` except `game.md` and `systems-index.md`
-- `design/narrative/*.md`
-- `design/art/art-direction.md`
-- `design/art/*-art.md`
-- `production/milestone.md`
+- `gat/overview/game.md`
+- `gat/overview/systems-index.md`
+- `gat/overview/art-direction.md`
+- `gat/narrative/*.md`
+- `gat/milestone/milestone.md`
+- each `gat/milestone/m{N}-<name>/m{N}-brief.md`
+- each system's docs under `gat/milestone/m{N}-<name>/<system>/`
 
-## Phase 2: Summarize State
+## Phase 2: Derive Per-Milestone Stage
+
+For each milestone that has an `m{N}-brief.md`, derive its stage from filesystem
+state:
+
+- `planned` — brief exists, all systems Pending (no GDDs on disk)
+- `designing` — at least one system designed but not all
+- `designed` — every in-scope system's GDD (and art/data where required) is on disk
+- `building` / `built` — user-set only; GAT cannot observe engineering. Read the
+  status field from `m{N}-brief.md` if the user has advanced it past `designed`.
+
+If the brief's status field disagrees with filesystem state, trust the brief's
+status only when it is `building` or `built` (engineering stages GAT can't
+derive); otherwise derive from files.
+
+## Phase 3: Status Panel
 
 Report a short factual summary:
 
-- Game overview present or missing
-- Systems index present or missing
-- Number of system GDDs
-- Number of narrative docs
-- Art direction present or missing
-- Number of system art docs
-- Milestone handoff roadmap present or missing
+```
+GAT Status:
 
-## Phase 3: Route
+Overview:
+  gat/overview/game.md          [present | missing]
+  gat/overview/systems-index.md [present | missing]
+  gat/overview/art-direction.md [present | missing]
 
-Use this logic:
+Narrative:
+  gat/narrative/*.md            [N docs | missing]
 
-1. If `design/gdd/game.md`, `design/gdd/systems-index.md`, or `design/art/art-direction.md` is missing:
-   recommend `/gat-brainstorm` (with optional hint)
-2. If the game overview or user goal indicates story, plot, lore, worldbuilding, characters, quests, dialogue, or authored narrative content matters, and no `design/narrative/story.md` exists:
-   recommend `/gat-story`
-3. If any system in `systems-index.md` lacks a GDD or art doc:
-   recommend `/gat-design` to continue the pipeline
-4. If `production/milestone.md` is missing:
-   recommend `/gat-milestone`
-5. Otherwise:
-   state that GAT pre-production is complete and tell the user to hand one milestone at a time to their downstream engineering workflow
+Milestones (from gat/milestone/milestone.md):
+  M1 <name>   [planned | designing | designed | building | built]  (K/N systems designed)
+  M2 <name>   [planned | designing | designed | building | built]  (K/N systems designed)
+  ...
+```
 
-## Phase 4: Hand Off
+## Phase 4: Route
 
-End with one short line telling the user which command to run next.
+Use earliest-first priority to pick the primary recommendation, and list other
+valid actions:
+
+1. If `gat/overview/game.md`, `gat/overview/systems-index.md`, or `gat/overview/art-direction.md` is missing:
+   recommend `/gat-brainstorm` (with optional hint). This is the earliest step.
+2. Else if the game needs narrative (per overview/user goal) and `gat/narrative/story.md` does not exist:
+   recommend `/gat-story`.
+3. Else if `gat/milestone/milestone.md` is missing:
+   recommend `/gat-milestone`.
+4. Else if the earliest milestone with unwritten systems exists:
+   recommend `/gat-design <that milestone>` (continue) or `/gat-design <that milestone> <system>`.
+5. Else if the earliest milestone is fully `designed` but no later milestone needs design:
+   state that the milestone is ready for engineering handoff (the user runs their downstream engineering workflow on that milestone directory).
+6. Otherwise:
+   state that GAT pre-production is complete for all planned milestones and tell the user to hand milestones one at a time to their downstream engineering workflow.
+
+Always also list other valid actions (e.g., "M1 ready for engineering; M2
+designing — run `/gat-design m2-<name>` to continue M2").
+
+## Phase 5: Hand Off
+
+End with one short line telling the user which command to run next (the primary
+recommendation), plus any alternative actions.

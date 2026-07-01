@@ -3,6 +3,7 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: artist
+> **Path**: gat/overview/art-direction.md
 
 ## 1. Visual Identity Summary
 
@@ -83,4 +84,4 @@
 - Engine or technical limits:
 - Reuse strategy:
 - Consistency rules:
-- System docs should inherit from this file instead of restating it wholesale.
+- Per-milestone system art docs (`gat/milestone/m{N}-<name>/<system>/<system>-art-m{N}.md`) should inherit from this file instead of restating it wholesale.

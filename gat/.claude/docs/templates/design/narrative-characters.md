@@ -3,9 +3,9 @@
 > **Status**: Draft | In Review | Approved
 > **Last Updated**: [Date]
 > **Owner**: writer
-> **Source Story**: design/narrative/story.md
-> **Source World**: design/narrative/world.md
-> **Source Art Direction**: design/art/art-direction.md
+> **Source Story**: gat/narrative/story.md
+> **Source World**: gat/narrative/world.md
+> **Source Art Direction**: gat/overview/art-direction.md
 
 ## 1. Cast Strategy
 

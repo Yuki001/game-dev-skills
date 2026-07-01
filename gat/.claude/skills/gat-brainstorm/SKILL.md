@@ -17,8 +17,8 @@ Pick questions from the angle table below — follow the conversation, not a scr
 - If argument is `discuss` → Mode: `discuss` (no files written, exploration only)
 - If argument is a hint or empty → Mode: `design` (produces foundational design docs and global art direction)
 
-Check whether `design/gdd/game.md`, `design/gdd/systems-index.md`, or
-`design/art/art-direction.md` already exist. If so, note them — the interview may
+Check whether `gat/overview/game.md`, `gat/overview/systems-index.md`, or
+`gat/overview/art-direction.md` already exist. If so, note them — the interview may
 refine or replace existing decisions instead of starting from scratch.
 
 ## Phase 2: The Interview
@@ -163,16 +163,16 @@ If yes, read templates:
 - `.claude/docs/templates/design/global-art.md`
 
 **Step 1** — Spawn `gat-designer` to write both foundational design files in one pass:
-- `design/gdd/game.md`
-- `design/gdd/systems-index.md`
+- `gat/overview/game.md`
+- `gat/overview/systems-index.md`
 
 Pass all interview answers, the confirmed system list with dependencies, and
 the game overview and systems index templates.
 
 **Step 2** — Spawn `gat-artist` to write the global art direction:
-- `design/art/art-direction.md`
+- `gat/overview/art-direction.md`
 
-Pass all interview answers, `game.md`, `systems-index.md`, the confirmed visual
+Pass all interview answers, `gat/overview/game.md`, `gat/overview/systems-index.md`, the confirmed visual
 identity decisions, and the global-art template. The artist should establish the
 shared visual identity, references, palette, readability rules, asset groups,
 production standards, and constraints for later system art docs.
@@ -183,7 +183,8 @@ Summarize what was decided and what remains open. No files written.
 
 Suggest:
 - `/gat-brainstorm` (without `discuss`) to turn this discussion into foundational design docs and global art direction
-- `/gat-design` to continue the pipeline (only after foundational design docs exist)
+- `/gat-story` if the game needs narrative (after foundational design docs exist)
+- `/gat-milestone` to plan milestone slices (after foundational design docs, and narrative if needed, exist)
 
 ## Phase 4: Hand Off
 
@@ -191,5 +192,4 @@ Summarize what was created or discussed.
 
 If design docs were written, suggest next steps:
 - `/gat-story` if the game needs story, lore, worldbuilding, characters, quests, dialogue, or authored narrative content
-- `/gat-design` to continue the pipeline (system GDDs, content data, and system art docs)
-- `/gat-milestone` to break the game into milestones (only after all design docs are complete)
+- `/gat-milestone` to break the game into milestone slices (milestone planning runs BEFORE per-system design; do NOT run `/gat-design` directly from here)
