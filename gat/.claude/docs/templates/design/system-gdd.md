@@ -10,9 +10,12 @@
 > **Source Index**: gat/overview/systems-index.md
 > **Milestone Brief**: gat/milestone/m{N}-<name>/m{N}-brief.md
 
-## 1. Summary
+## 1. Summary & Goal
 
 [2-3 sentences describing what this system is, what the player experiences, and why it exists.]
+
+- **Does**: [what this system does]
+- **Boundaries**: [what it must not own — which adjacent system owns that responsibility]
 
 > **Style Rule — No Pseudocode**: GDDs define rules, behaviors, and parameters using natural language and mathematical formulas. Do NOT write pseudocode blocks, data structures, or algorithm descriptions. Implementation (code architecture, data structures, algorithms, optimization) is owned by downstream engineering workflow, not by the designer.
 
@@ -22,20 +25,15 @@
 > milestone may redefine this system differently — additions, modifications, or
 > conflicts with an earlier milestone's version are legitimate iteration.
 
-## 2. Goal
-
-- What this system does:
-- Why it exists:
-- What it must not own:
-
-## 3. Player Experience
+## 2. Player Experience
 
 - What the player feels:
-- What the player can do:
-- Success feeling:
-- Failure feeling:
+- What the player does:
 
-## 4. Detailed Design
+> Keep this to one or two lines. Express success/failure as measurable
+> Acceptance Criteria in §6, not as subjective "feels good" language here.
+
+## 3. Detailed Design
 
 ### Core Rules
 
@@ -50,25 +48,15 @@
 
 ### Interactions With Other Systems
 
-| Other System | Input From Them | Output To Them | Notes |
-|--------------|-----------------|----------------|-------|
-| [System] | | | |
+> One table for all cross-system relationships: data flow (Input/Output),
+> dependency direction, and ownership notes. Use this instead of separate
+> Inputs/Outputs or Dependencies sections.
 
-## 5. Inputs And Outputs
+| Other System | Direction | Input From Them | Output To Them | Ownership Notes |
+|--------------|-----------|-----------------|----------------|-----------------|
+| [System] | Depends on / Used by | | | [Which system owns which value or decision] |
 
-### Inputs
-
-- [Input]
-
-### Outputs
-
-- [Output]
-
-### Ownership Notes
-
-- [Which system owns which value or decision]
-
-## 6. Formulas
+## 4. Formulas & Parameters
 
 ### [Formula Name]
 
@@ -78,50 +66,48 @@ result = [expression]
 
 > Use mathematical notation to describe design formulas. Do NOT write implementation pseudocode (loops, conditionals, variable assignments). Keep formulas at the design level — what is computed, not how the engine computes it.
 
-| Variable | Type | Range | Source | Description |
-|----------|------|-------|--------|-------------|
-| [Variable] | int / float / bool | | | |
+> One table covers both formula variables and tuning knobs. Mark a parameter
+> tunable when the designer expects to adjust it during balancing.
+
+| Name | Type | Range | Source | Tunable? | Effect Of Increase | Effect Of Decrease | Description |
+|------|------|-------|--------|----------|--------------------|--------------------|-------------|
+| [Name] | int / float / bool | | | Yes / No | | | |
 
 **Expected output range**:
 **Worked example**:
 
-## 7. Edge Cases
+## 5. Edge Cases
+
+> **As-needed** — omit unless the system has boundary behavior worth calling out separately. Otherwise fold edge behavior into Core Rules (§3) or Acceptance Criteria (§6).
 
 | Scenario | Expected Behavior | Rationale |
 |----------|-------------------|-----------|
 | [Scenario] | | |
 
-## 8. Dependencies
-
-| System | Direction | Nature Of Dependency |
-|--------|-----------|----------------------|
-| [System] | Depends on / Used by | Data / State / Rule / UI |
-
-## 9. Tuning Knobs
-
-| Parameter | Current Value | Safe Range | Effect Of Increase | Effect Of Decrease |
-|-----------|---------------|------------|--------------------|--------------------|
-| [Parameter] | | | | |
-
-## 10. Visual And Audio Hooks
-
-| Event | Visual Need | Audio Need | Priority |
-|-------|-------------|------------|----------|
-| [Event] | | | High / Medium / Low |
-
-## 11. UI Requirements
-
-| Information | Display Location | Update Frequency | Condition |
-|-------------|------------------|------------------|-----------|
-| [Info] | | | |
-
-## 12. Acceptance Criteria
+## 6. Acceptance Criteria
 
 - [ ] [Specific, testable criterion]
 - [ ] [Specific, testable criterion]
 - [ ] Performance or implementation constraint if relevant
 
-## 13. Open Questions
+## 7. UI Requirements
+
+> **As-needed** — omit this section for systems with no player-facing UI.
+
+| Information | Display Location | Update Frequency | Condition |
+|-------------|------------------|------------------|-----------|
+| [Info] | | | |
+
+## 8. Feedback Events
+
+> List feedback event names only. The system art doc
+> (`<system>-art-m{N}.md`) expands each event with visual/audio needs and
+> priority — do not duplicate that expansion here.
+
+- [Event name]
+- [Event name]
+
+## 9. Open Questions
 
 | Question | Owner | Resolution |
 |----------|-------|------------|

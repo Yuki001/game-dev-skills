@@ -44,13 +44,10 @@
 |--------------------|------------------|-------------------|------------|
 | [Choice] | | | Low / Medium / High |
 
-## 5. Quest Dependencies
+## 5. Open Questions
 
-| Quest | Depends On | Unlocks | Blocking Risk |
-|-------|------------|---------|---------------|
-| [Quest] | | | |
-
-## 6. Open Questions
+> Quest dependencies are encoded by the Catalog's Prerequisite column above;
+> no separate dependency section is needed.
 
 | Question | Owner | Resolution |
 |----------|-------|------------|

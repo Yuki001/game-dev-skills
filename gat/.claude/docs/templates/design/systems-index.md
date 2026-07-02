@@ -6,19 +6,22 @@
 
 ## Overview
 
-- Game:
-- Core loop anchor:
-- Pillars most affected by system design:
 - Notes:
 
-> **Note on paths**: This index is the GLOBAL system registry. Per-system GDDs,
-> content-data, and art docs no longer live beside this file — they are written
-> per milestone under `gat/milestone/m{N}-<name>/<system>/` as
+> **Note on paths**: This index is the GLOBAL system registry — the system list,
+> its dependencies, and priorities. Per-system GDDs, content-data, and art docs
+> are written per milestone under `gat/milestone/m{N}-<name>/<system>/` as
 > `<system>-gdd-m{N}.md`, `<system>-data-m{N}.md`, and `<system>-art-m{N}.md`.
-> The GDD/Art/Content Data columns below record which milestones have designed
-> each system, not a single global path.
+> The "Designed In Milestones" column records which milestones have designed
+> each system. Game name, core loop, and pillars live in `gat/overview/game.md`
+> (linked above) — not restated here.
 
 ## Systems Enumeration
+
+> The Depends On column is the single source of truth for the dependency graph.
+> Authoring order and per-milestone sequencing belong in the milestone plan
+> (`gat/milestone/milestone.md`); system-level risks belong in each milestone's
+> `m{N}-brief.md`.
 
 | Order | System | Category | Priority | Layer | Depends On | Status | Designed In Milestones | Notes |
 |-------|--------|----------|----------|-------|------------|--------|------------------------|-------|
@@ -46,39 +49,18 @@
 | Alpha | needed for full feature breadth |
 | Later | nice-to-have, polish, or deferred content |
 
-## Dependency Map
+## Layer Guide
 
-### Foundation Layer
+| Layer | Use For |
+|-------|---------|
+| Foundation | lowest-level systems everything else builds on (input, state, save) |
+| Core | primary gameplay systems that define the moment-to-moment experience |
+| Feature | secondary systems layered on top of Core (progression, economy, meta) |
+| Presentation | player-facing output systems (UI, audio, narrative delivery) |
 
-1. [System] - depends on: none
-
-### Core Layer
-
-1. [System] - depends on: [list]
-
-### Feature Layer
-
-1. [System] - depends on: [list]
-
-### Presentation Layer
-
-1. [System] - depends on: [list]
-
-## Suggested Authoring Order
-
-| Order | System | Why First | Effort | Notes |
-|-------|--------|-----------|--------|-------|
-| 1 | [System] | | S / M / L | |
-
-## High-Risk Systems
-
-| System | Risk Type | Why It Is Risky | Mitigation |
-|--------|-----------|-----------------|------------|
-| [System] | Design / Tech / Scope | | |
-
-> **No global progress tracker here.** Per-system design progress is tracked in
-> each milestone's `m{N}-brief.md` (Progress Tracker section). This index is the
-> global system registry, not a progress dashboard.
+> Layers are a loose build-order hint (Foundation → Core → Feature →
+> Presentation), not a hard dependency. The Depends On column is still the
+> authoritative dependency graph.
 
 ## Open Questions
 

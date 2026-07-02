@@ -83,10 +83,11 @@
 ## 8. Production Intent
 
 - First playable target:
-- Vertical-slice target:
-- Milestone shape:
 - Core features to implement first:
 - Biggest production unknown:
+
+> Vertical-slice target and milestone shape belong in the milestone plan
+> (`gat/milestone/milestone.md`), not here.
 
 ## 9. Shared Requirements
 
@@ -103,19 +104,15 @@
 - Priority assets:
 - Audio needs:
 
-## 10. Risks
+## 10. Open Questions
 
-| Risk | Type | Impact | Mitigation |
-|------|------|--------|------------|
-| [Risk] | Design / Tech / Scope / Art | | |
-
-## 11. Open Questions
+> Risks live in the milestone brief (`m{N}-brief.md`), the handoff packet — not here.
 
 | Question | Owner | Resolution |
 |----------|-------|------------|
 | [Question] | | Pending |
 
-## 12. Narrative Summary
+## 11. Narrative Summary
 
 > Fill this section only if the game has a narrative component. Keep it to a short handoff summary; use `/gat-story` for story, world, character, quest, and dialogue details. For pure arcade/abstract games, ignore it.
 

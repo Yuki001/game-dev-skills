@@ -21,8 +21,12 @@
 
 ## 3. Feedback Events
 
-| Event | Visual Need | Audio Need | Priority | Notes |
-|-------|-------------|------------|----------|-------|
+> Inherit event names from the source GDD's Feedback Events list. Expand each
+> event here with visual/audio needs and priority — do not re-enumerate events
+> from scratch.
+
+| Event (from GDD) | Visual Need | Audio Need | Priority | Notes |
+|-------------------|-------------|------------|----------|-------|
 | [Event] | | | High / Medium / Low | |
 
 ## 4. Asset Candidates

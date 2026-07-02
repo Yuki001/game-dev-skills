@@ -60,13 +60,7 @@
 - How consequences are shown:
 - Failure-state narrative approach:
 
-## 7. Dependencies
-
-| System / Doc | Dependency | Impact If Unresolved |
-|--------------|------------|----------------------|
-| [System or doc] | | |
-
-## 8. Content Scope
+## 7. Content Scope
 
 | Content Type | MVP Count | Later Count | Notes |
 |--------------|-----------|-------------|-------|
@@ -77,14 +71,16 @@
 | Dialogue lines / barks | | | |
 | Lore entries | | | |
 
-## 9. Risks
+## 8. Risks
 
 | Risk | Type | Impact | Mitigation |
 |------|------|--------|------------|
 | [Risk] | Tone / Scope / Systems / Sensitivity | | |
 
-## 10. Open Questions
+## 9. Open Questions
+
+> Unresolved system or document dependencies also go here as open questions.
 
 | Question | Owner | Resolution |
 |----------|-------|------------|
-| [Question] | | Pending |
+| [Question — including any unresolved system/doc dependency] | | Pending |

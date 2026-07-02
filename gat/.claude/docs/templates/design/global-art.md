@@ -25,6 +25,8 @@
 
 ### Emotional Color Mapping
 
+> **As-needed** — omit unless the game maps colors to distinct game states.
+
 | Game State | Dominant Colors | Mood |
 |------------|-----------------|------|
 | Exploration | | |
@@ -58,6 +60,8 @@
 | Audio | | | |
 
 ## 7. Production Standards
+
+> **As-needed** — omit until production actually starts; resolution/format tables are premature pre-production. Keep the section available so it can be filled later.
 
 ### Naming Convention
 

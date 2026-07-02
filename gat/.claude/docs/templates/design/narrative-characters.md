@@ -16,9 +16,12 @@
 
 ## 2. Core Cast
 
-| Character | Story Role | Gameplay Role | Want | Need | Conflict | Arc | Voice Keywords |
-|-----------|------------|---------------|------|------|----------|-----|----------------|
-| [Name] | Protagonist / Antagonist / Ally / Rival / Guide | | | | | | |
+> One row per major character. Voice/naming rules and per-character content
+> needs are folded into this table instead of living in separate sections.
+
+| Character | Story Role | Gameplay Role | Want | Need | Conflict | Arc | Voice Keywords | Voice / Naming Rules | Required Scenes / Barks | Notes |
+|-----------|------------|---------------|------|------|----------|-----|----------------|----------------------|-------------------------|-------|
+| [Name] | Protagonist / Antagonist / Ally / Rival / Guide | | | | | | | [vocabulary / sentence shape / avoid] | | |
 
 ## 3. Character Briefs
 
@@ -41,19 +44,7 @@
 |--------------|--------------|---------|----------------|
 | [A ↔ B] | | | |
 
-## 5. Voice And Naming Rules
-
-| Character / Group | Vocabulary | Sentence Shape | Avoid |
-|-------------------|------------|----------------|-------|
-| [Name or group] | | | |
-
-## 6. Content Scope
-
-| Character | Required Scenes / Conversations | Barks | Optional Content | Notes |
-|-----------|--------------------------------|-------|------------------|-------|
-| [Name] | | | | |
-
-## 7. Open Questions
+## 5. Open Questions
 
 | Question | Owner | Resolution |
 |----------|-------|------------|

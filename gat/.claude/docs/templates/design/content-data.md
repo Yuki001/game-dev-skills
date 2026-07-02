@@ -40,6 +40,8 @@
 
 ## 4. Tuning Log
 
+> **As-needed** — omit unless recording iteration changes worth a paper trail (otherwise let commits carry the history).
+
 > Changes made during iteration. Keep brief — date + what + why.
 
 | Date | Change | Reason |
@@ -47,6 +49,8 @@
 | | | |
 
 ## 5. Open Questions
+
+> **As-needed** — content-data questions usually belong in the source GDD's Open Questions instead. Only record questions specific to content instances here.
 
 | Question | Owner | Resolution |
 |----------|-------|------------|
