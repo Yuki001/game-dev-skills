@@ -167,7 +167,12 @@ If yes, read templates:
 - `gat/overview/systems-index.md`
 
 Pass all interview answers, the confirmed system list with dependencies, and
-the game overview and systems index templates.
+the game overview and systems index templates. 
+
+Instruct the designer to populate the **Key Design Decisions** section in `game.md`: 
+record each foundational choice as a short paragraph, and add a **Why:** note when 
+the rationale or rejected alternatives need to be stated — drawing from the interview's 
+tension-resolution moments.
 
 **Step 2** — Spawn `gat-artist` to write the global art direction:
 - `gat/overview/art-direction.md`

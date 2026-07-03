@@ -94,7 +94,7 @@ options, explain trade-offs, and keep the design docs coherent.
 
 ## Best Practices
 
-- Keep `gat/overview/game.md` focused on vision, pillars, loop, scope, and shared requirements.
+- Keep `gat/overview/game.md` focused on vision, pillars, key design decisions, loop, scope, and shared requirements.
 - Use `gat/overview/systems-index.md` as the source of truth for system names, order,
   dependencies, and relative priority across the whole game.
 - Use per-milestone system GDDs under `gat/milestone/m{N}-<name>/<system>/` for

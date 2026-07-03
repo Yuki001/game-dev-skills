@@ -104,13 +104,22 @@
 - Priority assets:
 - Audio needs:
 
-## 10. Open Questions
+## 10. Key Design Decisions
 
-> Risks live in the milestone brief (`m{N}-brief.md`), the handoff packet — not here.
+> Foundational choices resolved during brainstorm. Each entry is one decision.
+> Loop A re-entry may add or supersede entries when engineering or
+> later-milestone feedback surfaces a change.
 
-| Question | Owner | Resolution |
-|----------|-------|------------|
-| [Question] | | Pending |
+### Decision 1
+
+[One paragraph describing the choice.]
+
+**Why:** [Optional — One short paragraph describing the rationale, and 
+what alternatives were rejected. Omit when the choice is self-evident.]
+
+### Decision 2
+
+[One paragraph describing the choice.]
 
 ## 11. Narrative Summary
 
@@ -121,3 +130,12 @@
 - Tone keywords:
 - Narrative delivery needs:
 - Key narrative dependency or open question:
+
+## 12. Open Questions
+
+> Risks live in the milestone brief (`m{N}-brief.md`), the handoff packet — not here.
+
+| Question | Owner | Resolution |
+|----------|-------|------------|
+| [Question] | | Pending |
+
