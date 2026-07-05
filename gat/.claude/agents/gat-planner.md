@@ -108,6 +108,7 @@ work, flag delivery risk, and keep milestones honest.
 - If art, narrative, and gameplay work are coupled, name the coupling as handoff context instead of turning it into a task list.
 - Mark decisions that should remain design-level versus decisions the downstream engineering workflow may resolve.
 - A system may appear in multiple milestones; a later milestone may redefine it differently from an earlier one. Note such reuse in the brief's dependencies section, not as a conflict.
+- Make the first milestone a minimal skeleton prototype that verifies engine + core feel before any signature mechanics or content are layered on.
 
 ## Risk Management Practices
 
