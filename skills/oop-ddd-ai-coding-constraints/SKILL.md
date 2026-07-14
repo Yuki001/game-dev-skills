@@ -76,42 +76,68 @@ Follow a different layer structure only when the existing project clearly define
 
 ### Domain-Controlled View Wrapper
 
-Prefer composition over engine inheritance:
+Prefer the Domain Object as the primary object instead of following the structure prescribed by the engine's scene framework:
 
 - Keep `Actor`, `Player`, `Enemy`, and other Domain Objects as plain classes instead of inheriting engine scene types.
 - Use an engine-agnostic View contract and a plain-class wrapper with a private native node. If the engine requires inheritance, keep a separate minimal Host that forwards callbacks to Application and presentation to the wrapper.
 
-Use this shape by default:
+Do not use the following structures; they are violations:
 
+**Unity**:
 ```csharp
-public interface IActorView
-{
-    void SetPosition(WorldPosition position);
-    void PlayAnimation(AnimationId animation);
-}
+public class ActorController : MonoBehaviour {}
+```
 
-public sealed class Actor
-{
-    private readonly IActorView _view;
+**Godot**:
+```csharp
+public partial class ActorNode : Node {}
+```
 
-    public Actor(IActorView view)
-    {
-        _view = view;
+Use the following structures:
+
+**Unity**:
+```csharp
+public class Actor
+{
+    private ActorView _view = null;
+    public Initialize() {
+        // Create _view through an appropriate means, e.g. a factory
+        _view = _context.ViewFactory.CreateActor(configID);
     }
 }
 
-public sealed class UnityActorView : IActorView
+public class ActorView
 {
-    private readonly GameObject _node;
+    private GameObject _node = null;
 
-    // Translate IActorView operations to the wrapped GameObject.
+    void Initialize(string prefabPath);
+    void SetPosition(WorldPosition position);
+    void PlayAnimation(AnimationId animation);
+    void Destroy();
+    // Translate ActorView operations to the wrapped GameObject.
+}
+```
+
+**Godot**:
+```csharp
+public class Actor
+{
+    private ActorView _view = null;
+    public Initialize() {
+        // Create _view through an appropriate means, e.g. a factory
+        _view = _context.ViewFactory.CreateActor(configID);
+    }
 }
 
-public sealed class GodotActorView : IActorView
+public class ActorView
 {
-    private readonly Node _node;
+    private Node _node = null;
 
-    // Translate IActorView operations to the wrapped Node.
+    void Initialize(string prefabPath);
+    void SetPosition(WorldPosition position);
+    void PlayAnimation(AnimationId animation);
+    void Destroy();
+    // Translate ActorView operations to the wrapped Node.
 }
 ```
 

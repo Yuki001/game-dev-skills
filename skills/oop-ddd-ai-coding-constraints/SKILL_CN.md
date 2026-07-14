@@ -76,42 +76,68 @@ Domain -> no framework or infrastructure dependency
 
 ### Domain 主导的 View Wrapper
 
-优先使用组合而不是引擎继承：
+优先使用领域对象作为主要对象, 而不是引擎场景框架指定的做法：
 
 - 让 `Actor`、`Player`、`Enemy` 等 Domain Object 保持为普通类，不继承引擎场景类型。
 - 使用引擎无关的 View 契约和私有持有原生节点的普通 wrapper。引擎必须继承时，另设最小 Host，把回调转发给 Application、把表现操作转发给 wrapper。
 
-默认采用以下结构：
+不要采取以下结构 (属于违规)：
 
+**Unity** :
 ```csharp
-public interface IActorView
-{
-    void SetPosition(WorldPosition position);
-    void PlayAnimation(AnimationId animation);
-}
+public class ActorController : MonoBehaviour {}
+```
 
-public sealed class Actor
-{
-    private readonly IActorView _view;
+**Godot** :
+```csharp
+public partial class ActorNode : Node {}
+```
 
-    public Actor(IActorView view)
-    {
-        _view = view;
+需要采用以下结构：
+
+**Unity** :
+```csharp
+public class Actor
+{
+    private ActorView _view = null;
+    public Initialize() {
+        // 使用合适的方法创建 _view，例如factory
+        _view = _context.ViewFactory.CreateActor(configID);
     }
 }
 
-public sealed class UnityActorView : IActorView
+public class ActorView
 {
-    private readonly GameObject _node;
+    private GameObject _node = null;
 
-    // 把 IActorView 操作转换为对所封装 GameObject 的操作。
+    void Initialize(string prefabPath);
+    void SetPosition(WorldPosition position);
+    void PlayAnimation(AnimationId animation);
+    void Destroy();
+    // 把 ActorView 操作转换为对所封装 GameObject 的操作。
+}
+```
+
+**Godot** :
+```csharp
+public class Actor
+{
+    private ActorView _view = null;
+    public Initialize() {
+        // 使用合适的方法创建 _view，例如factory
+        _view = _context.ViewFactory.CreateActor(configID);
+    }
 }
 
-public sealed class GodotActorView : IActorView
+public class ActorView
 {
-    private readonly Node _node;
+    private Node _node = null;
 
-    // 把 IActorView 操作转换为对所封装 Node 的操作。
+    void Initialize(string prefabPath);
+    void SetPosition(WorldPosition position);
+    void PlayAnimation(AnimationId animation);
+    void Destroy();
+    // 把 ActorView 操作转换为对所封装 Node 的操作。
 }
 ```
 
