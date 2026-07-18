@@ -25,8 +25,9 @@ workflows:
   #       surfaces a change to overview or narrative.
   #   Loop B (iterate milestones): /gat-design {M} -> engineering workflow
   #     - each iteration delivers ONE new milestone (design it, hand it to
-  #       engineering, loop back for the next). Multiple milestones may be in
-  #       progress at different stages at the same time.
+  #       engineering, loop back for the next). Each milestone brief includes
+  #       detailed internal iterations for the downstream workflow to handle.
+  #       Multiple milestones may be in progress at different stages at the same time.
   # /gat-milestone sits between the loops: consumes globals from Loop A and
   # produces the milestone plan that Loop B iterates over.
   steps:

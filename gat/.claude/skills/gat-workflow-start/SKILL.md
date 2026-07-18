@@ -35,12 +35,9 @@ state:
 - `planned` — brief exists, all systems Pending (no GDDs on disk)
 - `designing` — at least one system designed but not all
 - `designed` — every in-scope system's GDD (and art/data where required) is on disk
-- `building` / `built` — user-set only; GAT cannot observe engineering. Read the
-  status field from `m{N}-brief.md` if the user has advanced it past `designed`.
 
-If the brief's status field disagrees with filesystem state, trust the brief's
-status only when it is `building` or `built` (engineering stages GAT can't
-derive); otherwise derive from files.
+If the brief's status field disagrees with filesystem state, derive the stage from
+filesystem state.
 
 ## Phase 3: Status Panel
 
@@ -58,8 +55,8 @@ Narrative:
   gat/narrative/*.md            [N docs | missing]
 
 Milestones (from gat/milestone/milestone.md):
-  M1 <name>   [planned | designing | designed | building | built]  (K/N systems designed)
-  M2 <name>   [planned | designing | designed | building | built]  (K/N systems designed)
+  M1 <name>   [planned | designing | designed]  (K/N systems designed)
+  M2 <name>   [planned | designing | designed]  (K/N systems designed)
   ...
 ```
 
@@ -77,7 +74,7 @@ valid actions:
 4. Else if the earliest milestone with unwritten systems exists:
    recommend `/gat-design <that milestone>` (continue) or `/gat-design <that milestone> <system>`.
 5. Else if the earliest milestone is fully `designed` but no later milestone needs design:
-   state that the milestone is ready for engineering handoff (the user runs their downstream engineering workflow on that milestone directory).
+   state that the milestone is ready for engineering handoff (the user runs their downstream engineering workflow on that milestone directory; the brief includes detailed internal iterations for the downstream workflow to handle).
 6. Otherwise:
    state that GAT pre-production is complete for all planned milestones and tell the user to hand milestones one at a time to their downstream engineering workflow.
 

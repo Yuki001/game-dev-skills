@@ -20,7 +20,7 @@ Milestone planning runs BEFORE per-system design. `/gat-milestone` needs only `g
 The flow has two loops:
 
 - **Loop A — refine globals (`/gat-brainstorm` ↔ `/gat-story`):** iterate on the SAME global files (`gat/overview/*` and `gat/narrative/*`), refining them over multiple passes. May re-enter later when engineering or later-milestone feedback surfaces a change to the overview or narrative.
-- **Loop B — iterate milestones (`/gat-design {M}` → engineering):** each iteration delivers ONE new milestone — design its systems, hand the milestone directory to engineering, then loop back for the next milestone. Multiple milestones may be in progress at different stages at the same time.
+- **Loop B — iterate milestones (`/gat-design {M}` → engineering):** each iteration delivers ONE new milestone — design its systems, hand the milestone directory to engineering, then loop back for the next milestone. Each milestone brief includes detailed internal iterations for the downstream engineering workflow to handle. Multiple milestones may be in progress at different stages at the same time.
 
 `/gat-milestone` sits between the two loops: it consumes the globals from Loop A and produces the milestone plan that Loop B iterates over.
 
@@ -37,7 +37,7 @@ The flow has two loops:
 - Track the global system list in `gat/overview/systems-index.md`; track per-milestone progress in each `m{N}-brief.md`
 - `/gat-design` requires a mandatory `{milestone}` argument — if omitted, it stops and asks for one. No inference, default, or fallback
 - A later milestone may redefine a system differently from an earlier one (additions, modifications, even conflicts). This is expected iteration, not an error
-- `gat/milestone/milestone.md` is an ordered set of milestone handoff slices with status (`planned -> designing -> designed -> building -> built`), not a task plan
+- `gat/milestone/milestone.md` is an ordered set of milestone handoff slices with status (`planned -> designing -> designed`), not a task plan
 - Different milestones may be in progress at the same time at different stages. A milestone may enter the engineering workflow as soon as its design docs are complete — later milestones need not be designed first
 - Engineering feedback may flow back to update `gat/overview/`, `gat/narrative/`, or the remaining milestone plan. Detecting docs made stale by such edits is the user's responsibility, not automated
 - Technical design, implementation task breakdown, verification plans, and code changes happen outside GAT

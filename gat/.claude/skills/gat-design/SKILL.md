@@ -92,8 +92,7 @@ NOT need content-data docs — their parameters fit within the GDD itself.
 **Step 4 — Update Progress**
 
 After writing a system's docs, update that system's row in the milestone's
-`m{N}-brief.md` progress tracker (System | GDD | Art | Data | Status) to mark
-GDD/Art/Data paths filled and Status Designed. If this was the first system
+`m{N}-brief.md` progress tracker (System | Iteration(s) | GDD | Art | Data | Design Status) to mark GDD/Art/Data paths filled and Design Status Designed. If this was the first system
 designed in the milestone, also set the milestone status from `planned` to
 `designing` (in both the brief and `gat/milestone/milestone.md`).
 

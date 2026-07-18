@@ -44,9 +44,10 @@ Read:
 
 Spawn `gat-planner` agent with all read content plus:
 
-- instruction to write or update `gat/milestone/milestone.md` as an ordered set of milestone slices (`M01`, `M02`, ...) with a status column (`planned -> designing -> designed -> building -> built`)
+- instruction to write or update `gat/milestone/milestone.md` as an ordered set of milestone slices (`M01`, `M02`, ...) with a status column (`planned -> designing -> designed`)
 - instruction to create a directory `gat/milestone/m{N}-<name>/` for each planned milestone
 - instruction to author an `m{N}-brief.md` skeleton (template: `.claude/docs/templates/plan/m-brief.md`) for each milestone, listing every in-scope system with status Pending and the milestone status `planned`
+- instruction to add an internal iteration plan to each brief using the template's repeated subsections;
 - instruction NOT to write system GDDs, content-data docs, art docs, task lists, technical designs, prompt packs, or code
 - planning focus from argument if provided
 

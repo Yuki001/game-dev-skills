@@ -17,7 +17,7 @@ gat/                          ← all GAT-produced documents live here
   milestone/
     milestone.md              ← ordered milestone roadmap with status (planner)
     m1-<name>/                ← per-milestone handoff unit
-      m1-brief.md             ← milestone brief: goal, scope, progress tracker, file refs (planner skeleton; designer updates progress)
+      m1-brief.md             ← milestone brief: goal, scope, progress tracker, file refs, internal iterations (planner skeleton; designer updates progress)
       <system>/
         <system>-gdd-m1.md    ← per-system GDD scoped to this milestone (designer)
         <system>-data-m1.md   ← concrete data instances for this milestone (designer)

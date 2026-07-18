@@ -4,11 +4,11 @@
 > **Last Updated**: [Date]
 > **Path**: gat/milestone/milestone.md
 
-> **Status lifecycle** (per milestone): `planned -> designing -> designed -> building -> built`.
+> **Status lifecycle** (per milestone): `planned -> designing -> designed`.
 > The planner sets `planned` and advances to `designing`/`designed` from observed
-> design documents. `building` and `built` are advanced by the user (GAT cannot
-> observe engineering progress). Each milestone's detailed status and progress
-> tracker live in its `m{N}-brief.md`.
+> design documents. Engineering execution is handled downstream and is not a GAT
+> milestone status. Each milestone's detailed scope and internal iteration plan
+> live in its `m{N}-brief.md`; GAT does not track internal iteration execution.
 
 ## Project Summary
 
@@ -40,6 +40,7 @@
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
 - Acceptance boundary for downstream workflow:
+- Internal iteration plan:
 - Decisions downstream workflow may make:
 - Decisions that must come back to design:
 - Risks and unknowns:
@@ -60,6 +61,7 @@
 - Dependencies from earlier milestones:
 - Handoff to next milestone:
 - Acceptance boundary for downstream workflow:
+- Internal iteration plan:
 - Decisions downstream workflow may make:
 - Decisions that must come back to design:
 - Risks and unknowns:

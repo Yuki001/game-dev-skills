@@ -89,13 +89,14 @@ work, flag delivery risk, and keep milestones honest.
 ## Milestone Handoff Rules
 
 - Each milestone should be one coherent production stage.
+- Each milestone should include an internal iteration plan in its brief.
 - Each milestone needs a player-facing or validation-facing outcome.
 - Each milestone should name the systems it draws from.
 - Each milestone should state what is intentionally out of scope.
 - Each milestone should reference the overview, narrative (scoped range), and content docs the downstream workflow should read.
 - Create a directory `gat/milestone/m{N}-<name>/` and an `m{N}-brief.md` skeleton for every planned milestone.
 - In each brief, list every in-scope system with status Pending; the designer will update these rows as systems are designed.
-- Track milestone status in `milestone.md` and in each brief (`planned -> designing -> designed -> building -> built`). Set `planned` on creation.
+- Track milestone status in `milestone.md` and in each brief (`planned -> designing -> designed`). Set `planned` on creation.
 - Avoid file lists, architecture decisions, coding tasks, and test plans; those belong downstream.
 
 ## Best Practices
