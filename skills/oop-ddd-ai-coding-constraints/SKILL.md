@@ -332,6 +332,14 @@ Before adding or expanding a public API, answer these questions in order:
 
 If the answers show that the API exists only for testing convenience, refuse to add it and redesign the testing strategy. Implement it when it is the minimal business contract explicitly required by the task. If it would create a meaningful, unauthorized contract expansion, explain the API, caller, necessity, and alternatives before requesting confirmation.
 
+### Do not extract interfaces without real variants
+
+Add an interface/port ONLY when the type will genuinely have multiple production implementations. For a single-implementation class, use a concrete class directly — no interface, no port, no abstraction "for future flexibility." Pre-emptive interfaces are over-design and expand the contract surface for no benefit.
+
+- Ask: "Will this type have ≥2 real production variants?" If no → concrete class.
+- Do not add a port just for testability. If a unit test can't be written without faking a type that has no real variant, that test belongs to integration (see Behavioral Testing Rules), not the unit suite.
+- Corollary: never introduce an unauthorized interface during task execution. If a deviation seems necessary, ask the user first.
+
 ## Test Seams and External Dependencies
 
 Create replaceable ports/interfaces only for real boundaries. Valid boundaries include:
@@ -380,6 +388,16 @@ Classify a test failure before changing code:
 | setup issue | Fix the fixture, configuration, or environment |
 
 Do not make public API expansion the default response to a failing test.
+
+### Unit tests cover only units; integration runs in the real engine
+
+Automated unit tests cover ONLY unit classes — engine-agnostic logic with no engine/visual dependency and no Context-level wiring. Anything that requires the real engine runtime, holds engine nodes, mounts views, or wires multiple scopes together (Context, Bootstrap, GameFlow, View mounting, scene assembly) is integration and is verified by running the real engine, not by unit tests.
+
+- Unit-test: leaf engine-agnostic logic only (schedulers, tick counters, value objects, math/collection utils, single domain behaviors with no engine nodes).
+- Do NOT unit-test: Contexts, bootstrap/flow controllers, View wrappers, anything that constructs views or touches engine nodes.
+- Visual/node-bearing types are never faked in unit tests. Verify them by running the real scene in the engine (screenshots, scene-tree inspection, output/error logs, runtime assertions).
+- Never modify the design (add an interface, seam, setter, or test-only hook) just to make an integration concern unit-testable. If a unit test can't be written honestly, the behavior belongs to engine integration, not the unit suite.
+- Contexts belong to overall integration; their lifecycle is verified by running the real entry point, not by fake-injecting their dependencies.
 
 ## Vertical Slices and Completeness
 
