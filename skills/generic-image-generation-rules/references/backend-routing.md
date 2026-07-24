@@ -13,12 +13,13 @@ Probe or infer the smallest relevant set:
 | background removal | foreground segmentation/matting to alpha |
 | mask / inpaint | local corrections and background-removal fallback |
 | one or more references | character, style, palette, layout, or item consistency |
-| native alpha output | direct transparent PNG |
+| native alpha output | direct transparent or partial-alpha PNG |
 | deterministic seed | controlled variation and reproduction |
 | batch generation | efficient exploration |
 | exact dimensions | sheet cells, UI, engine constraints |
 | vector/SVG output | editable geometric assets |
 | vision input | evidence-based evaluation |
+| video generation | reference-guided, motion-first source material for animation frames |
 
 Do not assume a capability from a tool name. Verify the callable interface or document the uncertainty.
 
@@ -28,8 +29,11 @@ Do not assume a capability from a tool name. Verify the callable interface or do
 - Choose a modern instruction-following image model for complex composition, readable labels, reference edits, or semantic scene control.
 - Choose SD/ComfyUI when the user needs local execution, checkpoint/LoRA/control-net workflows, repeatable seeds, or tag-oriented prompting.
 - Choose image edit over regeneration when the current silhouette and composition already pass.
-- For background removal, prefer an available skill, MCP, or API only for dedicated background removal; if none is available, fall back to mask/inpaint and inspect the resulting alpha and edges.
+- Prefer native transparent or partial-alpha generation when the selected model can represent the required opacity structure; inspect the returned alpha rather than trusting the prompt.
+- For background removal, prefer an available dedicated skill, MCP, or API; if none is available, fall back to a capable image-edit/inpaint model and inspect the resulting alpha and edges.
+- For emissive-only VFX, choose black-background additive delivery instead of background removal when the target engine/material supports it; do not use this path for smoke, shadows, or pixels that must occlude or darken the scene.
 - Choose direct sheet generation when a model can follow strict grid and per-cell phase instructions.
+- Choose video generation for motion-first sprite or VFX sources when continuous temporal behavior matters and reference images plus a motion description can constrain the result.
 - Choose frame-by-frame controlled edits when direct sheets cannot preserve identity, phase order, or cell geometry.
 - Choose deterministic post-processing tools for resizing, alpha inspection, slicing, and packing. Do not ask a generative model to perform exact grid arithmetic.
 
@@ -47,6 +51,7 @@ backend:
   generation_size:
   edit_support:
   alpha_support:
+  blend_mode_or_alpha_contract:
   batch_or_seed_support:
   cost_or_latency_class:
 ```
@@ -65,7 +70,8 @@ Use a fallback only if it preserves the hard gates:
 
 Examples:
 
-- No native alpha → removable matte → background-removal edit → alpha inspection.
+- Required alpha → native alpha-capable generation → dedicated removal/matting over a removable matte when needed → capable image edit/inpaint → alpha inspection.
+- Emissive VFX with no alpha requirement → pure black background → additive material → in-engine composite inspection.
 - Poor direct sheet generation → canonical reference → individual frames → deterministic pack.
 - Raster model fails exact geometry → construct SVG or composite generated parts deterministically.
 - Video source requested → hand off video generation/extraction to a dedicated skill, then resume here only for asset evaluation or packaging.

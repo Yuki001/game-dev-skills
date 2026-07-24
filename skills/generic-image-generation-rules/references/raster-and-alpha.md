@@ -13,6 +13,8 @@ Unless the engine/user specifies otherwise:
 
 Confirm engine-specific premultiplied-alpha, texture compression, mipmap, and color-space settings rather than guessing.
 
+These alpha defaults do not apply when the black-background additive VFX path is intentionally selected.
+
 ## Transparency paths
 
 ### A. Native alpha
@@ -36,6 +38,31 @@ Green is not always a good matte; use a color far from the subject palette.
 
 Use a mask when the boundary is known or only a local background region should change. State the change and preservation invariants explicitly.
 
+### D. Black-background additive VFX
+
+Use this path for emissive effects such as fire, sparks, magic, glow, and energy when the target engine/material supports additive or alpha-additive blending:
+
+1. generate or retain the effect over intentional pure black;
+2. keep the source lossless and avoid lifted blacks, compression blocks, backdrop texture, or non-effect haze;
+3. do not run background removal solely to create transparency;
+4. declare and verify the engine blend mode—commonly `One, One` or `SrcAlpha, One`, with engine-specific naming;
+5. preview through the actual material over dark, light, saturated, and expected gameplay backgrounds;
+6. record whether alpha participates in the blend equation.
+
+Black contributes zero under additive blending, so it disappears during composition while bright RGB adds light. This path cannot darken or normally occlude the scene and may wash out on bright backgrounds. Do not use it for smoke, shadows, dark particles, opaque cores, refraction masks, or assets that require ordinary translucency.
+
+## Background-removal capability differences
+
+Distinguish the host tool from the selected model and configuration:
+
+| Route | Capability guidance |
+|---|---|
+| `rembg` | A background-removal runner with selectable models and optional alpha-matting post-processing. It can output partial alpha; do not classify it as binary-only. Quality depends on the chosen model, alpha-matting settings, and source image. |
+| General/DIS BiRefNet weights | High-resolution foreground segmentation with strong fine-boundary reconstruction. A soft-looking mask or clean edge does not guarantee faithful recovery of intrinsic translucency. |
+| `BiRefNet-matting` / `BiRefNet_HR-matting` | Matting-specific weights intended for fractional alpha and fine semitransparent structures; prefer these when hair, fur, motion blur, glass-like edges, or soft transparency must survive. |
+
+Probe the exact model/variant, alpha-matting option, mask value range, output mode, and—when processing frames—temporal consistency. Use ordinary segmentation for mostly opaque subjects; use a matting-capable model/configuration when meaningful partial alpha is a hard requirement. For smoke, glow, and other VFX, also consider whether the additive-black path is the correct engine contract instead of forcing a cutout.
+
 ## Alpha checks
 
 Check:
@@ -50,6 +77,8 @@ Check:
 - shadow policy is intentional.
 
 Use `scripts/inspect_asset.py IMAGE --expect-transparent` for evidence. The script reports alpha availability, transparent/partial pixel counts when decodable, nontransparent bounds, and border transparency.
+
+Do not use `--expect-transparent` as a gate for an intentional additive-black asset. Instead verify pure-black neutrality, clean effect-only RGB, the declared blend equation, and the in-engine composite.
 
 ## Edge cleanup
 

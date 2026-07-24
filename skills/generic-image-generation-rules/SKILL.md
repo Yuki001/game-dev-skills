@@ -26,7 +26,7 @@ Resolve:
 
 - in-game purpose and viewing distance;
 - asset family: icon, prop, character, portrait, environment, tile, UI, VFX, sheet, or animation;
-- SVG versus raster, canvas size, aspect ratio, color space, alpha requirement, and engine constraints;
+- SVG versus raster, canvas size, aspect ratio, color space, alpha or blend-mode requirement, and engine constraints;
 - camera/projection, silhouette, pose, scale, lighting, palette, material, and style invariants;
 - references and the role of each reference;
 - animation timing, loop behavior, frame count, pivot, cell size, and sheet layout when applicable;
@@ -46,7 +46,7 @@ Choose the simplest production path that preserves the requested properties:
 
 - **SVG**: construct or generate vector-native markup, then validate it through `references/svg-workflow.md`.
 - **Raster PNG**: generate at or above delivery size, preserve a clean subject silhouette, then normalize and inspect.
-- **Transparent raster**: prefer reliable native alpha; otherwise generate against a deliberate removable matte and use image edit/background removal. Reinspect the actual alpha channel. Read `references/raster-and-alpha.md`.
+- **Transparent or composited VFX raster**: use native alpha or a removable matte for normal transparency. For emissive-only VFX, black-background additive delivery may replace alpha extraction when the target engine/material supports it. Validate the selected path through `references/raster-and-alpha.md`.
 - **Sprite sheet**: prompt the image model for a strict grid and explicit per-cell phases, then inspect the sheet and every cell. If direct generation cannot hold identity or grid geometry, fall back to canonical-reference plus controlled frame generation. Read `references/sprite-sheets.md`.
 - **Video-derived frames**: delegate video generation and extraction to a dedicated video skill/tool. Accept its ordered frames as inputs here only when game-asset evaluation or packaging is still requested.
 
@@ -78,7 +78,7 @@ Before aesthetic judging, apply deterministic checks:
 
 - file opens and format matches the contract;
 - exact dimensions/aspect ratio;
-- expected alpha is real, not a white/checkerboard background;
+- the selected transparency/compositing path is valid: real alpha for alpha assets, or intentional pure black plus a declared blend mode for additive VFX;
 - no clipped pixels, edge halos, accidental borders, or empty padding;
 - grid/cell geometry is divisible and consistent;
 - animation frames have stable canvas, pivot, scale, identity, and ordering;
@@ -120,7 +120,7 @@ Deliver only accepted files plus useful production metadata:
 
 - deterministic filenames and version suffixes;
 - source SVG plus rendered preview for production vector assets; placeholders may omit the preview;
-- PNG with correct alpha/color mode when raster;
+- PNG with the correct color/alpha mode, or a documented additive blend contract, when raster;
 - individual frames plus packed sheet and frame map when animated;
 - pivot/origin, cell size, padding/extrusion, frame duration, and loop mode;
 - contact sheet or preview for batches/animations.
@@ -133,7 +133,7 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/prompting.md` — semantic prompts, native prompts, Danbooru tag compilation, and edit prompts.
 - `references/game-asset-patterns.md` — reusable patterns for common game asset families.
 - `references/evaluation.md` — hard gates, weighted rubrics, comparison, and iteration decisions.
-- `references/raster-and-alpha.md` — PNG, alpha, matte removal, edge cleanup, and delivery checks.
+- `references/raster-and-alpha.md` — PNG, alpha, matte removal, additive VFX, edge cleanup, and delivery checks.
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.
 - `references/sprite-sheets.md` — direct sheet prompting, grid/frame consistency, and packaging.
 - `scripts/inspect_asset.py` — inspect PNG/SVG metadata, alpha, and grid geometry.

@@ -98,7 +98,7 @@ Evaluation emphasis: legibility at target DPI, consistent padding, state differe
 
 Specify effect family, source/emitter, anticipation, peak, dissipation, frame count, blend mode, background used for review, and whether the delivered pixels are premultiplied.
 
-Evaluation emphasis: temporal arc, stable center/pivot, no frame-edge clipping, usable alpha, smooth energy decay, and visibility on both light and dark test backgrounds.
+Evaluation emphasis: temporal arc, stable center/pivot, no frame-edge clipping, usable alpha or clean additive composition, smooth energy decay, and visibility on both light and dark test backgrounds.
 
 ## Pixel art
 

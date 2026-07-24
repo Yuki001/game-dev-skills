@@ -60,10 +60,6 @@ The sheet dimensions must match the grid plus declared padding. Use `scripts/ins
 
 Keep one shared canvas across frames. Never independently trim frames unless metadata restores a stable pivot.
 
-## External frame sequences
-
-Do not generate or extract video in this skill. When another dedicated skill/tool supplies an ordered frame sequence, treat it as imported source material. Apply the same canvas, pivot, alpha, consistency, timing, evaluation, and packaging checks described here.
-
 ## Vision evaluation
 
 Inspect:
@@ -76,7 +72,7 @@ Inspect:
 - limb/part topology;
 - palette/light flicker;
 - loop discontinuity;
-- alpha halo and frame-edge clipping.
+- alpha/additive compositing artifacts and frame-edge clipping.
 
 For gameplay, motion readability matters more than maximal smoothness. Strong anticipation and contact poses may justify uneven frame timing.
 
@@ -92,3 +88,16 @@ Deliver:
 - loop mode;
 - preview GIF/video/contact sheet;
 - source clip or canonical reference when useful.
+
+## Extension: Video generated animation frames
+
+**NOTE:** THIS PART NEEDS A DEDICATED VIDEO GENERATION TOOL AVAILABLE.
+
+When a dedicated Video Generation tool (skill/mcp/api) is available and motion-first generation suits the asset:
+
+1. Prepare one canonical appearance reference, or multiple key-time references when the video backend supports them. Keep the subject scale, framing, camera, and background treatment compatible with later extraction.
+2. Write a motion prompt that preserves the references and describes temporal behavior, particles, pacing, camera lock, and loop intent. Example: “A burning fireball churns continuously and emits sparks, with a fixed camera and stable centered silhouette.”
+3. Hand the references and motion prompt to the Video Generation skill. Request a short source clip, typically 10–20 seconds, with no cuts or camera movement.
+4. Hand the clip to a dedicated video-processing skill/tool. Sample an initial ordered sequence at a consistent interval derived from the usable duration and target frame count, then favor readable motion phases over blindly keeping every sample. Do not implement video extraction here.
+5. If true-alpha frames are required and the video is opaque, route them through the background-removal policy in `backend-routing.md`. If the emissive additive path is selected, retain pure black, skip background removal, and record the intended blend mode. Inspect alpha or black neutrality, particles, glow, and temporal consistency as applicable.
+6. Normalize canvas, pivot, scale, palette, and timing; reject unstable frames; then pack the approved sequence deterministically into the sprite sheet.
