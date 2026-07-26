@@ -96,7 +96,52 @@ After writing a system's docs, update that system's row in the milestone's
 designed in the milestone, also set the milestone status from `planned` to
 `designing` (in both the brief and `gat/milestone/milestone.md`).
 
-## Phase 3: Review
+## Phase 3: Cross-Document Consistency Audit
+
+After ALL documents in the current request are written (all systems in
+continue mode, or the single system in system mode), run a cross-document
+consistency audit before the review summary.
+
+**Scope** — audit every newly written or updated document in this request
+against:
+
+- Every other newly written document in this request (peer conflict check)
+- Existing system GDD/docs within the SAME milestone that were NOT touched in
+  this request (regression check — does the new design contradict an already-
+  designed system?)
+- `gat/overview/game.md` and `gat/overview/systems-index.md` (global coherence)
+- `gat/overview/art-direction.md` (art coherence, for system-art docs)
+
+**Checklist** — for each document pair, verify:
+
+1. **Terminology**: same concept, same name everywhere. No synonyms or
+   overlapping terms across systems.
+2. **Scope boundaries**: no two systems claim ownership of the same
+   responsibility, data, or behavior.
+3. **Data flow**: referenced data/events/signals that cross system boundaries
+   are defined on the producing side and match the consuming side's expectation.
+4. **Parameter consistency**: numeric parameters (speeds, timings, counts,
+   thresholds) that appear in multiple docs are identical or intentionally
+   different with a documented reason.
+5. **Dependency order**: if system A depends on system B, system B's design
+   must exist (or be designed in this same request) and must provide what A
+   consumes.
+6. **Narrative alignment**: if `gat/narrative/*.md` exists, check that system
+   behaviors don't contradict established story/world/character facts.
+
+**Resolution** — for each conflict found:
+
+- If the conflict is unambiguous (clear which side is correct), fix the
+  offending document(s) directly and note the fix in the audit summary.
+- If the conflict requires a design decision, use `AskUserQuestion` to
+  present both sides and ask the user to decide. Wait for the user's answer,
+  then resolve the conflict accordingly and update the affected document(s).
+
+**Output** — add an "Audit" section at the bottom of the review summary (Phase
+4) listing every check performed (document pairs audited), every conflict found,
+and how each was resolved (fixed / flagged for user).
+
+## Phase 4: Review
 
 Summarize what was created or updated for the system(s) in the milestone.
 
