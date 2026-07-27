@@ -101,6 +101,18 @@ For each asset, variant, or frame compare:
 
 For animation, view a contact sheet and the motion sequence. A single attractive frame can still belong to a broken animation.
 
+### Objective animation evidence
+
+Before visual scoring, collect any inexpensive evidence the available tools can provide:
+
+- frame count, order, dimensions, and alpha mode;
+- occupied-alpha bounds, empty/faint frames, and edge contact;
+- scale/area outliers and baseline or pivot drift;
+- palette or color-distribution drift;
+- whether adjacent frames contain meaningful visual change.
+
+Use these measurements to locate defects and write specific correction hints. They do not prove identity, motion semantics, or animation quality, and their thresholds should be calibrated to the asset rather than copied as universal constants. See `sprite-sheets.md` for extraction, alignment, directional, and packaging guidance.
+
 ## Iteration decision
 
 - `accept`: all gates pass and thresholds met.
@@ -108,4 +120,4 @@ For animation, view a contact sheet and the motion sequence. A single attractive
 - `regenerate`: global composition, pose, silhouette, or projection is wrong.
 - `change pipeline`: repeated failure shows a backend capability mismatch.
 
-After two rounds with the same major defect, revise the prompt structure, references, control method, or backend.
+When the same major defect persists, revise the prompt structure, references, control method, or backend instead of repeating near-identical attempts.

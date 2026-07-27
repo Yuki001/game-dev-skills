@@ -112,6 +112,14 @@ Treat pixel art as a constrained production format:
 - inspect at 1× and enlarged integer scale;
 - normalize generated drafts manually or deterministically before acceptance.
 
+For a sprite sequence or directional set:
+
+- build or select one shared palette across the whole set rather than quantizing each frame independently;
+- merge near-colors consistently so a shade does not flicker between neighboring frames;
+- select or infer one pixel-grid scale, then snap every frame to the same grid size and origin;
+- compare identity and palette before quantization because aggressive reduction can hide source drift;
+- use binary alpha only when the target pixel-art style requires a hard mask, not for soft VFX or deliberately translucent pixels.
+
 “Pixel-art style” at 1024 px is not automatically production pixel art.
 
 ## Cohesion across an asset set

@@ -30,7 +30,7 @@ Resolve:
 - camera/projection, silhouette, pose, scale, lighting, palette, material, and style invariants;
 - references and the role of each reference;
 - animation timing, loop behavior, frame count, pivot, cell size, and sheet layout when applicable;
-- batch/iteration budget and the acceptance rubric.
+- any user-supplied generation limits and the acceptance rubric.
 
 Separate **hard gates** from **quality criteria**. Define both before generation. Read:
 
@@ -47,7 +47,7 @@ Choose the simplest production path that preserves the requested properties:
 - **SVG**: construct or generate vector-native markup, then validate it through `references/svg-workflow.md`.
 - **Raster PNG**: generate at or above delivery size, preserve a clean subject silhouette, then normalize and inspect.
 - **Transparent or composited VFX raster**: use native alpha or a removable matte for normal transparency. For emissive-only VFX, black-background additive delivery may replace alpha extraction when the target engine/material supports it. Validate the selected path through `references/raster-and-alpha.md`.
-- **Sprite sheet**: prompt the image model for a strict grid and explicit per-cell phases, then inspect the sheet and every cell. If direct generation cannot hold identity or grid geometry, fall back to canonical-reference plus controlled frame generation. Read `references/sprite-sheets.md`.
+- **Sprite sheet**: prompt the image model for a strict grid and explicit per-cell phases, then inspect the sheet and every cell. If direct generation cannot hold identity or grid geometry, fall back to canonical-reference plus controlled frame generation. Read `references/sprite-sheets.md`; use `references/sprite-animation-presents.md` when action defaults or motion choreography would help.
 - **Video-derived frames**: delegate video generation and extraction to a dedicated video skill/tool. Accept its ordered frames as inputs here only when game-asset evaluation or packaging is still requested.
 
 ## 3. Compile prompts from one semantic source
@@ -68,9 +68,9 @@ Preflight available capabilities: generate, edit, mask/inpaint, reference images
 Distinguish two batch modes:
 
 - **Direct asset batch**: each output is a different usable asset. Generate directly into the requested target directory with deterministic final filenames, then validate every asset independently.
-- **Variant batch**: multiple attempts compete for one asset slot. Use a temporary or staging directory, compare them with short-lived labels, and place only accepted output in the target directory.
+- **Variant batch**: multiple attempts compete for one asset slot. Keep their roles clear with short-lived labels, compare them, and deliver only accepted output.
 
-Keep prompts, relevant parameters, comparison reasons, and iteration state in the current model context. Avoid changing every variation axis at once. Use lower-cost draft settings only for variant exploration and reserve expensive/high-resolution calls for selected outputs when supported.
+Keep prompts, relevant parameters, comparison reasons, and iteration state in the current model context. Avoid changing every variation axis at once.
 
 ## 5. Normalize and inspect
 
@@ -85,6 +85,8 @@ Before aesthetic judging, apply deterministic checks:
 - SVG passes objective structural checks and text-only shape review; production SVG additionally passes one render/view.
 
 Run `scripts/inspect_asset.py` for basic PNG/SVG metadata and any relevant optional size, color-type, alpha, border, padding, or sheet-grid checks. Treat its output as objective evidence for the checks it reports, not as proof of visual quality, semantic correctness, or target-runtime behavior. Read `references/raster-and-alpha.md` for alpha limitations and edge cleanup.
+
+For sprite sequences, use the optional Pillow-backed helpers under `scripts/sprite/` when sequence metrics, inferred strip cuts/alignment, or atlas/preview packaging are needed. Read `references/sprite-sheets.md` for their roles and commands.
 
 ## 6. Evaluate with vision
 
@@ -112,7 +114,7 @@ Choose the cheapest action that addresses the observed defect:
 - revise prompt compilation when the model repeatedly misreads the brief;
 - change backend or artifact path when the current one lacks a required capability.
 
-Re-evaluate every edited output. Stop when all hard gates pass and the plan's thresholds are met. If the same major defect survives two rounds, change the prompt structure, references, or pipeline rather than repeating near-identical calls.
+Re-evaluate every edited output. Stop when all hard gates pass and the plan's thresholds are met. If the same major defect persists, change the prompt structure, references, or pipeline rather than repeating near-identical calls.
 
 ## 8. Package game-ready outputs
 
@@ -135,5 +137,9 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/evaluation.md` — hard gates, weighted rubrics, comparison, and iteration decisions.
 - `references/raster-and-alpha.md` — PNG, alpha, matte removal, additive VFX, edge cleanup, and delivery checks.
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.
-- `references/sprite-sheets.md` — direct sheet prompting, grid/frame consistency, and packaging.
+- `references/sprite-sheets.md` — direct sheet prompting, extraction, alignment, directional sets, evaluation, and packaging.
+- `references/sprite-animation-presents.md` — optional sprite-sheet action presets, timing defaults, and motion choreography.
 - `scripts/inspect_asset.py` — inspect PNG/SVG metadata and apply optional size, color-type, alpha, border, padding, grid, and strict-SVG checks.
+- `scripts/sprite/inspect_sequence.py` — measure objective sequence drift and frame geometry; requires Pillow only when run.
+- `scripts/sprite/slice_strip.py` — infer strip cuts and align extracted frames; requires Pillow only when run.
+- `scripts/sprite/pack_animation.py` — write a PNG atlas, GIF, APNG, and animation JSON; requires Pillow only when run.
