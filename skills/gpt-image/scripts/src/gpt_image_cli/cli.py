@@ -3,10 +3,9 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #     "openai>=1.55",
-#     "python-dotenv>=1.0",
 # ]
 # ///
-"""General-purpose CLI for OpenAI GPT Image 2.
+"""General-purpose CLI for OpenAI GPT Image models.
 
 Mirrors the two official endpoints from the OpenAI cookbook using the official
 `openai` Python SDK:
@@ -36,8 +35,15 @@ Examples:
     # Alpha-channel inpaint (mask opaque = keep, transparent = regenerate)
     gpt-image -p "replace sky with aurora" -i photo.jpg -m sky_mask.png -f aurora.png
 
-    # Grid of 4, transparent background, webp
+    # Grid of 4, opaque background, webp
     gpt-image -p "isometric chair, minimalist" -n 4 --background opaque --format webp
+
+    # Native transparency when supported by the selected model or compatible endpoint
+    gpt-image -p "isolated product cutout" --background transparent --format png
+
+    # Generate on a flat chroma-key background, then remove it locally
+    gpt-image -p "isolated product on a perfectly flat solid green background" \
+        --background opaque --format png --remove-background
 
     # Run directly (no launcher needed)
     python "$SKILL_DIR/scripts/src/gpt_image_cli/cli.py" -p "a cat astronaut on the moon"
@@ -48,24 +54,62 @@ import argparse
 import base64
 import os
 import re
+import subprocess
 import sys
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
-from dotenv import load_dotenv
 from openai import APIError, OpenAI
 
 
+def _parse_env_line(line: str) -> tuple[str, str] | None:
+    """Parse a simple dotenv assignment without requiring python-dotenv."""
+    stripped = line.strip()
+    if not stripped or stripped.startswith("#"):
+        return None
+    if stripped.startswith("export "):
+        stripped = stripped[len("export ") :].lstrip()
+    if "=" not in stripped:
+        return None
+
+    key, value = stripped.split("=", 1)
+    key = key.strip()
+    value = value.strip()
+    if not key:
+        return None
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        value = value[1:-1]
+    return key, value
+
+
+def _load_env_file(path: Path) -> None:
+    """Load unset environment variables from one dotenv-style file."""
+    if not path.is_file():
+        return
+    try:
+        lines = path.read_text(encoding="utf-8-sig").splitlines()
+    except OSError as exc:
+        print(f"error: could not read env file {path}: {exc}", file=sys.stderr)
+        return
+
+    for line in lines:
+        parsed = _parse_env_line(line)
+        if parsed:
+            key, value = parsed
+            os.environ.setdefault(key, value)
+
+
 def _load_env_chain() -> None:
-    """Resolve OPENAI_API_KEY without overriding runtime-provided env.
+    """Resolve environment settings without overriding runtime-provided values.
 
     Order: process env → ./.env → ~/.env. Existing process env wins so
     hosted agents or explicit shell exports are not replaced by local files.
     """
-    load_dotenv(Path.cwd() / ".env", override=False)
-    load_dotenv(Path.home() / ".env", override=False)
+    _load_env_file(Path.cwd() / ".env")
+    _load_env_file(Path.home() / ".env")
 
 
 SIZE_SHORTCUTS: dict[str, str] = {
@@ -108,7 +152,7 @@ def model_rejects_input_fidelity(model: str) -> bool:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
         prog="gpt-image",
-        description="Call OpenAI GPT Image 2 (generations or edits) via the official openai Python SDK.",
+        description="Call OpenAI GPT Image models (generations or edits) via the official openai Python SDK.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("-p", "--prompt", required=True, help="Text prompt / edit instruction.")
@@ -141,8 +185,13 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("-n", "--n", type=int, default=1, help="Number of images to return. Default 1.")
     p.add_argument(
-        "--background", default=None, choices=["auto", "opaque"],
-        help="`opaque` disables transparency. Default API-side auto.",
+        "--background", default=None, choices=["auto", "transparent", "opaque"],
+        help="Background handling. Support depends on the selected model; the CLI passes the value through unchanged. Default API-side auto.",
+    )
+    p.add_argument(
+        "--remove-background", action="store_true",
+        help="After the API response, remove a flat chroma-key background with the bundled helper. "
+             "Does not rewrite the prompt; request a uniform key-color background and use PNG or WebP.",
     )
     p.add_argument(
         "--moderation", default=DEFAULT_MODERATION, choices=["auto", "low"],
@@ -254,6 +303,62 @@ def write_outputs(data: list[Any], out_path: Path, n: int) -> list[Path]:
     return written
 
 
+def remove_backgrounds(paths: list[Path]) -> bool:
+    """Replace keyed PNG/WebP outputs with locally processed alpha images."""
+    helper = Path(__file__).resolve().parents[2] / "remove_chroma_key.py"
+    if not helper.is_file():
+        print(f"error: background-removal helper not found: {helper}", file=sys.stderr)
+        return False
+
+    for path in paths:
+        if path.suffix.lower() not in {".png", ".webp"}:
+            print(
+                f"error: --remove-background requires a .png or .webp output: {path}",
+                file=sys.stderr,
+            )
+            return False
+
+        with TemporaryDirectory(prefix="gpt-image-remove-background-") as temp_dir:
+            processed = Path(temp_dir) / f"processed{path.suffix.lower()}"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(helper),
+                    "--input",
+                    str(path),
+                    "--out",
+                    str(processed),
+                    "--auto-key",
+                    "border",
+                    "--soft-matte",
+                    "--transparent-threshold",
+                    "12",
+                    "--opaque-threshold",
+                    "220",
+                    "--despill",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if result.returncode != 0:
+                if result.stdout:
+                    print(result.stdout.rstrip(), file=sys.stderr)
+                if result.stderr:
+                    print(result.stderr.rstrip(), file=sys.stderr)
+                print(
+                    f"error: background removal failed for {path}; the keyed source was kept.",
+                    file=sys.stderr,
+                )
+                return False
+
+            if result.stderr:
+                print(result.stderr.rstrip(), file=sys.stderr)
+            path.write_bytes(processed.read_bytes())
+
+    return True
+
+
 def main() -> int:
     args = parse_args()
 
@@ -272,6 +377,22 @@ def main() -> int:
     ext = args.output_format or "png"
     out_path = Path(args.file).expanduser().resolve() if args.file else default_output_path(args.prompt, ext)
 
+    if args.remove_background:
+        if args.output_format == "jpeg" or out_path.suffix.lower() not in {".png", ".webp"}:
+            print(
+                "error: --remove-background requires PNG or WebP output so alpha is preserved.",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            import PIL  # noqa: F401
+        except ImportError:
+            print(
+                "error: --remove-background requires Pillow. Install it in the active Python environment.",
+                file=sys.stderr,
+            )
+            return 2
+
     client = OpenAI()  # auto-reads OPENAI_API_KEY
 
     try:
@@ -285,7 +406,11 @@ def main() -> int:
         print(f"error: no image data in response: {result}", file=sys.stderr)
         return 1
 
-    for p in write_outputs(data, out_path, args.n):
+    written = write_outputs(data, out_path, args.n)
+    if args.remove_background and not remove_backgrounds(written):
+        return 1
+
+    for p in written:
         print(p)
     return 0
 

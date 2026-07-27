@@ -1,4 +1,4 @@
 interface:
   display_name: "GPT Image Executor"
-  short_description: "Execute GPT Image generation, editing, and inpainting"
-  default_prompt: "Use $gpt-image to execute this finalized image prompt or edit instruction with the packaged GPT Image CLI."
+  short_description: "Execute GPT Image generation, editing, and background removal"
+  default_prompt: "Use $gpt-image to execute this finalized image prompt or edit instruction, including the transparent-background workflow when requested."
