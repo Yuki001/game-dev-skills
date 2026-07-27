@@ -56,7 +56,7 @@ loop mode
 trim policy
 ```
 
-The sheet dimensions must match the grid plus declared padding. Use `scripts/inspect_asset.py SHEET --cols N --rows N` for basic divisibility checks.
+The sheet dimensions must match the grid plus declared padding. Use `scripts/inspect_asset.py SHEET --cols N --rows M` for basic divisibility checks.
 
 Keep one shared canvas across frames. Never independently trim frames unless metadata restores a stable pivot.
 

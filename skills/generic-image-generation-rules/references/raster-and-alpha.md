@@ -76,7 +76,9 @@ Check:
 - RGB values in transparent pixels do not create bleed during filtering/mipmaps;
 - shadow policy is intentional.
 
-Use `scripts/inspect_asset.py IMAGE --expect-transparent` for evidence. The script reports alpha availability, transparent/partial pixel counts when decodable, nontransparent bounds, and border transparency.
+Use `scripts/inspect_asset.py IMAGE --expect-transparent` for basic evidence. Add `--expect-size WIDTHxHEIGHT`, `--expect-color-type TYPE`, `--require-transparent-border`, `--require-partial-alpha`, or `--min-padding PIXELS` only when those properties belong to the asset contract. The script reports alpha availability, transparent/partial pixel counts when decodable, nontransparent bounds, four-side transparent padding, and border transparency.
+
+The standard-library inspector does not decode alpha pixels for interlaced PNGs or non-indexed PNGs whose bit depth is not 8. When it reports alpha analysis as unavailable, use another decoder rather than treating the file as visually opaque. The script also cannot prove correct internal holes, edge color decontamination, halo absence, intentional crop/padding, or mipmap behavior; inspect those visually or with a suitable image-processing/runtime tool.
 
 Do not use `--expect-transparent` as a gate for an intentional additive-black asset. Instead verify pure-black neutrality, clean effect-only RGB, the declared blend equation, and the in-engine composite.
 

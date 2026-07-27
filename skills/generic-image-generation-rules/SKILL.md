@@ -79,12 +79,12 @@ Before aesthetic judging, apply deterministic checks:
 - file opens and format matches the contract;
 - exact dimensions/aspect ratio;
 - the selected transparency/compositing path is valid: real alpha for alpha assets, or intentional pure black plus a declared blend mode for additive VFX;
-- no clipped pixels, edge halos, accidental borders, or empty padding;
+- no clipped pixels, edge halos, accidental borders, or unintended/excessive empty padding; preserve the contracted safe margin;
 - grid/cell geometry is divisible and consistent;
 - animation frames have stable canvas, pivot, scale, identity, and ordering;
 - SVG passes objective structural checks and text-only shape review; production SVG additionally passes one render/view.
 
-Run `scripts/inspect_asset.py` for PNG/SVG metadata, alpha evidence, and optional sheet-grid checks. Read `references/raster-and-alpha.md` for edge cleanup.
+Run `scripts/inspect_asset.py` for basic PNG/SVG metadata and any relevant optional size, color-type, alpha, border, padding, or sheet-grid checks. Treat its output as objective evidence for the checks it reports, not as proof of visual quality, semantic correctness, or target-runtime behavior. Read `references/raster-and-alpha.md` for alpha limitations and edge cleanup.
 
 ## 6. Evaluate with vision
 
@@ -136,4 +136,4 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/raster-and-alpha.md` — PNG, alpha, matte removal, additive VFX, edge cleanup, and delivery checks.
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.
 - `references/sprite-sheets.md` — direct sheet prompting, grid/frame consistency, and packaging.
-- `scripts/inspect_asset.py` — inspect PNG/SVG metadata, alpha, and grid geometry.
+- `scripts/inspect_asset.py` — inspect PNG/SVG metadata and apply optional size, color-type, alpha, border, padding, grid, and strict-SVG checks.

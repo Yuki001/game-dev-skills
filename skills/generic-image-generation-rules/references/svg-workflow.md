@@ -50,15 +50,15 @@ Avoid external fonts, remote images, scripts, or network dependencies unless the
 
 ## 3. Code-validate and text-evaluate every SVG
 
-First, run `scripts/inspect_asset.py` and inspect the source for objective validity:
+First, run `scripts/inspect_asset.py` for basic structural evidence:
 
 - XML parses and the root element is `<svg>`;
 - a valid positive-size `viewBox` or explicit dimensions exist;
 - IDs are stable and references such as `<use>`, masks, filters, and clip paths resolve;
-- graphic elements exist and numeric geometry is finite;
-- no unintended remote images, fonts, scripts, or network dependencies exist;
-- naming, canvas, and accessibility conventions are satisfied;
-- the target runtime supports deliberately used SVG features.
+- graphic elements exist and common numeric geometry attributes are finite;
+- external resources, scripts, `foreignObject`, or `role="img"` without an accessible name are reported as warnings.
+
+Use `--strict-svg` only when those warnings should fail the current asset contract. Otherwise, inspect the source to decide whether external images, fonts, scripts, naming, accessibility, and deliberately used SVG features are intentional and supported by the target runtime.
 
 Then evaluate the SVG shapes only from the SVG code text against the intended asset. This is a subjective semantic check, not another parser check. Reconstruct the likely composition from element types, groups, path data, coordinates, transforms, draw order, fills, and strokes. Judge whether:
 
@@ -70,7 +70,7 @@ Then evaluate the SVG shapes only from the SVG code text against the intended as
 - no obvious shape is missing, duplicated, disconnected, inverted, or placed outside the useful canvas;
 - repeated assets or icon-set elements follow the expected shared geometry conventions.
 
-Do not claim pixel-level visual certainty from text alone. For placeholders, this is the final subjective plausibility gate. For production SVGs, it catches semantic mistakes before the render/view gate.
+Do not claim pixel-level visual certainty or target-runtime compatibility from the script or text alone. For placeholders, this is the final subjective plausibility gate. For production SVGs, it catches semantic mistakes before the render/view gate.
 
 Fix failures from either the objective validation or the text-only shape review before continuing. Both checks are required for every SVG.
 

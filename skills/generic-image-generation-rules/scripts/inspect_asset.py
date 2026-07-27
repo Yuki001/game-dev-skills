@@ -38,10 +38,47 @@ SVG_NONFINITE_RE = re.compile(
     r"(?:^|[\s,;(])(?:nan|[+-]?inf(?:inity)?)(?=$|[\s,;)])",
     re.IGNORECASE,
 )
+SVG_NUMERIC_ATTRIBUTES = {
+    "baseFrequency",
+    "cx",
+    "cy",
+    "d",
+    "dx",
+    "dy",
+    "fill-opacity",
+    "filterRes",
+    "height",
+    "k1",
+    "k2",
+    "k3",
+    "k4",
+    "offset",
+    "opacity",
+    "pathLength",
+    "points",
+    "r",
+    "rx",
+    "ry",
+    "stdDeviation",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-opacity",
+    "stroke-width",
+    "transform",
+    "viewBox",
+    "width",
+    "x",
+    "x1",
+    "x2",
+    "y",
+    "y1",
+    "y2",
+}
 SVG_LENGTH_RE = re.compile(
     r"^\s*([+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"
     r"\s*(?:px|pt|pc|mm|cm|in)?\s*$"
 )
+SIZE_RE = re.compile(r"^\s*(\d+)\s*[xX×]\s*(\d+)\s*$")
 
 
 def _paeth(a: int, b: int, c: int) -> int:
@@ -211,6 +248,16 @@ def inspect_png(path: Path) -> dict:
                 border_total += 1
                 border_transparent += int(value == 0)
     bbox = [min(xs), min(ys), max(xs) + 1, max(ys) + 1] if xs else None
+    padding = None
+    if bbox:
+        left, top, right, bottom = bbox
+        padding = {
+            "left": left,
+            "top": top,
+            "right": width - right,
+            "bottom": height - bottom,
+        }
+        padding["minimum"] = min(padding.values())
     result["alpha_analysis"] = {
         "available": True,
         "transparent_pixels": transparent,
@@ -218,6 +265,7 @@ def inspect_png(path: Path) -> dict:
         "opaque_pixels": opaque,
         "transparent_fraction": transparent / (width * height),
         "nontransparent_bbox_xyxy": bbox,
+        "transparent_padding": padding,
         "transparent_border_fraction": border_transparent / border_total,
     }
     return result
@@ -246,6 +294,26 @@ def _valid_svg_view_box(value: str | None) -> bool:
     return all(math.isfinite(number) for number in numbers) and numbers[2] > 0 and numbers[3] > 0
 
 
+def _parse_size(value: str) -> tuple[int, int]:
+    match = SIZE_RE.fullmatch(value)
+    if not match:
+        raise argparse.ArgumentTypeError("size must use WIDTHxHEIGHT, for example 512x512")
+    width, height = (int(part) for part in match.groups())
+    if width < 1 or height < 1:
+        raise argparse.ArgumentTypeError("size dimensions must be positive")
+    return width, height
+
+
+def _parse_nonnegative_int(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("value must be an integer") from exc
+    if number < 0:
+        raise argparse.ArgumentTypeError("value must be non-negative")
+    return number
+
+
 def inspect_svg(path: Path) -> dict:
     root = ElementTree.parse(path).getroot()
     if root.tag.split("}")[-1] != "svg":
@@ -261,6 +329,8 @@ def inspect_svg(path: Path) -> dict:
     graphic_element_count = 0
     script_count = 0
     foreign_object_count = 0
+    title_count = 0
+    desc_count = 0
 
     for element in root.iter():
         tag = element.tag.split("}")[-1]
@@ -270,6 +340,10 @@ def inspect_svg(path: Path) -> dict:
             script_count += 1
         elif tag == "foreignObject":
             foreign_object_count += 1
+        elif tag == "title":
+            title_count += 1
+        elif tag == "desc":
+            desc_count += 1
 
         element_id = element.attrib.get("id")
         if element_id:
@@ -285,7 +359,7 @@ def inspect_svg(path: Path) -> dict:
                 elif value:
                     external_references.append(value)
             local_references.update(SVG_URL_REFERENCE_RE.findall(value))
-            if local_name in {"d", "points", "transform"} and SVG_NONFINITE_RE.search(value):
+            if local_name in SVG_NUMERIC_ATTRIBUTES and SVG_NONFINITE_RE.search(value):
                 nonfinite_attributes.append(f"{tag}.{local_name}")
             if local_name in {"aria-labelledby", "aria-describedby"}:
                 local_references.update(value.split())
@@ -317,6 +391,19 @@ def inspect_svg(path: Path) -> dict:
         warnings.append("SVG contains <script>; verify that scripting is intentional and supported")
     if foreign_object_count:
         warnings.append("SVG contains <foreignObject>; verify target-runtime support")
+    root_titles = [
+        child
+        for child in root
+        if child.tag.split("}")[-1] == "title"
+    ]
+    has_root_title = any("".join(title.itertext()).strip() for title in root_titles)
+    has_accessible_name = bool(
+        root.attrib.get("aria-label")
+        or root.attrib.get("aria-labelledby")
+        or has_root_title
+    )
+    if root.attrib.get("role") == "img" and not has_accessible_name:
+        warnings.append("SVG has role=\"img\" but no title, aria-label, or aria-labelledby")
 
     return {
         "path": str(path.resolve()),
@@ -336,6 +423,12 @@ def inspect_svg(path: Path) -> dict:
         "external_references": external_references,
         "script_count": script_count,
         "foreign_object_count": foreign_object_count,
+        "role": root.attrib.get("role"),
+        "title_count": title_count,
+        "desc_count": desc_count,
+        "root_title_count": len(root_titles),
+        "has_root_title": has_root_title,
+        "has_accessible_name": has_accessible_name,
         "structural_failures": structural_failures,
         "warnings": warnings,
         "note": (
@@ -349,8 +442,21 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("asset", type=Path)
     parser.add_argument("--expect-transparent", action="store_true")
+    parser.add_argument("--expect-size", type=_parse_size, metavar="WIDTHxHEIGHT")
+    parser.add_argument(
+        "--expect-color-type",
+        choices=sorted(name for name, _channels in COLOR_TYPES.values()),
+    )
+    parser.add_argument("--require-transparent-border", action="store_true")
+    parser.add_argument("--require-partial-alpha", action="store_true")
+    parser.add_argument("--min-padding", type=_parse_nonnegative_int, metavar="PIXELS")
     parser.add_argument("--cols", type=int)
     parser.add_argument("--rows", type=int)
+    parser.add_argument(
+        "--strict-svg",
+        action="store_true",
+        help="promote SVG compatibility and accessibility warnings to failures",
+    )
     args = parser.parse_args()
     try:
         suffix = args.asset.suffix.lower()
@@ -361,6 +467,23 @@ def main() -> int:
         else:
             raise ValueError("supported formats: .png, .svg")
         failures: list[str] = list(result.get("structural_failures", []))
+        if args.expect_size:
+            if result.get("format") != "png":
+                failures.append("--expect-size currently requires PNG")
+            elif (result["width"], result["height"]) != args.expect_size:
+                expected_width, expected_height = args.expect_size
+                failures.append(
+                    f"expected {expected_width}x{expected_height}, "
+                    f"got {result['width']}x{result['height']}"
+                )
+        if args.expect_color_type:
+            if result.get("format") != "png":
+                failures.append("--expect-color-type requires PNG")
+            elif result.get("color_type") != args.expect_color_type:
+                failures.append(
+                    f"expected color type {args.expect_color_type}, "
+                    f"got {result.get('color_type')}"
+                )
         if args.expect_transparent:
             alpha = result.get("alpha_analysis", {})
             if not result.get("has_alpha_channel"):
@@ -369,6 +492,48 @@ def main() -> int:
                 failures.append("alpha pixels could not be verified")
             elif not alpha.get("transparent_pixels", 0):
                 failures.append("asset contains no fully transparent pixels")
+        if args.require_transparent_border:
+            alpha = result.get("alpha_analysis", {})
+            if result.get("format") != "png":
+                failures.append("--require-transparent-border requires PNG")
+            elif not result.get("has_alpha_channel"):
+                failures.append("asset has no alpha channel")
+            elif not alpha.get("available"):
+                failures.append("alpha pixels could not be verified")
+            elif alpha.get("transparent_border_fraction") != 1.0:
+                failures.append("not every border pixel is fully transparent")
+        if args.require_partial_alpha:
+            alpha = result.get("alpha_analysis", {})
+            if result.get("format") != "png":
+                failures.append("--require-partial-alpha requires PNG")
+            elif not result.get("has_alpha_channel"):
+                failures.append("asset has no alpha channel")
+            elif not alpha.get("available"):
+                failures.append("alpha pixels could not be verified")
+            elif not alpha.get("partial_alpha_pixels", 0):
+                failures.append("asset contains no partially transparent pixels")
+        if args.min_padding is not None:
+            alpha = result.get("alpha_analysis", {})
+            padding = alpha.get("transparent_padding")
+            if result.get("format") != "png":
+                failures.append("--min-padding requires PNG")
+            elif not result.get("has_alpha_channel"):
+                failures.append("asset has no alpha channel")
+            elif not alpha.get("available"):
+                failures.append("alpha pixels could not be verified")
+            elif padding is None:
+                failures.append("asset contains no nontransparent pixels")
+            else:
+                result["padding_check"] = {
+                    "required_minimum": args.min_padding,
+                    "actual": padding,
+                    "passed": padding["minimum"] >= args.min_padding,
+                }
+                if padding["minimum"] < args.min_padding:
+                    failures.append(
+                        f"minimum transparent padding is {padding['minimum']} px; "
+                        f"expected at least {args.min_padding} px"
+                    )
         if args.cols or args.rows:
             if result.get("format") != "png":
                 failures.append("grid checks require PNG")
@@ -385,6 +550,12 @@ def main() -> int:
                 }
                 if not result["grid"]["divisible"]:
                     failures.append("image dimensions are not divisible by the requested grid")
+        if args.strict_svg:
+            if result.get("format") != "svg":
+                failures.append("--strict-svg requires SVG")
+            else:
+                failures.extend(result.get("warnings", []))
+        failures = list(dict.fromkeys(failures))
         result["checks_passed"] = not failures
         result["failures"] = failures
         print(json.dumps(result, ensure_ascii=False, indent=2))

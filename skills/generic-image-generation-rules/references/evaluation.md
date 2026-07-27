@@ -34,7 +34,7 @@ Choose only relevant criteria and make weights total 100:
 | game-set cohesion | matches accepted assets and import conventions |
 | animation quality | stable pivot, meaningful phases, loop and timing quality |
 
-Set a total threshold and any per-criterion minimum in the plan. A useful default is 80/100 total with no critical criterion below 3/5, but adjust for the task.
+Convert each 1–5 criterion score to weighted points with `weight × score / 5`, then sum the weighted points for a 100-point total. Set a total threshold and any per-criterion minimum in the plan. A useful default is 80/100 total with no critical criterion below 3/5, but adjust for the task.
 
 ## Vision evaluation prompt
 
