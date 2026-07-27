@@ -1,9 +1,9 @@
 ---
-name: generic-image-generation-rules
+name: game-image-generation-rules
 description: Plan, generate, inspect, vision-evaluate, refine, and package images and visual assets for game development through a backend-agnostic production loop. Use for PNG or SVG props, icons, characters, environments, tiles, UI, VFX, transparent cutouts, concept sheets, sprite sheets, or animation frames; especially when the task needs batch generation, native prompts or ComfyUI/Stable Diffusion Danbooru tags, reference consistency, background removal, format validation, or iterative quality scoring. This skill orchestrates available image, image-edit, vision, SVG, MCP, local, and host-native tools without requiring a specific generator.
 ---
 
-# Generic Image Generation Rules
+# Game Image Generation Rules
 
 Treat image generation as an asset-production pipeline, not a single prompt. Keep the active brief, prompts, and evaluation evidence in the model context while the task runs.
 

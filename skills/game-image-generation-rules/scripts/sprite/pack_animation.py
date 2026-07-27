@@ -338,7 +338,7 @@ def build_manifest(
     return {
         "frames": frame_map,
         "meta": {
-            "app": "generic-image-generation-rules/scripts/sprite/pack_animation.py",
+            "app": "game-image-generation-rules/scripts/sprite/pack_animation.py",
             "version": "1",
             "image": args.atlas.name if args.atlas else None,
             "format": "RGBA8888",

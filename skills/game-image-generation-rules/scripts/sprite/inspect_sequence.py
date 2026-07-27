@@ -250,7 +250,7 @@ def inspect_sequence(args: argparse.Namespace, Image: Any) -> dict[str, Any]:
         }
 
     return {
-        "schema": "generic-image-generation-rules.sprite-sequence-inspection/v1",
+        "schema": "game-image-generation-rules.sprite-sequence-inspection/v1",
         "frame_count": len(frames),
         "dimension_consistent": len(sizes) == 1,
         "sizes": [list(size) for size in sorted(sizes)],

@@ -574,7 +574,7 @@ def main() -> int:
         )
         boundaries = [spans[0][0], *(end for _, end in spans)] if contiguous else None
         manifest = {
-            "schema": "generic-image-generation-rules.sprite-strip-slice/v2",
+            "schema": "game-image-generation-rules.sprite-strip-slice/v2",
             "input": str(args.input),
             "input_size": list(strip.size),
             "method": args.method,
