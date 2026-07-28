@@ -38,9 +38,6 @@ Examples:
     # Grid of 4, opaque background, webp
     gpt-image -p "isometric chair, minimalist" -n 4 --background opaque --format webp
 
-    # Native transparency when supported by the selected model or compatible endpoint
-    gpt-image -p "isolated product cutout" --background transparent --format png
-
     # Generate on a flat chroma-key background, then remove it locally
     gpt-image -p "isolated product on a perfectly flat solid green background" \
         --background opaque --format png --remove-background
@@ -185,8 +182,8 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("-n", "--n", type=int, default=1, help="Number of images to return. Default 1.")
     p.add_argument(
-        "--background", default=None, choices=["auto", "transparent", "opaque"],
-        help="Background handling. Support depends on the selected model; the CLI passes the value through unchanged. Default API-side auto.",
+        "--background", default=None, choices=["auto", "opaque"],
+        help="Background handling. Use `opaque` for chroma-key removal. Default API-side auto.",
     )
     p.add_argument(
         "--remove-background", action="store_true",

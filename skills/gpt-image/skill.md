@@ -1,6 +1,6 @@
 ---
 name: gpt-image
-description: Execute image generation, editing, and transparent-background workflows with GPT Image models through the bundled scripts, defaulting to GPT Image 2 / gpt-image-2. Use when GPT Image is the selected backend and a supplied prompt or edit instruction must be executed for text-to-image generation, reference-image editing, multi-reference editing, masked inpainting, chroma-key background removal, or model-native transparent output. Treat the supplied prompt as authoritative; this skill does not search prompt galleries, choose art direction, or perform general prompt planning.
+description: Execute image generation, editing, and chroma-key transparent-background workflows with GPT Image 2 / gpt-image-2 through the bundled scripts. Use when GPT Image is the selected backend and a supplied prompt or edit instruction must be executed for text-to-image generation, reference-image editing, multi-reference editing, masked inpainting, or chroma-key background removal. Treat the supplied prompt as authoritative; this skill does not search prompt galleries, choose art direction, or perform general prompt planning.
 ---
 
 # GPT Image Executor
@@ -36,8 +36,6 @@ Execution-only runbook for GPT Image generation and editing. Use the packaged CL
 python "$SKILL_DIR/scripts/src/gpt_image_cli/cli.py" -p "PROMPT" [-f OUT] [-i REF...] [-m MASK] [options]
 ```
 
-`--remove-background` is an explicit execution flag: after the API response is saved, run the bundled chroma-key helper on every returned image and replace the keyed PNG/WebP at the same path with its alpha result. It does not rewrite the prompt, select a key color, or change this skill's normal judgment about whether background removal is appropriate.
-
 ## Key and cost rules
 
 - The CLI reads `OPENAI_API_KEY` from process env, then `.env`, then `~/.env`, without overriding an existing environment value.
@@ -58,7 +56,7 @@ python "$SKILL_DIR/scripts/src/gpt_image_cli/cli.py" -p "PROMPT" [-f OUT] [-i RE
 | `--size` | `1k`, `2k`, `4k`, `portrait`, `landscape`, `square`, `wide`, `tall`, or literal | Canvas size |
 | `--quality` | `low`, `medium`, `high`, `auto` | Cost and quality |
 | `-n, --n` | integer | Number of images |
-| `--background` | `auto`, `transparent`, `opaque` | Background behavior; passed through unchanged, with support determined by the selected model or endpoint |
+| `--background` | `auto`, `opaque` | Background behavior; use `opaque` for chroma-key removal |
 | `--remove-background` | flag | After the API response, run the bundled chroma-key remover on every output and replace each keyed PNG/WebP with its alpha result |
 | `--moderation` | `auto`, `low` | Generation moderation setting |
 | `--input-fidelity` | `low`, `high` | Edit fidelity; dropped for `gpt-image-2`, which rejects it |
@@ -98,7 +96,7 @@ Surface enough of API errors for debugging. Exit codes are `0` for success, `1` 
 
 ## Transparent-background workflow
 
-Use chroma-key removal first for simple opaque subjects because the default `gpt-image-2` model does not currently provide model-native transparent output.
+Use chroma-key removal for transparent assets. The only supported path is `--background opaque --remove-background`.
 
 Default sequence:
 
@@ -134,9 +132,7 @@ Use the helper command directly only when post-processing an image that already 
 
 Write the final output as `.png` or `.webp` to preserve alpha. Never overwrite an existing output unless explicitly requested; use `--force` only with authorization. If the matte removes subject details or the subject contains the key color, regenerate with a contrasting key color instead of increasing tolerance aggressively.
 
-Do not silently switch models for true transparency. Chroma-key removal is unsuitable for hair, fur, feathers, smoke, glass, liquids, translucent materials, reflective objects, soft shadows, realistic product grounding, or subjects that conflict with every practical key color. If the user requests true/model-native transparency, the chroma-key result fails validation, or the subject is unsuitable, explain that `gpt-image-2` does not currently support transparent backgrounds and ask before selecting another model or endpoint.
-
-The CLI accepts `--background transparent` and passes it through unchanged; model or endpoint support is authoritative. If the user explicitly selects the legacy `gpt-image-1.5` fallback, call it with `--model gpt-image-1.5 --background transparent --format png`. Do not select this deprecated model without confirmation.
+Chroma-key removal is unsuitable for hair, fur, feathers, smoke, glass, liquids, translucent materials, reflective objects, soft shadows, realistic product grounding, or subjects that conflict with every practical key color. If the chroma-key result fails validation or the subject is unsuitable, report the limitation instead of switching models or inventing another transparency path.
 
 ## API reference
 
