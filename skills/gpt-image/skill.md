@@ -134,6 +134,20 @@ Write the final output as `.png` or `.webp` to preserve alpha. Never overwrite a
 
 Chroma-key removal is unsuitable for hair, fur, feathers, smoke, glass, liquids, translucent materials, reflective objects, soft shadows, realistic product grounding, or subjects that conflict with every practical key color. If the chroma-key result fails validation or the subject is unsuitable, report the limitation instead of switching models or inventing another transparency path.
 
+### `remove_chroma_key.py` options
+
+| Option | Meaning |
+|---|---|
+| `--input PATH` | Required source image |
+| `--out PATH` | Required `.png` or `.webp` alpha output |
+| `--key-color HEX` | Exact key color; default `#00ff00` |
+| `--auto-key none\|corners\|border` | Sample the key color instead; prefer `border` for generated images |
+| `--tolerance 0..255` | Hard-key distance; default `12` |
+| `--soft-matte` + `--transparent-threshold` / `--opaque-threshold` | Enable a smooth alpha ramp; defaults `12` / `96`, while this workflow uses `12` / `220` |
+| `--despill`, `--spill-cleanup` | Equivalent flags that reduce key-color edge spill |
+| `--edge-contract 0..16`, `--edge-feather 0..64` | Shrink or soften the alpha edge |
+| `--force` | Overwrite an existing output |
+
 ## API reference
 
 Read `references/openai-cookbook.md` only when API behavior, supported parameters, or model semantics are uncertain. Do not use it to expand or rewrite the supplied prompt.
