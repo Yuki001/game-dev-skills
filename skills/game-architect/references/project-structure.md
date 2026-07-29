@@ -109,30 +109,40 @@ The recommended approach combines both as two layers:
 
 This hybrid works well because **code/scripts benefit from standalone format-level separation** — they are edited frequently, have different tooling (linters, compilers, IDE indexing), and are easier to navigate when grouped by type first. Assets similarly benefit from format-level grouping for batch operations and pipeline processing.
 
+When a Layer 1 category is divided into modules and contains files genuinely shared by several of them, add a `/common` directory within that category. Do not add `/common` mechanically: categories with clear non-module subdivisions (such as `/audio/music` and `/audio/sfx`) or categories that are likely to remain flat (such as `/configs`) do not need one. Keep files used by only one module in that module's directory. Category-specific common directories preserve format boundaries and avoid creating a single catch-all common directory at the project root.
+
 ### Structure Example
 ```
 /scripts              - All code/scripts (Layer 1: format)
+  /common             - Scripts shared across multiple modules
   /player             - Player logic (Layer 2: module)
   /enemy              - Enemy logic
   /combat             - Combat system
   /ui                 - UI logic
 /textures             - All textures (Layer 1: format)
+  /common
   /player
   /enemy
   /environment
 /models               - All 3D models
+  /common
   /characters
   /props
 /audio                - All audio files
   /music
   /sfx
 /prefabs              - Prefabs/blueprints
+  /common
 /configs              - Configuration/data files
 ```
 
 ### When to Prefer Module-First
 For very large projects with strong team module ownership, inverting the layers (module first, format second) can reduce cross-directory navigation for feature work:
 ```
+/common
+  /scripts
+  /textures
+  /models
 /player
   /scripts
   /textures

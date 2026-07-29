@@ -9,20 +9,11 @@
 
 ## 1. Overview
 
-A gameplay content editor is an authoring application for game-specific rules and content: levels, skills, buffs, items, quests, dialogue, behavior trees, progression data, and similar domain objects. It does not replace engine-native editors for scenes, models, animation, VFX, materials, or audio.
+A gameplay content editor authors game-specific rules and content. It complements rather than replaces engine-native scene, model, animation, VFX, material, or audio tools.
 
-Treat the content editor as an independent logical application even when its UI is embedded in a game engine, a web portal, a spreadsheet extension, or an in-game development tool. Define its domain model, data ownership, validation, and publishing boundary independently from its host.
+Treat it as an independent logical application even when embedded in another host. Define its domain model, ownership, validation, preview/debug, migration, compilation, and publishing boundaries explicitly.
 
-The editor should turn designer intent into valid, versioned, reviewable runtime content. Its main responsibilities are to:
-
-- Express content in the vocabulary of game design rather than engine internals.
-- Make references, dependencies, flows, and constraints visible.
-- Prevent invalid content or report it before runtime.
-- Convert authoring-friendly source data into runtime-ready artifacts.
-- Support preview, debugging, migration, bulk editing, and collaboration.
-- Scale content production without scaling manual engineering work at the same rate.
-
-Select the editor form from the dominant structure of the content. Homogeneous records fit tables; complex objects fit structured forms; branching logic fits graphs; spatial gameplay fits level tools; time-oriented processes fit timelines. Do not force every domain into one universal editor.
+Choose the editor form from the content's dominant structure: records use tables, nested objects use forms, branching logic uses graphs, spatial gameplay uses spatial editors, and ordered events use timelines. Do not force every domain into one universal editor.
 
 ## 2. Editor Types
 
@@ -34,15 +25,14 @@ Select the editor form from the dominant structure of the content. Homogeneous r
 | Structured object | One domain object with nested parts | Skills, buffs, equipment, quest definitions, level parameters |
 | Graph and logic | Nodes, edges, branches, and dependencies | Behavior trees, state machines, skill flow, quests, dialogue, tutorials |
 | Gameplay level | Spatial anchors plus gameplay rules | Spawns, encounters, waves, triggers, objectives |
+| Gameplay actor | Spatial form plus actor metadata and sequences | Actors, boxes, sockets, anchors, collision volumes, skill sequences |
 | Timeline and sequence | Tracks, clips, steps, and events | Tutorials, narrative flow, skill phases, level sequences |
 | Specialized visual | A domain-specific visual relationship | Tech trees, drop trees, curves, matrices, relationship graphs |
 | Integrated workspace | Multiple content types with cross-references | RPG-style databases, campaign tools, live content portals |
 
 ### 2.2 Database and Table Editors
 
-Use a database or table editor for large sets of similarly shaped records that require filtering, comparison, statistics, and bulk changes. RPG databases, card catalogs, progression tables, and drop configurations are common examples.
-
-Model the content as databases or categories containing typed records. Give every record a stable ID; use its name only for display and search. Define each field through a schema that specifies its type, default value, range, enumeration, reference target, and editing control.
+Use a database or table editor for large sets of similarly shaped records. Model typed fields through schemas, give each record a stable ID, and use names only for display and search.
 
 ```text
 Database
@@ -60,15 +50,11 @@ Provide operations that match work on large data sets:
 - Find all content that refers to a selected record.
 - Visualize curves, probability distributions, and economic totals when useful.
 
-Validate unique keys, references, ranges, probability or weight rules, progression continuity, and domain-specific relationships. Report errors at the table, record, and field level.
-
-During compilation, resolve references, calculate derived fields, build indices, and remove editor-only metadata. Do not make runtime code depend on cell coordinates, column order, or display names.
-
-When a row grows into a deeply nested object that is difficult to compare in tabular form, move that content to a structured object editor instead of continually adding columns.
+Validate at table, record, and field level. Compile by resolving references, calculating derived fields, building indices, and removing editor-only metadata; runtime code must not depend on cell coordinates, column order, or display names. Move deeply nested rows to a structured object editor.
 
 ### 2.3 Structured Object Editors
 
-Use a structured object editor for a domain object composed of nested parts, optional modules, typed variants, and external references. Skills, buffs, equipment, encounters, and complex quest definitions often fit this form.
+Use a structured object editor for one domain object with nested parts, optional modules, typed variants, and external references.
 
 ```text
 Content Object
@@ -79,7 +65,7 @@ Content Object
 └─ External References
 ```
 
-Organize fields by domain meaning rather than serialization layout. For example, a skill editor may group casting requirements, costs, targeting, phases, effects, and presentation references even when runtime data stores them differently.
+Organize fields by domain meaning rather than serialization layout.
 
 Provide:
 
@@ -90,17 +76,11 @@ Provide:
 - Domain controls such as target selectors, condition builders, and effect lists.
 - A computed view showing inherited and defaulted values.
 
-Do not mix template semantics. A copied object is independent; an inherited object stores overrides; a composed object references reusable parts. Ambiguous propagation makes the effect of later edits unpredictable.
-
-Validate required modules, type-specific fields, ordering, mutually exclusive options, reference compatibility, and template overrides. Use the real runtime implementation for rule evaluation or simulation whenever correctness matters; do not maintain a second business implementation only for editor preview.
-
-Compile authoring structures into explicit runtime descriptors. Include stable type identifiers and format versions rather than relying on editor class names or reflection paths.
+Keep copy, inheritance, and composition semantics distinct. Validate modules, variants, ordering, references, and overrides through the real runtime implementation where correctness matters. Compile to explicit runtime descriptors with stable type IDs and format versions.
 
 ### 2.4 Graph and Logic Editors
 
-Use a graph editor when connections, branches, parallel paths, dependencies, or reusable subflows are central to the content. Behavior trees, dialogue, quests, tutorials, and skill execution flows have different graph semantics even if they share graph UI infrastructure.
-
-A graph normally contains stable nodes, typed ports, edges, parameters, and optional local variables:
+Use a graph editor when connections, branches, parallel paths, dependencies, or reusable subflows dominate. Model stable nodes, typed ports, edges, parameters, and optional local variables:
 
 ```text
 Graph
@@ -115,9 +95,7 @@ Graph
    └─ TargetPort
 ```
 
-Keep node and edge identities stable across renaming, reordering, and visual repositioning. Store visual layout separately from execution semantics so moving a node does not change runtime behavior.
-
-Define the semantics of each graph family explicitly:
+Keep visual layout separate from execution semantics, and define each graph family's rules:
 
 - Which node and port types are allowed.
 - Whether flow, data, or both travel across an edge.
@@ -127,7 +105,7 @@ Define the semantics of each graph family explicitly:
 
 #### Behavior Tree Editors
 
-A behavior tree editor is a specialized graph editor with tree semantics:
+A behavior tree editor applies tree semantics to shared graph infrastructure:
 
 ```text
 Behavior Tree
@@ -138,13 +116,11 @@ Behavior Tree
       └─ Condition / Action
 ```
 
-Reuse generic graph infrastructure for selection, layout, stable IDs, undo/redo, serialization, and runtime highlighting. Enforce behavior-tree rules separately: parent-child hierarchy, child order, composite execution policy, decorator constraints, status propagation, interruption, and blackboard access.
-
-Use behavior trees primarily for hierarchical and reactive decision logic, especially AI. They can also support skills or encounters when the content genuinely follows selector/sequence-style decision semantics; do not use them merely because a graph view is convenient.
+Enforce hierarchy, child order, composite/decorator rules, status propagation, interruption, and blackboard access. Use behavior trees for genuinely hierarchical, reactive decision logic.
 
 #### State Machine Editors
 
-A state machine editor is a specialized directed graph in which nodes are states and edges are transitions:
+A state machine editor uses states as nodes and transitions as edges:
 
 ```text
 State Machine
@@ -155,13 +131,9 @@ State Machine
    └─ Condition / Priority
 ```
 
-Reuse the graph canvas and editing services, but define state-machine-specific semantics for initial states, transition conditions, priority, re-entry, interruption, and state lifecycle. Add hierarchy, parallel regions, or history only when the runtime model supports them explicitly.
+Define initial states, transitions, priority, re-entry, interruption, and lifecycle explicitly. Add hierarchy, parallel regions, or history only when supported by runtime semantics.
 
-Use state machines for AI modes, character states, skill casting phases, interaction flow, and other mutually exclusive or lifecycle-oriented behavior. They often appear as a sub-editor inside a larger AI, character, or skill editor.
-
-Provide node search, contextual creation, typed connection feedback, grouping, comments, subgraphs, and reference navigation. Preserve stable node IDs so layout changes do not invalidate debug mappings or create noisy data changes.
-
-Validate entry and exit requirements, unreachable nodes, illegal cycles, missing ports, type mismatches, invalid parallel behavior, recursive dependencies, and variable scope. Report each problem against a node or edge and focus it directly in the editor.
+Provide node search, contextual creation, typed connections, grouping, subgraphs, and reference navigation. Validate graph rules against specific nodes or edges while preserving stable source-to-runtime IDs.
 
 Make runtime debugging a first-class capability:
 
@@ -170,15 +142,11 @@ Make runtime debugging a first-class capability:
 - Support breakpoints, stepping, and recorded execution traces where practical.
 - Map runtime errors and compiled instructions back to source node IDs.
 
-Interpret small graphs directly when simplicity is more important. For larger, performance-sensitive, or deterministic systems, compile graphs into compact node arrays, state machines, instruction streams, or generated code. Keep source-to-runtime mappings in every mode.
-
-Do not use a graph when the content is fundamentally a field set or an ordered list. Visual complexity is not evidence that a graph is the correct model.
+Interpret small graphs directly or compile larger ones, but keep source-to-runtime mappings. Do not use a graph for content that is fundamentally a field set or ordered list.
 
 ### 2.5 Gameplay Level Editors
 
-Use a gameplay level editor to author spatial gameplay meaning above an engine scene or an abstract map. It should describe rules and relationships, not replace modeling, terrain, lighting, VFX, or other engine-native editing.
-
-Typical content has the following shape:
+Use a gameplay level editor to author spatial gameplay rules above an engine scene or abstract map:
 
 ```text
 Gameplay Level
@@ -190,19 +158,38 @@ Gameplay Level
 └─ References and Variants
 ```
 
-Choose views by structure: spatial placement for anchors and regions, grids for discrete areas, topology graphs for rooms and routes, tables for waves, and logic graphs only for genuinely branching level flow. Multiple views should edit one shared content model rather than duplicate the same facts.
+Use spatial, grid, topology, table, or graph views over one shared model. Reference stable gameplay anchors rather than scene paths. Validate reachability, references, ordering, difficulty, and budgets through the real level runtime, then compile by level or region.
 
-Reference stable gameplay anchors instead of long-lived scene hierarchy paths or object names. Art restructuring should not silently break gameplay data.
+### 2.6 Gameplay Actor Editors
 
-Validate required entrances and objectives, reachable completion paths, spawn and region references, wave closure, trigger ordering, difficulty coverage, and content budgets. Provide quick entry at a selected stage, trigger and region visualization, wave simulation, and objective-state inspection through the real level runtime.
+Use a gameplay actor editor when an actor's definition is inseparable from a spatial representation. It edits the actor itself plus spatial metadata such as hit, hurt, collision, interaction, detection, or targeting boxes.
 
-Compile level content by resolving anchors, expanding templates, building trigger and objective indices, and packaging data by level or region.
+```text
+Gameplay Actor
+├─ Actor Definition
+├─ Spatial Representation
+│  ├─ Model / Shape Preview
+│  ├─ Boxes / Volumes
+│  └─ Sockets / Anchors
+├─ Metadata and References
+└─ Optional Skill Timeline
+   └─ Tracks, Phases, Events, and Bindings
+```
 
-### 2.6 Timeline and Sequence Editors
+Provide:
 
-Use a timeline for business content organized primarily by time or ordered steps: tutorials, narrative commands, skill phases, boss phase transitions, and level event sequences. Reference animation, audio, or VFX assets without taking responsibility for editing them.
+- Actor identity, type, properties, components, and content references.
+- Add, remove, duplicate, name, classify, and group spatial boxes or volumes.
+- Direct manipulation of shape, size, transform, attachment, tags, and gameplay purpose.
+- Stable local coordinate spaces and attachment to the actor root, bones, sockets, or anchors.
+- An optional timeline for actor skill sequences, activation windows, phases, events, and bindings.
+- Scrubbing and runtime-backed preview of animation, movement, boxes, events, and skill execution.
 
-Model sequences as tracks containing clips and instantaneous markers, with explicit bindings to gameplay targets:
+Keep the actor catalog in a database when bulk comparison is useful, and open this editor for spatial authoring. Reference animation, models, VFX, and audio without replacing their native tools. Validate stable IDs, shapes, attachments, coordinate spaces, timeline bindings, event order, and referenced content.
+
+### 2.7 Timeline and Sequence Editors
+
+Use a timeline for content organized by time or ordered steps. Model tracks, clips, markers, and explicit gameplay bindings:
 
 ```text
 Sequence
@@ -212,15 +199,11 @@ Sequence
 └─ Markers / Events
 ```
 
-Provide snapping, range editing, multi-track alignment, reusable clips, nested sequences, and time preview.
+Provide snapping, range editing, alignment, reusable clips, nested sequences, and preview. Validate tracks, bindings, overlaps, phase boundaries, references, waits, and jumps. If branching dominates, use a logic graph that invokes sequences.
 
-Validate required tracks and bindings, illegal overlap, phase boundaries, referenced content, and waits or jumps that can prevent completion. Display the current time, active clips, pending waits, and emitted events during runtime debugging.
+### 2.8 Specialized Visual Editors
 
-If branching dominates the flow, use a logic graph and let its nodes invoke sequences. Avoid hiding a complex state machine inside timeline clips.
-
-### 2.7 Specialized Visual Editors
-
-Use a specialized editor when a domain relationship is technically storable in tables but substantially easier to understand through a dedicated view. Examples include technology trees, drop trees, progression curves, faction relationships, and tag or interaction matrices.
+Use a specialized editor when a domain relationship is easier to understand through a dedicated view than a table:
 
 ```text
 Domain Model
@@ -229,13 +212,11 @@ Domain Model
 └─ Specialized View
 ```
 
-Treat the visualization as another view of the authoritative source data, not as a second copy. Add domain-specific analysis such as probability totals, cyclic prerequisites, isolated nodes, unreachable unlocks, and abnormal curve intervals.
+Keep the visualization as a view of authoritative source data. Prefer strong domain constraints and analysis over a generic canvas.
 
-Prefer a focused editor with strong domain constraints over a generic canvas with weak semantics.
+### 2.9 Integrated Content Workspaces
 
-### 2.8 Integrated Content Workspaces
-
-Combine several editor types when a project has many related content domains. An RPG-style database, campaign tool, or live content portal is an integrated workspace rather than a single universal editor.
+Use an integrated workspace to coordinate several editor types without flattening their interaction models:
 
 ```text
 Content Workspace
@@ -255,21 +236,19 @@ Unify the surrounding production context:
 - Change sets, approval state, ownership, and release version.
 - Links from a business object to its records, graphs, levels, and preview environment.
 
-Keep specialized editing behavior inside the appropriate editor. The workspace coordinates context and workflow; it should not flatten all content into one interaction model.
+Keep specialized editing inside its appropriate editor; share navigation, IDs, references, validation, build, and publishing services.
 
 ## 3. Common Mechanisms and Constraints
 
 ### 3.1 Domain Model and Data Pipeline
 
-Define domain concepts, relations, and invariants before designing the UI. Present skills, effects, objectives, conditions, and other design concepts instead of raw serialization fields or engine components.
-
-Prefer a one-way production pipeline:
+Define domain concepts and invariants before the UI, then use a one-way production pipeline:
 
 ```text
 Authoring Source -> Validation -> Compile/Bake -> Runtime Data -> Package/Publish
 ```
 
-Optimize source data for editing, review, and version control. Optimize runtime data for loading, lookup, memory, networking, and compatibility. Treat generated runtime data as reproducible output, not as an authoring source.
+Optimize source data for authoring and runtime data for execution. Treat generated data as reproducible output.
 
 ### 3.2 Identity, References, and Dependencies
 
@@ -281,13 +260,11 @@ Optimize source data for editing, review, and version control. Optimize runtime 
 
 ### 3.3 Validation, Versioning, and Migration
 
-Run cheap validation while editing, complete validation on save or submission, and release-gating validation before publishing. Cover field, object, cross-object, global, and package-level rules. Every issue should identify the content, location, rule, severity, and practical correction.
-
-Version authoring schemas and runtime formats independently where needed. Implement explicit, batchable, repeatable migrations for field renames, type changes, node replacement, and structural changes. Report migration results and retire obsolete compatibility paths after an agreed support window.
+Run cheap validation while editing, complete validation on save, and release-gating validation before publishing. Issues must identify location, rule, severity, and correction. Version schemas and runtime formats explicitly; make migrations batchable, repeatable, and reported.
 
 ### 3.4 Transactions and Collaboration
 
-Treat a meaningful edit as one transaction: deleting a node and its edges, replacing references, applying a template, or updating a group of records. Support undo, redo, and rollback at that level.
+Treat a meaningful multi-part edit as one undoable transaction.
 
 Organize source files for collaboration:
 
@@ -304,15 +281,11 @@ Keep the extension chain explicit:
 Domain Type -> Schema -> Editor -> Validation -> Compiler -> Runtime -> Debug View
 ```
 
-Drive multiple stages from shared type registration or metadata where practical. Unknown types must fail visibly rather than lose data silently.
-
-Use the formal runtime or shared domain implementation for preview and simulation when correctness matters. Editor-only approximations are acceptable only when their limits are visible.
+Drive stages from shared type registration where practical. Fail visibly on unknown types, and use the formal runtime or shared domain implementation for correctness-sensitive preview.
 
 ### 3.6 Publishing and Change Control
 
-Track draft, validated, approved, and published states when the production process requires them. A published artifact should identify its source revision, compiler version, dependencies, and runtime format.
-
-For hot-updatable content, define which changes are safe during an active session, how old and new versions coexist, how ongoing battles or quests retain their content version, and how rollback preserves consistency with player state.
+Track production states when required. Published artifacts must identify source revision, compiler, dependencies, and runtime format. For hot updates, define version coexistence, session pinning, safe changes, and rollback behavior.
 
 ## 4. Summary
 
@@ -322,6 +295,7 @@ Choose an editor by the shape of the content:
 - Use structured forms for complex domain objects.
 - Use graphs for connections and branching execution.
 - Use gameplay level tools for spatial rules.
+- Use gameplay actor tools for actors with spatial metadata and skill sequences.
 - Use timelines for time-oriented sequences.
 - Use specialized views for domain relationships.
 - Use an integrated workspace to connect multiple editor types.
@@ -330,7 +304,8 @@ Use the following mapping to select an editor from the game data or system being
 
 | Game data or system | Dominant data shape | Primary editor | Useful companion |
 |---|---|---|---|
-| Items, actors, enemies, classes, and other master catalogs | Many homogeneous records | Database and table editor | Structured object editor for complex records |
+| Items, classes, and other master catalogs | Many homogeneous records | Database and table editor | Structured object editor for complex records |
+| Actors, characters, enemies, and interactive entities | Spatial form plus actor metadata | Gameplay actor editor | Database for catalogs; timeline for skill sequences |
 | Balance values, economy parameters, and progression tables | Records, formulas, and numeric series | Database and table editor | Curve, statistics, or distribution view |
 | Skills, buffs, equipment, and effect definitions | Nested typed objects and reusable parts | Structured object editor | Graph editor for branching execution; timeline editor for phases, timing, and ordered events |
 | Quests, dialogue, tutorials, and guided flows | Branches, conditions, stages, and references | Graph and logic editor | Database or structured forms for content records; timeline for fixed sequences |
@@ -347,19 +322,4 @@ Use the following mapping to select an editor from the game data or system being
 | Live events and scheduled content | Content records, schedules, rules, and references | Structured object or database editor | Timeline or calendar-style specialized view |
 | Large cross-domain content sets | Multiple content models with dense cross-references | Integrated content workspace | Specialized editor modules for each content type |
 
-Let different editors keep their appropriate interaction models while sharing IDs, references, schemas, validation, migration, compilation, publishing, and runtime-debug protocols.
-
-Review a content-editor architecture by asking:
-
-- Does it expose the language of game design rather than engine internals?
-- Does the editor type match the dominant content structure?
-- Is there one authoritative authoring source?
-- Are runtime artifacts generated through a clear boundary?
-- Can references and change impact be traced?
-- Can invalid content be rejected before runtime?
-- Does preview use the formal business implementation?
-- Can new domain types extend the complete toolchain coherently?
-- Can content be diffed, migrated, reviewed, and published reliably?
-- Has generality reduced the efficiency of the actual authoring task?
-
-A good content editor makes valid content easy to create, invalid content difficult to produce, and runtime problems traceable back to specific authored data.
+Keep one authoritative source and make IDs, references, validation, compilation, migration, publishing, and runtime debugging consistent across editors. A good editor makes valid content easy to create and runtime problems traceable to authored data.
