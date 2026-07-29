@@ -1,0 +1,4 @@
+interface:
+  display_name: "ImageMagick CLI"
+  short_description: "Comprehensive ImageMagick CLI workflows and reference"
+  default_prompt: "Use $imagemagick-cli to inspect these images and build a safe, verified ImageMagick 7 command for the requested transformation."

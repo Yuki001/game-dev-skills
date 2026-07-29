@@ -12,6 +12,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | Drawing | Game-focused, backend-agnostic production rules for planning, generating, inspecting, evaluating, refining, and packaging image assets. |
 | [gpt-image](./skills/gpt-image/skill.md) | Drawing | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | Drawing | Generate images through OpenRouter's Image API with the bundled Python script. |
+| [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | Drawing | Comprehensive ImageMagick 7 command-line image processing for reproducible inspection, conversion, editing, composition, animation, and batch automation workflows. |
 | [animation-shader](./skills/animation-shader/SKILL.md) | Tool | Used for creating anime-style shaders. |
 
 ---
@@ -28,4 +29,5 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | 画图 | 面向游戏开发、与生成后端无关的图像资产生产规则，涵盖规划、生成、检查、评估、迭代优化和交付。 |
 | [gpt-image](./skills/gpt-image/skill.md) | 画图 | 适用于 OpenAI 图像生成端点的简化画图 skill，改编自 [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill)。 |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | 画图 | 通过 OpenRouter Image API 生成图片，并使用内置 Python 脚本保存结果。 |
+| [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | 画图 | 全面的 ImageMagick 7 命令行图像处理 skill，适用于可复现的检查、转换、编辑、合成、动画及批量自动化工作流。 |
 | [animation-shader](./skills/animation-shader/SKILL.md) | 工具 | 用于二次元 shader 创建。 |
