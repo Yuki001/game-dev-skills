@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Three.js Model Review</title>
+    <link rel="stylesheet" href="/viewer/styles.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/three/build/three.module.js",
+          "three/addons/": "/three/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="viewport" aria-label="3D model review viewport"></canvas>
+
+      <section class="title-panel">
+        <p class="eyebrow">MODEL REVIEW</p>
+        <h1 id="asset-name">Loading asset…</h1>
+        <p id="source-label">Preparing deterministic review scene.</p>
+      </section>
+
+      <section class="control-panel" aria-label="Review controls">
+        <div class="control-group">
+          <span>View</span>
+          <button type="button" data-view="iso" class="active">ISO</button>
+          <button type="button" data-view="front">Front</button>
+          <button type="button" data-view="back">Back</button>
+          <button type="button" data-view="left">Left</button>
+          <button type="button" data-view="right">Right</button>
+          <button type="button" data-view="top">Top</button>
+        </div>
+        <div class="control-group">
+          <span>Surface</span>
+          <button type="button" id="wireframe-toggle">Wireframe</button>
+          <button type="button" id="grid-toggle" class="active">Grid</button>
+        </div>
+      </section>
+
+      <aside class="stats-panel">
+        <div>
+          <span>Meshes</span>
+          <strong id="mesh-count">—</strong>
+        </div>
+        <div>
+          <span>Triangles</span>
+          <strong id="triangle-count">—</strong>
+        </div>
+        <div>
+          <span>Size</span>
+          <strong id="size-value">—</strong>
+        </div>
+      </aside>
+
+      <div id="status" role="status">Loading…</div>
+    </main>
+
+    <script type="module" src="/viewer/viewer.js"></script>
+  </body>
+</html>

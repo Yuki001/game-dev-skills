@@ -1,0 +1,4 @@
+interface:
+  display_name: "3D Model Generator by Three.js"
+  short_description: "Build, export, and visually review Three.js models"
+  default_prompt: "Use $3d-model-generator-by-threejs to build, export, and review a procedural 3D model from my description."
