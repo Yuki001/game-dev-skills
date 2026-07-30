@@ -8,6 +8,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 import { buildAndExport } from '../build-and-export.mjs';
+import { renderPreview } from '../render-preview.mjs';
 import { createBuildContext } from '../runtime/context.mjs';
 import { inspectBuildSource } from '../runtime/load-model-build.mjs';
 import { validateScene } from '../runtime/validate-scene.mjs';
@@ -151,6 +152,111 @@ test('height-field builders create indexed Y-up surfaces', () => {
     () => context.builders.heightField({ heights: [[0, 1], [2]] }),
     /rectangular heights grid/
   );
+});
+
+test('polyMesh builds indexed geometry with optional attributes', () => {
+  const context = createBuildContext();
+  const mesh = context.builders.polyMesh({
+    name: 'colored-pyramid',
+    positions: [
+      [-1, 0, -1],
+      [1, 0, -1],
+      [1, 0, 1],
+      [-1, 0, 1],
+      [0, 2, 0]
+    ],
+    indices: [
+      0, 2, 1,
+      0, 3, 2,
+      0, 1, 4,
+      1, 2, 4,
+      2, 3, 4,
+      3, 0, 4
+    ],
+    uvs: [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+      [0.5, 0.5]
+    ],
+    colors: [
+      [1, 0, 0],
+      [0, 1, 0],
+      [0, 0, 1],
+      [1, 1, 0],
+      [1, 1, 1]
+    ]
+  });
+  const scene = new context.THREE.Scene();
+  scene.add(mesh);
+  const validation = validateScene(scene);
+
+  assert.equal(mesh.geometry.getAttribute('position').count, 5);
+  assert.equal(mesh.geometry.getAttribute('normal').count, 5);
+  assert.equal(mesh.geometry.getAttribute('uv').count, 5);
+  assert.equal(mesh.geometry.getAttribute('color').count, 5);
+  assert.equal(mesh.geometry.index.count, 18);
+  assert.equal(mesh.material.vertexColors, true);
+  assert.equal(validation.valid, true);
+  assert.throws(
+    () =>
+      context.builders.polyMesh({
+        positions: [[0, 0, 0], [1, 0, 0], [0, 1, 0]],
+        indices: [0, 1, 3]
+      }),
+    /valid triangle vertex indices/
+  );
+});
+
+test('surface and curve helpers place repeated objects deterministically', () => {
+  const context = createBuildContext();
+  const surface = context.builders.heightField({
+    heights: [
+      [1, 1],
+      [1, 1]
+    ],
+    size: [4, 4]
+  });
+  const sample = context.helpers.sampleSurface(surface, 0.5, -0.5);
+
+  assert.ok(sample);
+  assertVectorClose(sample.point.toArray(), [0.5, 1, -0.5]);
+  assertVectorClose(sample.normal.toArray(), [0, 1, 0]);
+
+  const placed = context.builders.box({
+    size: [0.5, 0.5, 0.5],
+    position: [0.5, 0, -0.5]
+  });
+  context.helpers.placeOnSurface(placed, surface, {
+    offset: 0.25,
+    alignToNormal: true
+  });
+  assertVectorClose(placed.position.toArray(), [0.5, 1.25, -0.5]);
+
+  const curve = new context.THREE.LineCurve3(
+    new context.THREE.Vector3(0, 0, 0),
+    new context.THREE.Vector3(0, 0, 4)
+  );
+  const source = context.builders.box({
+    name: 'curve-item',
+    size: [0.2, 0.5, 0.2]
+  });
+  const repeated = context.helpers.repeatAlongCurve(source, {
+    curve,
+    count: 3,
+    tangentAxis: 'y'
+  });
+  const alignedAxis = new context.THREE.Vector3(0, 1, 0).applyQuaternion(
+    repeated.children[1].quaternion
+  );
+
+  assert.equal(repeated.children.length, 3);
+  assertVectorClose(repeated.children[0].position.toArray(), [0, 0, 0]);
+  assertVectorClose(repeated.children[1].position.toArray(), [0, 0, 2]);
+  assertVectorClose(repeated.children[2].position.toArray(), [0, 0, 4]);
+  assertVectorClose(alignedAxis.toArray(), [0, 0, 1]);
+  assert.equal(context.helpers.sampleSurface(surface, 5, 5), null);
 });
 
 test('extended primitive builders create valid geometry', () => {
@@ -378,6 +484,28 @@ test('template builds and round-trips GLB, glTF, OBJ, and STL', async () => {
       await readFile(join(outputDirectory, 'validation.json'), 'utf8')
     );
     assert.equal(validation.valid, true);
+
+    for (const extension of ['glb', 'gltf', 'obj', 'stl']) {
+      const previewPath = join(outputDirectory, `preview-${extension}.png`);
+      const preview = await renderPreview({
+        model: join(outputDirectory, `model.${extension}`),
+        out: previewPath,
+        views: ['iso', 'front', 'top'],
+        width: 320,
+        height: 180
+      });
+      const previewPng = await readFile(previewPath);
+
+      assert.equal(preview.width, 320);
+      assert.equal(preview.height, 180);
+      assert.ok(preview.triangles > 0);
+      assert.deepEqual(
+        Array.from(previewPng.subarray(0, 8)),
+        [137, 80, 78, 71, 13, 10, 26, 10]
+      );
+      assert.equal(previewPng.readUInt32BE(16), 320);
+      assert.equal(previewPng.readUInt32BE(20), 180);
+    }
   } finally {
     assertSafeTempPath(outputDirectory);
     await rm(outputDirectory, { recursive: true, force: true });

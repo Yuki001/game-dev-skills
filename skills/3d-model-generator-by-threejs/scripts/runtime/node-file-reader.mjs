@@ -1,4 +1,13 @@
 export function installNodeFileReader() {
+  if (!globalThis.ProgressEvent) {
+    globalThis.ProgressEvent = class ProgressEvent {
+      constructor(type, init = {}) {
+        this.type = type;
+        Object.assign(this, init);
+      }
+    };
+  }
+
   if (globalThis.FileReader) return;
 
   globalThis.FileReader = class FileReader {

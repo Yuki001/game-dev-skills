@@ -230,6 +230,24 @@ builders.heightField({
 
 ## Custom construction
 
+Create indexed or non-indexed polygon geometry from numeric arrays:
+
+```js
+const panel = builders.polyMesh({
+  positions: [
+    [-1, 0, -1],
+    [1, 0, -1],
+    [1, 0, 1],
+    [-1, 0, 1]
+  ],
+  indices: [0, 2, 1, 0, 3, 2],
+  uvs: [[0, 0], [1, 0], [1, 1], [0, 1]],
+  material: { color: '#d26a3a' }
+});
+```
+
+`positions`, `normals`, `uvs`, and vertex `colors` accept flat arrays, grouped arrays, or typed arrays. Indices must describe triangles. Normals are computed when omitted; set `computeNormals: false` only when normals are intentionally unnecessary.
+
 Wrap custom geometry:
 
 ```js
@@ -252,6 +270,8 @@ Convert degrees:
 ```js
 helpers.deg(45);
 ```
+
+### Bounds and placement
 
 Read world-space bounds:
 
@@ -297,6 +317,33 @@ helpers.fitToSize(root, [2, 1, 2], {
 
 Use `mode: 'cover'` to fill instead. Set `uniform: false` only for axis-aligned objects that may be distorted.
 
+Sample the uppermost visible mesh surface at a world-space X/Z coordinate:
+
+```js
+const sample = helpers.sampleSurface(terrain, x, z);
+
+if (sample) {
+  sample.point;  // world-space Vector3
+  sample.normal; // world-space Vector3
+}
+```
+
+The helper casts downward in world Y and returns `null` on a miss. Use `fromY`, `maxDistance`, or `recursive` when the defaults are unsuitable.
+
+Place an object's pivot on the sampled surface:
+
+```js
+helpers.placeOnSurface(marker, terrain, {
+  x,
+  z,
+  offset: 0.1,
+  alignToNormal: true,
+  upAxis: 'y'
+});
+```
+
+### Repetition and orientation
+
 Create linear copies:
 
 ```js
@@ -306,6 +353,23 @@ const row = helpers.repeatLinear(bolt, {
   name: 'bolt-row'
 });
 ```
+
+Create evenly spaced copies along a `THREE.Curve`:
+
+```js
+const row = helpers.repeatAlongCurve(post, {
+  curve,
+  count: 12,
+  start: 0,
+  end: 1,
+  tangentAxis: 'y',
+  alignToTangent: true,
+  closed: false,
+  name: 'curve-row'
+});
+```
+
+Closed curves omit a duplicate copy at the endpoint. `offset` adds a shared local curve-space position offset.
 
 Create radial copies around an axis:
 
@@ -320,6 +384,16 @@ const ring = helpers.repeatRadial(spoke, {
   name: 'spoke-ring'
 });
 ```
+
+Orient an object's local Y axis between two points:
+
+```js
+helpers.orientBetween(beam, [0, 0, 0], [1, 2, 0], {
+  stretchAxis: 'y'
+});
+```
+
+### Transform baking
 
 Mirror a clone:
 
@@ -347,14 +421,6 @@ const baked = helpers.bakeTransforms(root);
 ```
 
 The source remains unchanged by default. Pass `{ clone: false }` only when intentional in-place replacement is safe. Baking is intended for static meshes, not skinned or transform-animated hierarchies.
-
-Orient an object's local Y axis between two points:
-
-```js
-helpers.orientBetween(beam, [0, 0, 0], [1, 2, 0], {
-  stretchAxis: 'y'
-});
-```
 
 Set shadow flags recursively:
 

@@ -30,7 +30,7 @@ The function may also return a `THREE.Object3D` directly. Prefer the object form
 | `apiVersion` | Runtime contract version. Currently `1`. |
 | `THREE` | Pinned Three.js namespace for custom geometry and scene operations. |
 | `builders` | High-level primitive and material constructors. |
-| `helpers` | Placement, repetition, mirroring, orientation, and unit utilities. |
+| `helpers` | Bounds, surface placement, curve repetition, mirroring, orientation, and unit utilities. |
 | `rng` | Seeded deterministic random-number generator. |
 | `logger` | Runtime logger. |
 

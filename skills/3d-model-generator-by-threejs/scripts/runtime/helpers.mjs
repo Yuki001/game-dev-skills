@@ -78,6 +78,35 @@ function translateInWorld(object, delta) {
   object.updateMatrixWorld(true);
 }
 
+function setWorldPosition(object, position) {
+  const localPosition = position.clone();
+
+  if (object.parent) {
+    object.parent.updateWorldMatrix(true, false);
+    object.parent.worldToLocal(localPosition);
+  }
+
+  object.position.copy(localPosition);
+  object.updateMatrixWorld(true);
+}
+
+function worldNormal(intersection, rayDirection) {
+  const normal = intersection.face?.normal
+    ? intersection.face.normal
+        .clone()
+        .applyMatrix3(
+          new THREE.Matrix3().getNormalMatrix(intersection.object.matrixWorld)
+        )
+        .normalize()
+    : rayDirection.clone().negate();
+
+  if (normal.dot(rayDirection) > 0) {
+    normal.negate();
+  }
+
+  return normal;
+}
+
 function swapAttributeVertices(attribute, first, second) {
   for (let component = 0; component < attribute.itemSize; component += 1) {
     const value = attribute.getComponent(first, component);
@@ -273,6 +302,113 @@ export const helpers = Object.freeze({
     return object;
   },
 
+  sampleSurface(surface, x, z, options = {}) {
+    if (!surface?.isObject3D) {
+      throw new Error('helpers.sampleSurface() requires an Object3D surface.');
+    }
+
+    if (!Number.isFinite(x) || !Number.isFinite(z)) {
+      throw new Error('helpers.sampleSurface() x and z must be finite numbers.');
+    }
+
+    const bounds = worldBounds(surface);
+    if (bounds.isEmpty()) return null;
+
+    const size = bounds.getSize(new THREE.Vector3());
+    const margin = Math.max(size.y, 1);
+    const fromY = options.fromY ?? bounds.max.y + margin;
+    const maxDistance =
+      options.maxDistance ?? fromY - bounds.min.y + margin;
+
+    if (!Number.isFinite(fromY) || !Number.isFinite(maxDistance) || maxDistance <= 0) {
+      throw new Error(
+        'helpers.sampleSurface() fromY and maxDistance must define a valid ray.'
+      );
+    }
+
+    const direction = new THREE.Vector3(0, -1, 0);
+    const raycaster = new THREE.Raycaster(
+      new THREE.Vector3(x, fromY, z),
+      direction,
+      0,
+      maxDistance
+    );
+    const intersection = raycaster
+      .intersectObject(surface, options.recursive ?? true)
+      .find((item) => item.object?.isMesh);
+
+    if (!intersection) return null;
+
+    return {
+      point: intersection.point.clone(),
+      normal: worldNormal(intersection, direction),
+      object: intersection.object,
+      distance: intersection.distance,
+      faceIndex: intersection.faceIndex,
+      uv: intersection.uv?.clone() ?? null
+    };
+  },
+
+  placeOnSurface(object, surface, options = {}) {
+    if (!object?.isObject3D) {
+      throw new Error('helpers.placeOnSurface() requires an Object3D.');
+    }
+
+    object.updateWorldMatrix(true, false);
+    const currentPosition = object.getWorldPosition(new THREE.Vector3());
+    const x = options.x ?? currentPosition.x;
+    const z = options.z ?? currentPosition.z;
+    const sample = helpers.sampleSurface(surface, x, z, options);
+
+    if (!sample) {
+      throw new Error(
+        `helpers.placeOnSurface() found no surface at x=${x}, z=${z}.`
+      );
+    }
+
+    const offset = options.offset ?? 0;
+    if (!Number.isFinite(offset)) {
+      throw new Error('helpers.placeOnSurface() offset must be finite.');
+    }
+
+    setWorldPosition(
+      object,
+      sample.point.clone().addScaledVector(sample.normal, offset)
+    );
+
+    if (options.alignToNormal ?? false) {
+      const axis = options.upAxis ?? 'y';
+      if (!AXES.includes(axis)) {
+        throw new Error(`Unsupported surface up axis: ${axis}`);
+      }
+
+      const localUp = new THREE.Vector3(
+        axis === 'x' ? 1 : 0,
+        axis === 'y' ? 1 : 0,
+        axis === 'z' ? 1 : 0
+      );
+      const worldQuaternion = new THREE.Quaternion().setFromUnitVectors(
+        localUp,
+        sample.normal
+      );
+
+      if (object.parent) {
+        const parentWorldQuaternion = object.parent.getWorldQuaternion(
+          new THREE.Quaternion()
+        );
+        object.quaternion
+          .copy(parentWorldQuaternion.invert())
+          .multiply(worldQuaternion);
+      } else {
+        object.quaternion.copy(worldQuaternion);
+      }
+
+      object.updateMatrixWorld(true);
+    }
+
+    return object;
+  },
+
   repeatLinear(source, options = {}) {
     const count = Math.max(0, Math.floor(options.count ?? 1));
     const step = toVector3(options.step ?? [1, 0, 0]);
@@ -282,6 +418,69 @@ export const helpers = Object.freeze({
     for (let index = 0; index < count; index += 1) {
       const clone = source.clone(true);
       clone.position.addScaledVector(step, index);
+      clone.name = source.name ? `${source.name}-${index + 1}` : `item-${index + 1}`;
+      group.add(clone);
+    }
+
+    return group;
+  },
+
+  repeatAlongCurve(source, options = {}) {
+    const curve = options.curve;
+
+    if (!(curve instanceof THREE.Curve)) {
+      throw new Error('helpers.repeatAlongCurve() requires a THREE.Curve.');
+    }
+
+    const count = Math.max(0, Math.floor(options.count ?? 1));
+    const start = options.start ?? 0;
+    const end = options.end ?? 1;
+    const tangentAxis = options.tangentAxis ?? 'z';
+    const offset = toVector3(options.offset ?? [0, 0, 0]);
+    const closed = options.closed ?? curve.closed ?? false;
+
+    if (
+      !Number.isFinite(start) ||
+      !Number.isFinite(end) ||
+      start < 0 ||
+      end > 1 ||
+      start > end
+    ) {
+      throw new Error(
+        'helpers.repeatAlongCurve() start and end must satisfy 0 <= start <= end <= 1.'
+      );
+    }
+
+    if (!AXES.includes(tangentAxis)) {
+      throw new Error(`Unsupported tangent axis: ${tangentAxis}`);
+    }
+
+    const localAxis = new THREE.Vector3(
+      tangentAxis === 'x' ? 1 : 0,
+      tangentAxis === 'y' ? 1 : 0,
+      tangentAxis === 'z' ? 1 : 0
+    );
+    const group = new THREE.Group();
+    group.name = options.name ?? `${source.name || 'object'}-curve-array`;
+
+    for (let index = 0; index < count; index += 1) {
+      const denominator = closed ? Math.max(count, 1) : Math.max(count - 1, 1);
+      const t =
+        count === 1
+          ? start
+          : start + (end - start) * (index / denominator);
+      const clone = source.clone(true);
+      clone.position.copy(curve.getPointAt(t)).add(offset);
+
+      if (options.alignToTangent ?? true) {
+        const tangent = curve.getTangentAt(t).normalize();
+        const orientation = new THREE.Quaternion().setFromUnitVectors(
+          localAxis,
+          tangent
+        );
+        clone.quaternion.copy(orientation).multiply(source.quaternion);
+      }
+
       clone.name = source.name ? `${source.name}-${index + 1}` : `item-${index + 1}`;
       group.add(clone);
     }

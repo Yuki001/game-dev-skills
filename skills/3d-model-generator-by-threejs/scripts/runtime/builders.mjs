@@ -257,6 +257,71 @@ function createHeightField(options = {}) {
   return createMesh(geometry, options);
 }
 
+function numericAttribute(value, itemSize, label, minimumCount = 1) {
+  const isNested =
+    Array.isArray(value) &&
+    value.length > 0 &&
+    (Array.isArray(value[0]) || ArrayBuffer.isView(value[0]));
+  let values;
+
+  if (isNested) {
+    if (
+      value.some(
+        (item) =>
+          (!Array.isArray(item) && !ArrayBuffer.isView(item)) ||
+          item.length !== itemSize
+      )
+    ) {
+      throw new Error(`${label} entries must each contain ${itemSize} values.`);
+    }
+
+    values = value.flatMap((item) => Array.from(item));
+  } else if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+    values = Array.from(value);
+  } else {
+    throw new Error(`${label} must be a numeric array or typed array.`);
+  }
+
+  if (
+    values.length < minimumCount * itemSize ||
+    values.length % itemSize !== 0 ||
+    values.some((item) => !Number.isFinite(item))
+  ) {
+    throw new Error(
+      `${label} must contain finite values in groups of ${itemSize}.`
+    );
+  }
+
+  return new Float32Array(values);
+}
+
+function triangleIndices(value, vertexCount) {
+  if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
+    throw new Error('builders.polyMesh() indices must be an array or typed array.');
+  }
+
+  const values = Array.from(value);
+
+  if (
+    values.length < 3 ||
+    values.length % 3 !== 0 ||
+    values.some(
+      (item) =>
+        !Number.isInteger(item) ||
+        item < 0 ||
+        item >= vertexCount
+    )
+  ) {
+    throw new Error(
+      'builders.polyMesh() indices must contain valid triangle vertex indices.'
+    );
+  }
+
+  return vertexCount > 65535
+    ? new Uint32Array(values)
+    : new Uint16Array(values);
+}
+
 export function createBuilders() {
   return Object.freeze({
     material: materialFrom,
@@ -278,6 +343,99 @@ export function createBuilders() {
         throw new Error('builders.mesh() requires a BufferGeometry.');
       }
       return createMesh(options.geometry, options);
+    },
+
+    polyMesh(options = {}) {
+      const positions = numericAttribute(
+        options.positions,
+        3,
+        'builders.polyMesh() positions',
+        3
+      );
+      const vertexCount = positions.length / 3;
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(positions, 3)
+      );
+
+      if (options.indices !== undefined) {
+        geometry.setIndex(
+          new THREE.BufferAttribute(
+            triangleIndices(options.indices, vertexCount),
+            1
+          )
+        );
+      } else if (vertexCount % 3 !== 0) {
+        throw new Error(
+          'Non-indexed builders.polyMesh() positions must describe complete triangles.'
+        );
+      }
+
+      if (options.normals !== undefined) {
+        const normals = numericAttribute(
+          options.normals,
+          3,
+          'builders.polyMesh() normals'
+        );
+        if (normals.length !== positions.length) {
+          throw new Error(
+            'builders.polyMesh() normals count must match positions count.'
+          );
+        }
+        geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+      }
+
+      if (options.uvs !== undefined) {
+        const uvs = numericAttribute(
+          options.uvs,
+          2,
+          'builders.polyMesh() uvs'
+        );
+        if (uvs.length / 2 !== vertexCount) {
+          throw new Error(
+            'builders.polyMesh() UV count must match positions count.'
+          );
+        }
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+      }
+
+      let material = options.material;
+      if (options.colors !== undefined) {
+        const colors = numericAttribute(
+          options.colors,
+          3,
+          'builders.polyMesh() colors'
+        );
+        if (colors.length / 3 !== vertexCount) {
+          throw new Error(
+            'builders.polyMesh() color count must match positions count.'
+          );
+        }
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        if (!material?.isMaterial) {
+          material =
+            typeof material === 'string' || typeof material === 'number'
+              ? { color: material, vertexColors: true }
+              : {
+                  color: '#ffffff',
+                  ...material,
+                  vertexColors: material?.vertexColors ?? true
+                };
+        }
+      }
+
+      if (
+        options.computeNormals === true ||
+        (options.computeNormals !== false && options.normals === undefined)
+      ) {
+        geometry.computeVertexNormals();
+      }
+
+      geometry.computeBoundingBox();
+      geometry.computeBoundingSphere();
+      return createMesh(geometry, { ...options, material });
     },
 
     box(options = {}) {

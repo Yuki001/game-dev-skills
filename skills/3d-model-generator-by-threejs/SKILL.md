@@ -1,6 +1,6 @@
 ---
 name: 3d-model-generator-by-threejs
-description: Generate procedural 3D models from natural-language requests by writing a constrained buildModel(ctx) module that uses Three.js, bundled builders and helpers, deterministic validation and export scripts, and optional browser visual review. Use when needs to create, revise, export, or visually audit programmatic 3D assets in GLB, glTF, OBJ, or STL without Blender or another DCC tool.
+description: Generate procedural 3D models from natural-language requests by writing a constrained buildModel(ctx) module that uses Three.js, bundled builders and helpers, deterministic validation and export scripts, PNG previews, and optional browser visual review. Use when needs to create, revise, export, or visually audit programmatic 3D assets in GLB, glTF, OBJ, or STL without Blender or another DCC tool.
 ---
 
 # 3D Model Generator by Three.js
@@ -21,14 +21,21 @@ Generate model-specific JavaScript while keeping model construction helpers, val
    ```
 
 7. Inspect `<task-dir>/validation.json`. Fix every error and evaluate warnings that affect the requested formats.
-8. When visual review is useful, run:
+8. Render a deterministic PNG preview of the exported artifact:
+
+   ```text
+   node scripts/render-preview.mjs --model <task-dir>/model.glb --out <task-dir>/preview.png --views iso,front,top
+   ```
+
+   Read `references/preview-rendering.md` for supported formats, views, and rendering limitations.
+9. When interactive visual review is useful, run:
 
    ```text
    node scripts/serve-viewer.mjs --artifact-dir <task-dir> --model model.glb
    ```
 
    Open the printed local URL with an available browser tool. Review the exported artifact, not only the source scene. Use `--source model-build.mjs` when source-scene comparison is needed.
-9. Iterate by modifying only `model-build.mjs`, rebuilding, and reviewing again.
+10. Iterate by modifying only `model-build.mjs`, rebuilding, and reviewing again.
 
 ## Build Rules
 
@@ -73,9 +80,11 @@ Complete a model task only when:
 - `scripts/runtime/`: Stable build context, builders, helpers, seeded RNG, source checks, and scene validation.
 - `scripts/exporters/`: Format-specific GLB/glTF, OBJ, and STL exporters.
 - `scripts/build-and-export.mjs`: Main deterministic pipeline.
+- `scripts/render-preview.mjs`: Standalone exported-model PNG renderer.
 - `scripts/serve-viewer.mjs`: Local source and round-trip viewer server.
 - `assets/model-build.template.mjs`: Generated-task starting point.
 - `assets/viewer/`: Browser review application.
 - `references/build-contract.md`: Generated module contract and safety rules.
 - `references/builder-api.md`: Builder and helper API.
 - `references/export-formats.md`: Format capabilities and limitations.
+- `references/preview-rendering.md`: Standalone preview command and limitations.
