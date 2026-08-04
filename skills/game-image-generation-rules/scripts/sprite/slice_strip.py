@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Split a horizontal sprite strip with alpha projection and DP, then align frames."""
+"""Slice a sprite strip or a multi-row sheet into frames with alpha projection and DP, then align.
+
+Single strip: `--frames N` slices one horizontal strip into N column frames.
+Multi-row sheet: `--rows R --frames N` first splits the sheet into R horizontal row
+bands (row-band alpha projection + DP, same as columns), then slices each row into N
+frames. Frames are written in row-major reading order. `--rows R` alone emits row
+strips only (no column slicing).
+"""
 
 from __future__ import annotations
 
@@ -63,6 +70,20 @@ def alpha_projection(rgba: Any) -> list[float]:
         row = y * width
         for x in range(width):
             projection[x] += values[row + x]
+    return projection
+
+
+def row_alpha_projection(rgba: Any) -> list[float]:
+    width, height = rgba.size
+    alpha = rgba.getchannel("A")
+    values = list(pixel_data(alpha))
+    projection = [0.0] * height
+    for y in range(height):
+        row = y * width
+        total = 0.0
+        for x in range(width):
+            total += values[row + x]
+        projection[y] = total
     return projection
 
 
@@ -452,13 +473,18 @@ def align_frames(
     return outputs, placements
 
 
-def pack_strip(frames: list[Any], Image: Any) -> Any:
+def pack_strip(frames: list[Any], Image: Any, columns: int | None = None) -> Any:
     cell_width = max(frame.width for frame in frames)
     cell_height = max(frame.height for frame in frames)
-    strip = Image.new("RGBA", (cell_width * len(frames), cell_height), (0, 0, 0, 0))
+    if columns is None or columns < 1 or columns > len(frames):
+        columns = len(frames)
+    rows = (len(frames) + columns - 1) // columns
+    strip = Image.new("RGBA", (cell_width * columns, cell_height * rows), (0, 0, 0, 0))
     for index, frame in enumerate(frames):
-        x = index * cell_width + (cell_width - frame.width) // 2
-        y = (cell_height - frame.height) // 2
+        column = index % columns
+        row = index // columns
+        x = column * cell_width + (cell_width - frame.width) // 2
+        y = row * cell_height + (cell_height - frame.height) // 2
         strip.alpha_composite(frame, (x, y))
     return strip
 
@@ -471,11 +497,26 @@ def ensure_writable(path: Path, force: bool) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Split a horizontal sprite strip using alpha projection and DP."
+        description=(
+            "Slice a sprite sheet into frames using alpha projection and DP. "
+            "With --rows, split the sheet into that many horizontal row bands first "
+            "(row-band alpha projection + DP), then slice each row into --frames column "
+            "frames; with --rows alone (no --frames), output row strips only. "
+            "Without --rows, slice a single horizontal strip into --frames frames."
+        )
     )
     parser.add_argument("input", type=Path)
     parser.add_argument("output_dir", type=Path)
-    parser.add_argument("--frames", type=int, required=True)
+    parser.add_argument("--frames", type=int)
+    parser.add_argument(
+        "--rows",
+        type=int,
+        help=(
+            "Split the sheet into this many horizontal row bands first (content-aware "
+            "alpha projection + DP, same as columns). Each row band is then sliced into "
+            "columns. Use it when the generator returns a multi-row grid."
+        ),
+    )
     parser.add_argument("--method", choices=("projection-dp", "equal"), default="projection-dp")
     parser.add_argument("--alpha-threshold", type=int, default=10)
     parser.add_argument(
@@ -497,8 +538,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    if args.frames < 1:
-        print("error: --frames must be positive", file=sys.stderr)
+    if args.rows is None and args.frames is None:
+        print("error: --frames is required unless --rows is given", file=sys.stderr)
+        return 2
+    if (args.frames is not None and args.frames < 1) or (args.rows is not None and args.rows < 1):
+        print("error: --frames and --rows must be positive", file=sys.stderr)
         return 2
     if (
         not 1 <= args.alpha_threshold <= 255
@@ -514,47 +558,109 @@ def main() -> int:
     try:
         with Image.open(args.input) as source:
             strip = source.convert("RGBA")
-        if strip.width < args.frames:
-            raise ValueError("strip width is smaller than the requested frame count")
         smoothing_radius = args.smooth_radius
         if smoothing_radius is None:
             smoothing_radius = max(3, strip.width // 220) // 2
-        projection = smooth(alpha_projection(strip), smoothing_radius)
-        if args.method == "equal":
-            equal = equal_boundaries(strip.width, args.frames)
-            spans = [
-                (equal[index], equal[index + 1])
-                for index in range(args.frames)
-            ]
-            natural_count = args.frames
-        else:
-            spans, natural_count = segment_strip(
-                projection,
-                args.frames,
+
+        # --- Row split (optional, content-aware) -------------------------------
+        if args.rows is not None:
+            row_projection = smooth(row_alpha_projection(strip), smoothing_radius)
+            row_spans, natural_rows = segment_strip(
+                row_projection,
+                args.rows,
                 args.width_weight,
                 args.min_width_ratio,
             )
-        if not spans:
-            raise ValueError("no usable sprite content was detected")
-        raw_frames = [
-            strip.crop((start, 0, end, strip.height))
-            for start, end in spans
-        ]
-        frames, placements = align_frames(
-            raw_frames,
-            args.align,
-            args.cell_size,
-            args.padding,
-            args.alpha_threshold,
-            Image,
-        )
+            if not row_spans:
+                raise ValueError("no usable sprite content was detected")
+        else:
+            row_spans = [(0, strip.height)]
+            natural_rows = None
+
+        # --- Column slice per row (skipped when only rows requested) -----------
+        # Each entry: (row_index, col_index, row_span, col_span)
+        frame_crops: list[tuple[int, int, tuple[int, int], tuple[int, int]]] = []
+        frame_warnings: list[str] = []
+        natural_col_counts: list[int] = []
+        if args.frames is not None:
+            if strip.width < args.frames:
+                raise ValueError("strip width is smaller than the requested frame count")
+            for row_index, (row_start, row_end) in enumerate(row_spans):
+                band = strip.crop((0, row_start, strip.width, row_end))
+                projection = smooth(alpha_projection(band), smoothing_radius)
+                if args.method == "equal":
+                    equal = equal_boundaries(strip.width, args.frames)
+                    col_spans = [
+                        (equal[index], equal[index + 1])
+                        for index in range(args.frames)
+                    ]
+                    natural_count = args.frames
+                else:
+                    col_spans, natural_count = segment_strip(
+                        projection,
+                        args.frames,
+                        args.width_weight,
+                        args.min_width_ratio,
+                    )
+                if not col_spans:
+                    raise ValueError(
+                        f"no usable sprite content was detected in row {row_index}"
+                    )
+                natural_col_counts.append(natural_count)
+                if natural_count != args.frames:
+                    frame_warnings.append(
+                        f"row {row_index}: detected {natural_count} natural poses; "
+                        f"expected {args.frames}"
+                    )
+                for col_index, col_span in enumerate(col_spans):
+                    frame_crops.append((row_index, col_index, (row_start, row_end), col_span))
+
+            # Preserve global reading order (row-major) across all frames.
+            frame_crops.sort(key=lambda item: (item[0], item[1]))
+            raw_frames = [
+                strip.crop((col_span[0], row_span[0], col_span[1], row_span[1]))
+                for _row, _col, row_span, col_span in frame_crops
+            ]
+            frames, placements = align_frames(
+                raw_frames,
+                args.align,
+                args.cell_size,
+                args.padding,
+                args.alpha_threshold,
+                Image,
+            )
+        else:
+            # Rows-only mode: emit each row band as an aligned strip image.
+            raw_rows = [
+                strip.crop((0, row_start, strip.width, row_end))
+                for row_start, row_end in row_spans
+            ]
+            frames, placements = align_frames(
+                raw_rows,
+                args.align,
+                args.cell_size,
+                args.padding,
+                args.alpha_threshold,
+                Image,
+            )
 
         args.output_dir.mkdir(parents=True, exist_ok=True)
         digits = max(2, len(str(len(frames) - 1)))
-        frame_paths = [
-            args.output_dir / f"{args.prefix}_{index:0{digits}d}.png"
-            for index in range(len(frames))
-        ]
+        if args.rows is not None and args.frames is not None:
+            # Multi-row frames: name by row/column so cells map back to the sheet grid.
+            row_digits = max(2, len(str(len(row_spans) - 1)))
+            col_digits = max(2, len(str(args.frames - 1)))
+            frame_paths = [
+                args.output_dir
+                / f"{args.prefix}_r{frame_crops[index][0]:0{row_digits}d}"
+                f"_c{frame_crops[index][1]:0{col_digits}d}.png"
+                for index in range(len(frames))
+            ]
+        else:
+            frame_paths = [
+                args.output_dir / f"{args.prefix}_{index:0{digits}d}.png"
+                for index in range(len(frames))
+            ]
         for output in frame_paths:
             ensure_writable(output, args.force)
         if args.sheet_output:
@@ -565,46 +671,74 @@ def main() -> int:
         for frame, output in zip(frames, frame_paths):
             frame.save(output)
         if args.sheet_output:
-            pack_strip(frames, Image).save(args.sheet_output)
+            columns = args.frames if (args.frames is not None and args.rows is not None) else None
+            pack_strip(frames, Image, columns).save(args.sheet_output)
 
-        contiguous = (
-            spans[0][0] == 0
-            and spans[-1][1] == strip.width
-            and all(spans[index][1] == spans[index + 1][0] for index in range(len(spans) - 1))
-        )
-        boundaries = [spans[0][0], *(end for _, end in spans)] if contiguous else None
-        manifest = {
-            "schema": "game-image-generation-rules.sprite-strip-slice/v2",
-            "input": str(args.input),
-            "input_size": list(strip.size),
-            "method": args.method,
-            "boundaries": boundaries,
-            "spans": [list(span) for span in spans],
-            "expected_frame_count": args.frames,
-            "natural_frame_count": natural_count,
-            "output_frame_count": len(frames),
-            "alignment": args.align,
-            "warnings": (
-                []
-                if natural_count == args.frames
-                else [
-                    f"detected {natural_count} natural poses; expected {args.frames}"
-                ]
-            ),
-            "frames": [
+        def _contiguous_bounds(spans: list[tuple[int, int]], extent: int) -> list[int] | None:
+            contiguous = (
+                spans[0][0] == 0
+                and spans[-1][1] == extent
+                and all(
+                    spans[index][1] == spans[index + 1][0]
+                    for index in range(len(spans) - 1)
+                )
+            )
+            return [spans[0][0], *(end for _, end in spans)] if contiguous else None
+
+        warnings: list[str] = []
+        if args.rows is not None and natural_rows is not None and natural_rows != args.rows:
+            warnings.append(f"detected {natural_rows} natural rows; expected {args.rows}")
+        warnings.extend(frame_warnings)
+
+        if args.frames is not None:
+            frame_entries = [
                 {
                     "index": index,
+                    "row": frame_crops[index][0],
+                    "column": frame_crops[index][1],
                     "source_rect": [
-                        spans[index][0],
-                        0,
-                        spans[index][1] - spans[index][0],
-                        strip.height,
+                        frame_crops[index][3][0],
+                        frame_crops[index][2][0],
+                        frame_crops[index][3][1] - frame_crops[index][3][0],
+                        frame_crops[index][2][1] - frame_crops[index][2][0],
                     ],
                     "output": str(frame_paths[index]),
                     **placements[index],
                 }
                 for index in range(len(frames))
-            ],
+            ]
+        else:
+            frame_entries = [
+                {
+                    "index": index,
+                    "row": index,
+                    "source_rect": [
+                        0,
+                        row_spans[index][0],
+                        strip.width,
+                        row_spans[index][1] - row_spans[index][0],
+                    ],
+                    "output": str(frame_paths[index]),
+                    **placements[index],
+                }
+                for index in range(len(frames))
+            ]
+
+        manifest = {
+            "schema": "game-image-generation-rules.sprite-strip-slice/v3",
+            "input": str(args.input),
+            "input_size": list(strip.size),
+            "method": args.method,
+            "row_count": len(row_spans),
+            "row_boundaries": _contiguous_bounds(row_spans, strip.height),
+            "row_spans": [list(span) for span in row_spans],
+            "natural_row_count": natural_rows,
+            "expected_frames_per_row": args.frames,
+            "natural_col_counts": natural_col_counts or None,
+            "output_frame_count": len(frames),
+            "alignment": args.align,
+            "warnings": warnings,
+            "frames": frame_entries,
         }
         if args.manifest:
             args.manifest.write_text(

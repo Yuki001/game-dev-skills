@@ -47,7 +47,7 @@ Do not let a motion or style reference silently replace the canonical subject. S
 
 1. Define the exact grid, frame order, action phases, shared camera, cell size, and pivot.
 2. Prompt the image model to generate one strict review sheet with every cell assigned a named phase.
-3. Inspect whole-sheet geometry, then slice and evaluate every cell.
+3. Inspect whole-sheet geometry, then slice and evaluate every cell. For a multi-row sheet, split rows first (`slice_strip.py --rows`), then slice each row's columns.
 4. Reject missing, duplicated, reordered, merged, or inconsistent phases.
 5. Normalize shared canvas, scale, pivot, palette, alpha, and edge treatment.
 6. Preview the sequence at intended timing.
@@ -93,21 +93,50 @@ Keep one shared canvas across frames. Never independently trim frames unless met
 
 These helpers import Pillow only when executed. If Pillow is unavailable, they stop with the same environment-aware dependency hint used by the image-generation chroma-key helper.
 
+### Pipeline
+
+Run the scripts as an ordered pipeline. Each arrow is a handoff; validate before passing downstream.
+
+```text
+AI generate sheet
+  --> inspect_asset.py SHEET --cols C --rows R     # whole-sheet: size, alpha, border, padding, grid divisibility
+  --> slice_strip.py SHEET frames/ --rows R --frames C
+          [--align baseline --cell-size WxH]        # multi-row: row-band projection+DP, then per-row column slice
+          [--sheet-output repacked.png --manifest slice.json]
+  --> inspect_sequence.py frames/                   # per-frame: occupancy, centroid/baseline drift, edge contact, palette drift, motion delta
+  --> vision review (contact sheet + playback)      # semantic: identity, phases, order, topology
+  --> pack_animation.py frames/ --output-prefix anim
+          [--names run,jump,dash --fps N --trim]    # one atlas + JSON (per-row frameTags); GIF + APNG per row
+```
+
+Key points:
+
+- **Multi-row sheets need `--rows`.** A generator grid is usually not a single strip. `--rows R` first splits the sheet into R horizontal row bands using the same content-aware alpha projection + DP as columns, then slices each band into `--frames C` frames. Output is in row-major reading order. `--rows R` alone (no `--frames`) emits row strips only.
+- **Multi-row frames are named by row and column.** With `--rows R --frames C`, files are `{prefix}_r{row}_c{col}.png` (e.g. `frame_r01_c03.png`), so each frame maps straight back to its sheet cell during review. Single-strip and rows-only outputs keep the flat `{prefix}_{index}.png` numbering. Both `inspect_sequence.py` and `pack_animation.py` read the row/column names in correct row-major order.
+- **Each row is one animation; `pack_animation.py` packs them together.** When rows are present (from the sibling `slice.json`, or `_r{row}_c{col}` names), it writes **one shared atlas** (one band per row) and **one JSON** with a `frameTag` per row (named via `--names`, else `{name}_r{row}`), while **GIF/APNG are written per row** (`{prefix}_{tag}.gif/.apng`) since a preview holds a single animation. With no row info it behaves as a single-animation packer. Mixed tagged/untagged input is an error. Use `--output-prefix` for multi-row (an explicit single `--gif/--apng` file cannot hold several animations).
+- **`--normalize per-row` (default) sizes each row to its own max frame; `--normalize global` gives every frame one shared canvas.** Per-row keeps a tall row from inflating shorter ones; pick `global` if your engine reads a fixed uniform grid instead of JSON rects.
+- **`slice_strip.py` always writes uniform-dimension output frames.** `align_frames` places every frame on a shared canvas (the `--cell-size`, or `max(content)+padding` when unset). So a later `inspect_sequence.py` reporting `dimension_consistent: false` means the frames did **not** come straight from `slice_strip.py` — most likely they were re-trimmed (e.g. `pack_animation.py --trim`) or cut by hand. Variable widths live only in the manifest `source_rect`, not in the saved PNGs.
+- **`dimension_consistent` is a diagnostic, not a hard gate.** No reference lists it as one. Content-aware cutting and `--trim` legitimately produce variable raw source widths; judge stability by `centroid_range`, `baseline_range`, `edge_contact_frames`, and `occupied_vs_median`, not by equal pixel dimensions.
+- **Prefer `projection-dp` over `--method equal` for AI grids.** A model's drawn grid rarely lands on true equal boundaries; divisibility (`inspect_asset --cols/--rows`) only proves the sheet is divisible, not that each cell is aligned.
+
+### Script roles
+
 - `scripts/sprite/inspect_sequence.py` measures ordered frames without modifying them: Alpha bounds, occupancy, edge contact, centroid/baseline range, color-distribution drift, and adjacent-frame motion delta over the visible-pixel union.
-- `scripts/sprite/slice_strip.py` detects natural content runs, drops minor remote residue, splits touching runs with Alpha projection and DP, and optionally aligns frames by center, Alpha centroid, or source-relative baseline. Baseline alignment preserves vertical offsets such as a jump arc.
-- `scripts/sprite/pack_animation.py` packs ordered frames into a uniform-grid PNG atlas and Aseprite-style JSON, GIF, and APNG. It uses one shared GIF palette, a configurable binary GIF Alpha threshold, and explicit loop metadata. It supports trim rectangles, padding, extrusion, pivots, FPS or per-frame durations. It is a single-animation packer, not a general multi-page bin packer.
+- `scripts/sprite/slice_strip.py` detects natural content runs, drops minor remote residue, splits touching runs with Alpha projection and DP, and optionally aligns frames by center, Alpha centroid, or source-relative baseline. Baseline alignment preserves vertical offsets such as a jump arc. With `--rows`, it first splits a multi-row sheet into row bands (row-band projection + DP), then slices each band into columns.
+- `scripts/sprite/pack_animation.py` packs frames into a PNG atlas and Aseprite-style JSON, GIF, and APNG. Frames are grouped into animation rows automatically (slice manifest preferred, then `_r{row}_c{col}` names, else a single animation); each row becomes one atlas band, one frameTag, and one GIF/APNG preview. It uses one shared GIF palette, a configurable binary GIF Alpha threshold, and explicit loop metadata. It supports trim rectangles, padding, extrusion, pivots, FPS or per-frame durations, and per-row or global canvas normalization. It packs one set of animation rows into a single atlas; it is not a general multi-page bin packer.
 
 Typical calls:
 
 ```text
-python scripts/sprite/inspect_sequence.py frames/ --output sequence-report.json
+python scripts/sprite/inspect_asset.py sheet.png --cols 4 --rows 2 --expect-transparent
+python scripts/sprite/slice_strip.py sheet.png frames/ --rows 2 --frames 4 --align baseline --cell-size 256x256 --sheet-output repacked.png --manifest slice.json
 python scripts/sprite/slice_strip.py strip.png frames/ --frames 8 --align baseline --cell-size 256x256 --manifest slice.json
-python scripts/sprite/pack_animation.py frames/ --output-prefix walk --fps 12 --columns 4 --trim
+python scripts/sprite/inspect_sequence.py frames/ --output sequence-report.json
+python scripts/sprite/pack_animation.py frames/ --output-prefix hero --names run,jump --fps 12 --trim   # multi-row
+python scripts/sprite/pack_animation.py frames/ --output-prefix walk --fps 12 --trim                     # single animation
 ```
 
-`--output-prefix` writes the atlas, JSON, GIF, and APNG together. Select individual output flags when only some formats are needed. Treat the inspection JSON and inferred cuts as evidence to review, not proof that the motion phases are semantically correct.
-
-The projection/DP and alignment workflow is a clean Python implementation of concepts adapted from PerfectPixel Studio. See `sprite-animation-presents.md` for the source note and MIT notice.
+`--output-prefix` writes the atlas and JSON together, plus one GIF and APNG per animation row. Select individual output flags when only some formats are needed (multi-row previews require `--output-prefix`). Treat the inspection JSON and inferred cuts as evidence to review, not proof that the motion phases are semantically correct.
 
 ## Strip extraction fallback
 

@@ -141,5 +141,5 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/sprite-animation-presents.md` — optional sprite-sheet action presets, timing defaults, and motion choreography.
 - `scripts/inspect_asset.py` — inspect PNG/SVG metadata and apply optional size, color-type, alpha, border, padding, grid, and strict-SVG checks.
 - `scripts/sprite/inspect_sequence.py` — measure objective sequence drift and frame geometry; requires Pillow only when run.
-- `scripts/sprite/slice_strip.py` — infer strip cuts and align extracted frames; requires Pillow only when run.
-- `scripts/sprite/pack_animation.py` — write a PNG atlas, GIF, APNG, and animation JSON; requires Pillow only when run.
+- `scripts/sprite/slice_strip.py` — slice a strip into frames, or a multi-row sheet into per-row strips then frames (`--rows`); align by center/centroid/baseline; requires Pillow only when run.
+- `scripts/sprite/pack_animation.py` — pack frames into one PNG atlas + Aseprite JSON; auto-groups animation rows (slice manifest or `_r{row}_c{col}` names) into per-row atlas bands, frameTags, and per-row GIF/APNG; requires Pillow only when run.
