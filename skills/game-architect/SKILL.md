@@ -76,6 +76,7 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | Mod & DLC System (Plugin Architecture, Config Database, Scripting, Hooks, Extensibility) | `references/system-mod.md` |
 | Procedural Content Generation (PCG) (World/Level Generation, Roguelike, Noise, Simulation) | `references/system-pcg.md` |
 | Algorithm & Data Structures (Pathfinding, Search, Physics, Generic Solver) | `references/algorithm.md` |
+| Puzzle Game System (Match-3, Jigsaw, Water Sort, Blocks, Physics Puzzles, Board Games, Content & Presentation Boundaries) | `references/system-puzzle.md` |
 
 ### Multiplayer References
 
