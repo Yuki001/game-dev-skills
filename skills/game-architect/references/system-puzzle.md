@@ -35,7 +35,7 @@ ResolutionTrace ──drives transition─> Presenter
                 └─semantic events──> FeedbackLayer
 ```
 
-| Class | Responsibility |
+| Conceptual Role | Responsibility |
 |---|---|
 | `PuzzleDefinition` | Stores level data, rule parameters, objectives, and resource references |
 | `PuzzleSession` | Manages one play session, phases, input, random state, score, and outcome |
@@ -63,6 +63,27 @@ Keep genre-specific concepts—such as grids, containers, vector shapes, ropes, 
 | Hybrid | Keep content and high-volume state data-oriented, while encapsulating complex rule clusters in domain entities or services behind the same session-facing roles. |
 
 `History` records commands or state outside the domain model, while `ResolutionTrace` is the semantic output of a committed domain transition. These roles may still be merged into fewer concrete classes as described above.
+
+### Common Simplified Class Designs
+
+Most puzzles implement the conceptual roles with three or four concrete classes rather than one class per role:
+
+| Simplified Class | Responsibilities Absorbed |
+|---|---|
+| `LevelData` / `PuzzleConfig` | `PuzzleDefinition`: initial state, mechanic parameters, goals, limits, scoring, and resource references |
+| `PuzzleModel` / `Board` / `World` | `RuntimeState` plus `RuleSet`, `Resolver`, and `ObjectiveSet`: owns mutable gameplay data, validates and applies actions, resolves consequences, and evaluates the outcome |
+| `PuzzleController` / `PuzzleSession` | Session lifecycle, input-to-action conversion, phase control, restart, and any required `History`; it calls the model and exposes resolution results to presentation |
+| `PuzzleView` / `PuzzleScreen` | `Presenter`, trace playback, and often `FeedbackLayer`: represents current state, animates committed changes, and plays transient feedback without deciding outcomes |
+
+Common further simplifications are:
+
+| Simplification | Resulting Responsibility Merge |
+|---|---|
+| Session-centric | A single `PuzzleGame` merges `PuzzleController` and `PuzzleModel`, thereby absorbing session, state, rules, resolution, objectives, and optionally history. Keep level data and presentation separate. |
+| Domain-centric | A `Board` or `World` absorbs state, local rules, resolution, and objective checks, while `PuzzleSession` retains lifecycle, input phases, and history. This is useful when the gameplay model needs independent tests or reuse. |
+| Screen-centric | `PuzzleScreen` merges controller, presenter, trace playback, and feedback, but delegates all outcome-determining work to `PuzzleModel`. This suits small, single-screen puzzles with tightly coupled input and presentation. |
+
+`ResolutionTrace` may be a small action-result object or event list rather than a dedicated class, and `History` may be an internal snapshot or command list. Split a responsibility back out only when its lifecycle, complexity, reuse, or testing needs become independent; do not move authoritative rules into the view.
 
 ## 3. Content and Representations: PuzzleDefinition
 
@@ -176,10 +197,10 @@ The same technology may appear in either layer; responsibility and lifecycle det
 
 ## 7. Implementation Order
 
-1. Implement `PuzzleDefinition` and minimal content loading; validate the mechanic with hand-authored data first.
-2. Define `RuntimeState`, then use `PuzzleSession` to complete start, input, resolution, and finish.
-3. Implement minimal `RuleSet`, `Resolver`, and `ObjectiveSet`, making physics authority explicit.
-4. Add `ResolutionTrace`, then connect `Presenter` and `FeedbackLayer`.
-5. Add `History`, undo, replay, solving, and automated validation as required.
-6. Build editors, baking, caches, and specialized runtime representations only as content volume grows.
-7. Optimize from measurements on target devices; do not pre-generalize a universal puzzle framework.
+1. Define the minimal gameplay data model: the level-data schema, runtime state structure, action representation, transition rules, and objective conditions; validate the mechanic with hand-authored data first.
+2. Implement the data model with a small concrete class set: `PuzzleDefinition` for immutable level data, and a compact `PuzzleModel`, `Board`, or `World` that owns `RuntimeState` and absorbs rule validation, resolution, and objective evaluation; complete and test the smallest playable state transition before splitting roles into separate classes.
+3. Add a `PuzzleSession` or controller for input, lifecycle, restart, and phase control, then connect a minimal `Presenter` that can represent the current state.
+4. Introduce a small action-result object or event list when presentation must animate committed changes; promote it to `ResolutionTrace`, and split out `RuleSet`, `Resolver`, or `ObjectiveSet`, only when cascades, simulation, reuse, or testing justify independent responsibilities.
+5. Add `FeedbackLayer`, `History`, undo, replay, solving, save / restore, and automated validation only as the product requires them.
+6. Build import pipelines, editors, baking, caches, and specialized runtime representations only as source complexity or content volume grows.
+7. Optimize and further separate systems from measurements on target devices; do not pre-generalize a universal puzzle framework.
