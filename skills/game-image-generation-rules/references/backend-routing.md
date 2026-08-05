@@ -33,7 +33,10 @@ Do not assume a capability from a tool name. Verify the callable interface or do
 - Prefer native transparent or partial-alpha generation when the selected model can represent the required opacity structure; inspect the returned alpha rather than trusting the prompt.
 - For background removal, prefer an available dedicated skill, MCP, or API; if none is available, fall back to a capable image-edit/inpaint model and inspect the resulting alpha and edges.
 - For emissive-only VFX, choose black-background additive delivery instead of background removal when the target engine/material supports it; do not use this path for smoke, shadows, or pixels that must occlude or darken the scene.
-- For sprite animation, use the routing table in `sprite-sheet/sprite-sheets.md`: prefer the video route when both video-generation and frame-extraction capabilities are available; otherwise use a motion-reference sheet plus the target appearance; use direct full-sheet generation only when neither route is available.
+- For sprite animation, use the routing table in `sprite-sheet/sprite-sheets.md`; choose one of 3 routes:
+    - **Video**: video generation and frame extraction are required
+    - **Reference**: image-to-image is required with reference image input
+    - **Direct**: text-to-image is required for sprite sheet generation
 - Choose deterministic post-processing tools for resizing, alpha inspection, slicing, and packing. Do not ask a generative model to perform exact grid arithmetic.
 
 ## Preflight
@@ -73,6 +76,6 @@ Examples:
 
 - Required alpha → native alpha-capable generation → dedicated removal/matting over a removable matte when needed → capable image edit/inpaint → alpha inspection.
 - Emissive VFX with no alpha requirement → pure black background → additive material → in-engine composite inspection.
-- Sprite animation → video generation + frame extraction → motion-reference sheet plus target appearance → direct full-sheet generation.
+- Sprite animation → accepted canonical appearance reference + video generation + frame extraction → motion-reference sheet plus target appearance → direct full-sheet generation.
 - Raster model fails exact geometry → construct SVG or composite generated parts deterministically.
 - Video source selected → hand the generation result to an available frame-extraction capability, which may belong to the same or a different backend; then resume here from the ordered frame list.

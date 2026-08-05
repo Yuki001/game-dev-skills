@@ -47,7 +47,7 @@ Choose the simplest production path that preserves the requested properties:
 - **SVG**: construct or generate vector-native markup, then validate it through `references/svg-workflow.md`.
 - **Raster PNG**: generate at or above delivery size, preserve a clean subject silhouette, then normalize and inspect.
 - **Transparent or composited VFX raster**: use native alpha or a removable matte for normal transparency. For emissive-only VFX, black-background additive delivery may replace alpha extraction when the target engine/material supports it. Validate the selected path through `references/raster-and-alpha.md`.
-- **Sprite sheet or animation frames**: follow `references/sprite-sheet/sprite-sheets.md`. Prefer the video route when both video-generation and frame-extraction capabilities are available; one backend may provide both, or separate backends may be chained. Otherwise use a motion-reference sheet plus a replacement appearance reference, and use direct full-sheet generation only when neither route is available. Generation stays in the selected backend layer; this skill inspects, evaluates, and packages its sheet or frame-list result.
+- **Sprite sheet or animation frames**: follow `references/sprite-sheet/sprite-sheets.md` to select one of 3 routes: video-generation, reference-sheet, or direct sheet-generation.
 
 ## 3. Compile prompts from one semantic source
 
@@ -85,7 +85,7 @@ Before aesthetic judging, apply deterministic checks:
 
 Run `scripts/inspect_asset.py` for basic PNG/SVG metadata and any relevant optional size, color-type, alpha, border, padding, or sheet-grid checks. Treat its output as objective evidence for the checks it reports, not as proof of visual quality, semantic correctness, or target-runtime behavior. Read `references/raster-and-alpha.md` for alpha limitations and edge cleanup.
 
-For sprite sequences, use the optional Pillow-backed helpers under `scripts/sprite/` when sheet slicing/alignment, sequence metrics, or atlas/preview packaging are needed. Read `references/sprite-sheet/sprite-sheets.md` for routing, result contracts, script selection, and commands.
+For sprite sequences, use the optional Pillow-backed helpers under `scripts/sprite/` when pixel-frame normalization, sheet slicing/alignment, sequence metrics, or atlas/preview packaging are needed. Read `references/sprite-sheet/sprite-sheets.md` for routing, result contracts, script selection, and commands.
 
 ## 6. Evaluate with vision
 
@@ -138,6 +138,7 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.
 - `references/sprite-sheet/sprite-sheets.md` — sprite workflow routing, shared result contracts, script usage, evaluation, packaging, and links to video, reference, direct, and animation-preset guidance.
 - `scripts/inspect_asset.py` — inspect PNG/SVG metadata and apply optional size, color-type, alpha, border, padding, grid, and strict-SVG checks.
+- `scripts/sprite/normalize_pixel_sequence.py` — normalize transparent video-derived pixel-art frames with one shared crop, fixed native canvas and anchor, sequence-wide palette, binary alpha, and a JSON report; requires Pillow.
 - `scripts/sprite/inspect_sequence.py` — measure objective sequence drift and frame geometry; requires Pillow only when run.
 - `scripts/sprite/slice_strip.py` — slice a strip into frames, or a multi-row sheet into per-row strips then frames (`--rows`); align by center/centroid/baseline; requires Pillow only when run.
 - `scripts/sprite/pack_animation.py` — pack frames into one PNG atlas + Aseprite JSON; auto-groups animation rows (slice manifest or `_r{row}_c{col}` names) into per-row atlas bands, frameTags, and per-row GIF/APNG; requires Pillow only when run.

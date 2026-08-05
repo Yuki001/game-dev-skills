@@ -9,12 +9,14 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [game-architect](./skills/game-architect/SKILL.md) | Architecture | Comprehensive guide for game project architecture, requirement analysis, and logic design. |
 | [oop-ddd-ai-coding-constraints](./skills/oop-ddd-ai-coding-constraints/SKILL.md) | Architecture | My preferred OOP + DDD programming-pattern skill. **Note:** Use with caution; it is opinionated and not suitable for everyone. For a broader range of patterns and alternatives, use [game-architect](./skills/game-architect/SKILL.md). |
 | [game-agent-toolkit](./gat/README.md) | Workflow | Game Agents Toolkit — a milestone-driven game design pre-production workflow. Downstream implementation can continue with OpenSpec or Superpowers. |
-| [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | Drawing | Game-focused, backend-agnostic production rules for planning, generating, inspecting, evaluating, refining, and packaging image assets. |
-| [gpt-image](./skills/gpt-image/skill.md) | Drawing | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
-| [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | Drawing | Generate images through OpenRouter's Image API with the bundled Python script. |
-| [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | Drawing | Comprehensive ImageMagick 7 command-line image processing for reproducible inspection, conversion, editing, composition, animation, and batch automation workflows. |
+| [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | Image | Game-focused, backend-agnostic production rules for planning, generating, inspecting, evaluating, refining, and packaging image assets. |
+| [gpt-image](./skills/gpt-image/skill.md) | Image | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
+| [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | Image | Generate images through OpenRouter's Image API with the bundled Python script. |
+| [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | Image | Comprehensive ImageMagick 7 command-line image processing for reproducible inspection, conversion, editing, composition, animation, and batch automation workflows. |
 | [3d-model-generator-by-threejs](./skills/3d-model-generator-by-threejs/SKILL.md) | 3D Models | Generate procedural 3D models from natural-language descriptions for use in game engines, using a Three.js-based pipeline to validate and export GLB, glTF, OBJ, or STL assets. |
 | [animation-shader](./skills/animation-shader/SKILL.md) | Render | Used for creating anime-style shaders. |
+| [openrouter-video-generate](./skills/openrouter-video-generate/SKILL.md) | Video | Generate, poll, resume, and download videos through OpenRouter's asynchronous Video API. |
+| [slice-video-frames](./skills/slice-video-frames/SKILL.md) | Video | Extract ordered video frames by FPS, exact count, timestamps, or every source frame, with optional chroma-key cleanup. |
 
 ---
 
@@ -33,3 +35,5 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | 画图 | 全面的 ImageMagick 7 命令行图像处理 skill，适用于可复现的检查、转换、编辑、合成、动画及批量自动化工作流。 |
 | [3d-model-generator-by-threejs](./skills/3d-model-generator-by-threejs/SKILL.md) | 3D模型 | 根据自然语言描述生成可用于游戏引擎的程序化 3D 模型，并通过基于 Three.js 的流程完成验证及 GLB、glTF、OBJ、STL 资产导出。 |
 | [animation-shader](./skills/animation-shader/SKILL.md) | 渲染 | 用于二次元 shader 创建。 |
+| [openrouter-video-generate](./skills/openrouter-video-generate/SKILL.md) | 视频 | 通过 OpenRouter 异步 Video API 生成、轮询、续查并下载视频。 |
+| [slice-video-frames](./skills/slice-video-frames/SKILL.md) | 视频 | 按帧率、指定数量、时间点或全部源帧提取有序切片，并可选进行色键去背景。 |

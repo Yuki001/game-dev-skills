@@ -294,7 +294,6 @@ def extrude_sprite(atlas: Any, sprite: Any, x: int, y: int, amount: int) -> None
 
 def pack_atlas(
     rows: list[list[Any]],
-    columns: int,
     padding: int,
     extrusion: int,
     trim: bool,
@@ -529,7 +528,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--gif", type=Path)
     parser.add_argument("--apng", type=Path)
     parser.add_argument("--name", default="animation")
-    parser.add_argument("--columns", type=int)
     parser.add_argument("--padding", type=int, default=1)
     parser.add_argument("--extrude", type=int, default=0)
     parser.add_argument("--trim", action="store_true")
@@ -650,7 +648,6 @@ def main() -> int:
         if args.atlas or args.json:
             atlas, records, row_ranges = pack_atlas(
                 rows,
-                args.columns,
                 args.padding,
                 args.extrude,
                 args.trim,

@@ -1,6 +1,6 @@
 # Video generation workflow
 
-Use this workflow first when video-generation and frame-extraction capabilities are both available. They may be exposed by one combined skill/tool or by separate backends chained through a source clip. This workflow resumes from the final frame-list result.
+Use this workflow first when video-generation and frame-extraction capabilities are both available. They may be exposed by one combined skill/tool or by separate backends chained through a source clip. Start from an accepted canonical appearance reference, then resume the shared sprite pipeline from the final frame-list result.
 
 ## Capability preconditions
 
@@ -18,13 +18,21 @@ Verify separately that frame extraction can:
 - return ordered image frames with source timing or explicit durations;
 - satisfy or declare the required alpha, matte, or additive-blend contract.
 
-If the task supplies only text, create a canonical appearance image with an available image backend when video generation needs an image reference. This preparatory still does not switch the task to direct sheet generation.
+Verify that an image-generation backend is available when the task does not already provide a usable appearance reference.
+
+## Canonical reference preparation
+
+Reuse an accepted user or project reference when it already fixes the intended subject and style. Otherwise, use an available image-generation backend to create one canonical still from the same asset contract before calling the video backend. This preparatory still does not switch the task to direct sheet generation.
+
+Require the still to establish the complete subject, projection and facing, proportions or silhouette, target rendering style, palette and lighting, stable camera scale, and a background or alpha treatment compatible with the planned video extraction. Prefer a neutral readable state that leaves room for the requested motion.
+
+Inspect the still at target size and with vision. Correct or regenerate it before video generation when identity, topology, view, scale, palette, silhouette, or edge clearance fails; do not ask the video backend to repair a bad reference while animating it. Use prompt-only video generation only when the subject is intentionally unconstrained or the selected backend cannot accept an image reference, and record that exception as an increased consistency risk.
 
 ## Video-generation request
 
 Give the video-generation backend:
 
-- the canonical appearance reference and its identity anchors;
+- the exact accepted canonical appearance reference and its identity anchors;
 - action, facing direction, projection, ground line, and gameplay purpose;
 - a short motion description with anticipation, contact/apex, recovery, and loop intent;
 - fixed-camera, stable-scale, full-subject, and no-cut requirements;
@@ -53,6 +61,6 @@ The frame-extraction capability produces this result. Video generation does not 
 
 ## Handoff and fallback
 
-Pass the returned frames directly to the shared sequence inspection and packaging stages in `sprite-sheets.md`; do not run `slice_strip.py`.
+Resolve the declared alpha, matte, or additive contract, then pass the returned frames to the shared sequence pipeline in `sprite-sheets.md`; do not run `slice_strip.py`. For hard-edged pixel art, run `normalize_pixel_sequence.py` before sequence inspection. Do not use it for soft-alpha or additive VFX.
 
 Route failures to the responsible capability: rerun video generation for camera movement, subject replacement, incomplete action, topology flicker, or crossed framing; rerun frame extraction for wrong segment, ordering, sampling, timing, or output-format defects. If a materially revised video route still cannot satisfy the hard gates, fall back to `workflow-reference.md` when a motion-reference sheet can be obtained, otherwise use `workflow-direct.md`.

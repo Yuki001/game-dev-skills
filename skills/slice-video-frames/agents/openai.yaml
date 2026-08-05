@@ -1,0 +1,4 @@
+interface:
+  display_name: "Slice Video Frames"
+  short_description: "Extract timed video frames with optional alpha cleanup"
+  default_prompt: "Use $slice-video-frames to extract an ordered frame sequence from this video."
