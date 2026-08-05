@@ -19,7 +19,8 @@ Probe or infer the smallest relevant set:
 | exact dimensions | sheet cells, UI, engine constraints |
 | vector/SVG output | editable geometric assets |
 | vision input | evidence-based evaluation |
-| video generation | reference-guided, motion-first source material for animation frames |
+| video generation | generate a reference-guided continuous-motion source clip |
+| frame extraction | decode a source clip and return selected ordered frames with timing |
 
 Do not assume a capability from a tool name. Verify the callable interface or document the uncertainty.
 
@@ -32,9 +33,7 @@ Do not assume a capability from a tool name. Verify the callable interface or do
 - Prefer native transparent or partial-alpha generation when the selected model can represent the required opacity structure; inspect the returned alpha rather than trusting the prompt.
 - For background removal, prefer an available dedicated skill, MCP, or API; if none is available, fall back to a capable image-edit/inpaint model and inspect the resulting alpha and edges.
 - For emissive-only VFX, choose black-background additive delivery instead of background removal when the target engine/material supports it; do not use this path for smoke, shadows, or pixels that must occlude or darken the scene.
-- Choose direct sheet generation when a model can follow strict grid and per-cell phase instructions.
-- Choose video generation for motion-first sprite or VFX sources when continuous temporal behavior matters and reference images plus a motion description can constrain the result.
-- Choose frame-by-frame controlled edits when direct sheets cannot preserve identity, phase order, or cell geometry.
+- For sprite animation, use the routing table in `sprite-sheet/sprite-sheets.md`: prefer the video route when both video-generation and frame-extraction capabilities are available; otherwise use a motion-reference sheet plus the target appearance; use direct full-sheet generation only when neither route is available.
 - Choose deterministic post-processing tools for resizing, alpha inspection, slicing, and packing. Do not ask a generative model to perform exact grid arithmetic.
 
 ## Preflight
@@ -45,6 +44,8 @@ Keep only relevant facts in the current working context:
 backend:
   route:
   tool/model:
+  capability_providers:
+  handoff_artifacts:
   capabilities_verified:
   limitations:
   prompt_dialect:
@@ -72,6 +73,6 @@ Examples:
 
 - Required alpha → native alpha-capable generation → dedicated removal/matting over a removable matte when needed → capable image edit/inpaint → alpha inspection.
 - Emissive VFX with no alpha requirement → pure black background → additive material → in-engine composite inspection.
-- Poor direct sheet generation → canonical reference → individual frames → deterministic pack.
+- Sprite animation → video generation + frame extraction → motion-reference sheet plus target appearance → direct full-sheet generation.
 - Raster model fails exact geometry → construct SVG or composite generated parts deterministically.
-- Video source requested → hand off video generation/extraction to a dedicated skill, then resume here only for asset evaluation or packaging.
+- Video source selected → hand the generation result to an available frame-extraction capability, which may belong to the same or a different backend; then resume here from the ordered frame list.

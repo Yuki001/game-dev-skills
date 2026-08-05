@@ -183,7 +183,7 @@ Generate multiple variants, then test exact edge continuity deterministically. A
 Create a 6-frame game VFX concept sequence for a compact arcane impact, arranged left-to-right on a strict 6×1 review sheet. Each cell represents: 1 anticipation spark, 2 contact flash, 3 expanding violet ring, 4 fragmented energy shards, 5 fading wisps, 6 nearly empty residual motes. Fixed emitter at cell center, no camera movement, consistent scale, high-contrast cyan core / violet edge, readable on dark and light backgrounds. Transparent outside the effect, no smoke backdrop, no text, no cell borders in the delivered frames.
 ```
 
-Treat direct sheet generation as the normal first attempt. Slice and evaluate every cell; normalize pivots/alpha and repack only after the grid and phases pass.
+Route this sequence through `sprite-sheet/sprite-sheets.md`. Prefer video-derived frames when video-generation and frame-extraction capabilities are both available, whether supplied by one backend or two; otherwise use a compatible motion-reference sheet, and use the direct sheet prompt above only as the final generation route. Evaluate every frame before normalizing and packing.
 
 ### UI nine-slice panel
 

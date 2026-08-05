@@ -111,7 +111,7 @@ Before visual scoring, collect any inexpensive evidence the available tools can 
 - palette or color-distribution drift;
 - whether adjacent frames contain meaningful visual change.
 
-Use these measurements to locate defects and write specific correction hints. They do not prove identity, motion semantics, or animation quality, and their thresholds should be calibrated to the asset rather than copied as universal constants. See `sprite-sheets.md` for extraction, alignment, directional, and packaging guidance.
+Use these measurements to locate defects and write specific correction hints. They do not prove identity, motion semantics, or animation quality, and their thresholds should be calibrated to the asset rather than copied as universal constants. See `sprite-sheet/sprite-sheets.md` for workflow routing, extraction, sequence inspection, and packaging guidance.
 
 ## Iteration decision
 
