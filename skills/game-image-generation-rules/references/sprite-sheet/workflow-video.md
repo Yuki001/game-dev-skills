@@ -7,6 +7,7 @@ Use this workflow first when video-generation and frame-extraction capabilities 
 Verify that video generation can:
 
 - accept an appearance reference or a sufficiently constrained subject prompt;
+- optionally accept ordered pose images or a skeleton sequence as a motion guide when one is supplied;
 - generate a short clip without cuts or camera movement;
 - keep the complete subject inside a stable frame;
 - return a clip that the selected frame-extraction capability can access.
@@ -33,6 +34,7 @@ Inspect the still at target size and with vision. Correct or regenerate it befor
 Give the video-generation backend:
 
 - the exact accepted canonical appearance reference and its identity anchors;
+- any supplied ordered-pose motion reference, with its source order and action-phase mapping, when the backend supports this optional input;
 - action, facing direction, projection, ground line, and gameplay purpose;
 - a short motion description with anticipation, contact/apex, recovery, and loop intent;
 - fixed-camera, stable-scale, full-subject, and no-cut requirements;

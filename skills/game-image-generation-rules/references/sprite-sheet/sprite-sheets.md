@@ -33,16 +33,20 @@ Check capabilities and inputs in priority order. A route is usable only when all
 
 | Priority | Enter when | Workflow | Backend result | Fallback |
 |---:|---|---|---|---|
-| 1 | Video generation can produce a usable clip and frame extraction can return ordered frames; one backend may provide both capabilities or two backends may be chained | [Video generation](workflow-video.md) | ordered frame images | reference generation |
-| 2 | The complete video route is unavailable, unsuitable, or failed; a motion-reference sheet exists or can be obtained | [Reference generation](workflow-reference.md) | one generated sheet | direct generation |
-| 3 | A complete video route or suitable motion reference is unavailable | [Direct generation](workflow-direct.md) | one generated sheet | report the unsupported continuity requirement or deliver only a passing result |
+| 1 | Video generation can produce a usable clip and frame extraction can return ordered frames; one backend may provide both capabilities or two backends may be chained | [Video generation](workflow-video.md) | ordered frame images | reference generation only with a valid motion-reference sheet; otherwise direct generation |
+| 2 | The complete video route is unavailable, unsuitable, or failed; a valid motion-reference sprite sheet is supplied or can be obtained | [Reference generation](workflow-reference.md) | one replacement sheet | change the replacement backend/implementation or report unsupported |
+| 3 | A complete video route and a valid motion-reference sprite sheet are unavailable | [Direct generation](workflow-direct.md) | one generated sheet | report the unsupported continuity requirement or deliver only a passing result |
 
-Exception: when the user explicitly supplies or designates a sheet as the motion reference, use reference generation even if the complete video route is available.
+Exception: when the user explicitly supplies or designates a valid sprite sheet as the motion reference, use reference generation even if the complete video route is available.
+
+Manually invoke [reference-sheet preprocessing](reference-sheet-preprocessing.md) only when the user explicitly requests normalization of a motion-reference sheet. It is an optional utility, not another generation route or a prerequisite for reference generation.
 
 For the reference route, distinguish:
 
-- **motion reference**: sprite sheet or ordered poses that control phase order, timing, contact, recoil, and loop handoff;
+- **motion-reference sheet**: sprite sheet that controls phase order, timing, contact, recoil, and loop handoff;
 - **appearance reference**: character setting image, canonical image, or text specification that controls identity, costume, proportions, topology, palette, and material.
+
+A motion reference may be a sprite sheet or ordered poses. Motion-reference sprite sheets qualify for reference generation. Ordered poses may optionally guide the video workflow when the selected backend supports them; they do not qualify as input to reference generation.
 
 An appearance reference alone does not provide temporal continuity. When the complete video route is unavailable and no motion reference was supplied, ask whether the user has one or wants one searched for; also inspect relevant project assets. If the user already requested or allowed external search, search without asking again. Use direct generation only when no suitable motion reference is available.
 
@@ -54,15 +58,19 @@ Reference and direct generation return one sheet plus the planned geometry:
 
 ```text
 sheet_path
+replacement mode when reference-generated
+source-sheet metadata and target metadata match when reference-generated
+source crop rectangle when single-animation extraction was used
 columns, rows
 frame_count and row-major order
+frame or region rectangles when packing is irregular
 cell size when fixed
 frame durations or FPS
 loop mode
 alpha or blend-mode contract
 ```
 
-The backend may miss exact pixel geometry, but it must still produce the requested number of distinct, ordered phases without merged cells or crossed cell boundaries.
+A reference-generated sheet must preserve the selected source-sheet metadata contract. A directly generated sheet may miss exact pixel geometry, but it must still produce the requested number of distinct, ordered phases without merged cells or crossed cell boundaries.
 
 ### Frame-list result
 
