@@ -100,6 +100,8 @@ Note : Only read the multiplayer references when multiplayer is needed.
 | **Data-Driven Design** | Data Layer First | High Content Complexity. <br>  Flow Orchestration. <br> Simple Data Management. | **Content**:  Quests, Level Design.<br>**Flow**: Tutorial Flow, Skill Execution, Narrative.<br>**Mgmt**: Inventory, Shop, Mail, Leaderboard. | `references/data-driven-design.md` |
 | **Use-Case Driven Prototype** | Use-Case Implementation First | Rapid Validation | Game Jam, Core Mechanic Testing. | `references/prototype-design.md` |
 
+Here, **Data-Driven Design** means a **data-structure-first programming paradigm**, not specifically configuration-driven gameplay. See `references/data-driven-design.md` for the full terminology boundary.
+
 ### Mixing Paradigms
 
 Most projects mix paradigms:

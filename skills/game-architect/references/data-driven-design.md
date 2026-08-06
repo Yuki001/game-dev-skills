@@ -2,6 +2,8 @@
 
 Applicable to lightweight business modules (e.g., Inventory, Shop) centered on data management and display, suitable for Model layer design in MV series architectures.
 
+In this skill, **Data-Driven Design** means a **data-structure-first programming paradigm**: design the data structures first, then organize behavior and business processes around them. It does not specifically mean configuration-driven gameplay, nor is it limited to memory-layout-focused Data-Oriented Design (DOD).
+
 ## Introduction
 - **Core**: Focuses on data structure design and analysis, maintaining the purity of data structures.
 - **Characteristics**: Separation of Data and Behavior.
