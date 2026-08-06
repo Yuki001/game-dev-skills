@@ -1,6 +1,6 @@
 ---
 name: game-image-generation-rules
-description: Plan, generate, inspect, vision-evaluate, refine, and package images and visual assets for game development through a backend-agnostic production loop. Use for PNG or SVG props, icons, characters, environments, tiles, UI, VFX, transparent cutouts, concept sheets, sprite sheets, or animation frames; especially when the task needs batch generation, native prompts or ComfyUI/Stable Diffusion Danbooru tags, reference consistency, background removal, format validation, or iterative quality scoring. This skill orchestrates available image, image-edit, vision, SVG, MCP, local, and host-native tools without requiring a specific generator.
+description: Plan, generate, inspect, vision-evaluate, refine, and package images and visual assets for game development through a backend-agnostic production loop. Use for PNG or SVG props, icons, characters, environments, tiles, UI, HUD/gameplay screens, VFX, transparent cutouts, concept or worldbuilding boards, sprite sheets, static sprite collections, or animation frames; especially when the task needs batch generation, native prompts or ComfyUI/Stable Diffusion Danbooru tags, reference consistency, background removal, format validation, or iterative quality scoring. This skill orchestrates available image, image-edit, vision, SVG, MCP, local, and host-native tools without requiring a specific generator.
 ---
 
 # Game Image Generation Rules
@@ -36,7 +36,9 @@ Separate **hard gates** from **quality criteria**. Define both before generation
 
 - `references/backend-routing.md` to select and preflight generators/editors;
 - `references/prompting.md` to compile native prompts or Danbooru tags;
-- `references/game-asset-patterns.md` for asset-specific brief and prompt patterns.
+- `references/game-asset-patterns.md` for individual asset, character-sheet, static sprite collection, environment, tile, and panorama patterns;
+- `references/game-hud-patterns.md` for complete gameplay-screen and HUD compositions;
+- `references/game-gallery-patterns.md` for multi-panel worldbuilding, mixed design, and character-roster boards.
 
 Ask only when a missing choice materially changes the deliverable. Otherwise record a reasonable assumption in the plan.
 
@@ -47,6 +49,7 @@ Choose the simplest production path that preserves the requested properties:
 - **SVG**: construct or generate vector-native markup, then validate it through `references/svg-workflow.md`.
 - **Raster PNG**: generate at or above delivery size, preserve a clean subject silhouette, then normalize and inspect.
 - **Transparent or composited VFX raster**: use native alpha or a removable matte for normal transparency. For emissive-only VFX, black-background additive delivery may replace alpha extraction when the target engine/material supports it. Validate the selected path through `references/raster-and-alpha.md`.
+- **Gameplay screen or HUD composition**: use `references/game-hud-patterns.md`; treat the result as a screen concept unless its UI components are separately constructed and validated.
 - **Sprite sheet or animation frames**: follow `references/sprite-sheet/sprite-sheets.md` to select one of 3 routes: video-generation, reference-sheet, or direct sheet-generation.
 
 ## 3. Compile prompts from one semantic source
@@ -132,7 +135,9 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 
 - `references/backend-routing.md` — capability discovery and backend selection.
 - `references/prompting.md` — semantic prompts, native prompts, Danbooru tag compilation, and edit prompts.
-- `references/game-asset-patterns.md` — reusable patterns for common game asset families.
+- `references/game-asset-patterns.md` — reusable patterns for individual game assets, character sheets, static sprite collections, environments, tiles, and panoramas.
+- `references/game-hud-patterns.md` — whole-screen gameplay and HUD composition contracts and genre patterns.
+- `references/game-gallery-patterns.md` — multi-panel worldbuilding, hybrid design-board, and character-roster patterns.
 - `references/evaluation.md` — hard gates, weighted rubrics, comparison, and iteration decisions.
 - `references/raster-and-alpha.md` — PNG, alpha, matte removal, additive VFX, edge cleanup, and delivery checks.
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.

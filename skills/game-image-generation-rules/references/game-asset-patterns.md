@@ -31,6 +31,16 @@ Evaluation emphasis: silhouette, crop, recognizability, edge quality, value sepa
 
 Plan identity anchors: face shape, hair silhouette, body proportions, costume layers, palette swatches, signature equipment, and forbidden drift.
 
+Choose the sheet's purpose before allocating regions:
+
+- use a **turnaround/reference sheet** for production continuity and neutral orthographic views;
+- use an **expression sheet** for facial consistency across named emotions;
+- use an **exploratory concept sheet** for alternatives, measurements, annotations, and unresolved design decisions.
+
+Do not present exploratory sketches as a production turnaround. A production sheet needs compatible scale, ground line, camera, anatomy, costume topology, and equipment placement across views.
+
+Use `game-gallery-patterns.md` when the deliverable is a multi-character roster or a board that mixes characters with environments, maps, or props.
+
 For a sheet, allocate regions before detail:
 
 ```text
@@ -58,6 +68,18 @@ Specify:
 - no camera movement.
 
 Generate a neutral canonical frame first. Use it as the identity reference for subsequent frames.
+
+## Static sprite collection
+
+Use this pattern when one regular sheet contains multiple independent assets rather than sequential animation frames. Define:
+
+- asset family, intended gameplay use, and required variety;
+- rows, columns, cell size, gutters, and row-major asset order or identifiers;
+- projection, facing convention, canonical scale, occupied bounds, and padding;
+- shared palette, outline, shading, light direction, and alpha policy;
+- forbidden duplicates and per-cell acceptance criteria at native display size.
+
+Do not assign animation phases, duration, FPS, loop mode, or temporal-continuity requirements. Inspect the full collection for set-level cohesion, then slice and validate every cell as an independent asset. Reject missing, duplicated, merged, crossed, clipped, or stylistically drifting cells.
 
 ## Tile or tileset
 
@@ -91,6 +113,8 @@ Evaluation emphasis: navigation readability, scale cues, depth separation, colli
 ## UI element
 
 Prefer SVG or deterministic composition for exact geometry and text. Separate states such as normal, hover, pressed, disabled, selected, cooldown, and alert.
+
+Use `game-hud-patterns.md` when the deliverable is a complete gameplay screen in which scene, camera, visible game state, and HUD must be composed together.
 
 Evaluation emphasis: legibility at target DPI, consistent padding, state differentiation, contrast, nine-slice safety, and localization expansion.
 
@@ -141,6 +165,33 @@ Evaluate new assets against both their individual rubric and this set-level bibl
 
 Adapt these slots to the project style bible and delivery contract.
 
+### Official character turnaround sheet
+
+```text
+Create one landscape game-character reference sheet on a 1536×1024 canvas with a clean white background and an organized official-setting-material layout.
+IDENTITY: [original character or supplied appearance reference], with fixed face shape, hair silhouette, body proportions, costume layers, palette, and signature equipment.
+TURNAROUND: show full-body front, true orthographic side, and back views in neutral stance, at identical scale, camera height, and ground line. These must be three distinct views, not repeated three-quarter poses or mirrored approximations.
+SUPPORTING REGIONS: a small row of named facial expressions, clothing and equipment close-ups, palette swatches, and a scale marker. Include a short setting note only when exact copy is supplied.
+CONSISTENCY: preserve anatomy, costume seams, closures, accessories, material zones, colors, handedness, and equipment attachment points across every view.
+OUTPUT: crisp readable layout, generous gutters, no scenic background, dynamic action pose, perspective distortion, cropped feet, duplicate views, or invented labels.
+```
+
+Evaluate view identity and costume topology before judging illustration polish.
+
+### Character expression sheet
+
+```text
+Create one strict 4×4 facial-expression sheet for the same original game character. Use one identical head-and-shoulders crop, camera angle, scale, hairstyle, clothing neckline, palette, and light direction in all 16 cells. Expressions in row-major order: happy, sad, angry, surprised, shy, speechless, mischievous grin, contemplative, curious, proud, hurt, disdainful, confused, frightened, crying, and affectionate joy. Change only expression-related facial features and subtle head gesture. Use clean equal gutters and no merged cells, duplicate expressions, identity drift, costume changes, scenic backgrounds, or unreadable generated labels.
+```
+
+If labels are required, supply their exact text; otherwise identify expressions outside the generated image by row and column.
+
+### Exploratory character concept sheet
+
+```text
+Create one portrait-oriented exploratory game-character concept sheet for an original elven archer. Place one large full-body hero sketch at center, then surround it with two side-view cloak variations, three small action-pose thumbnails, a bow and quiver construction study with supplied measurements, clothing-detail callouts, material swatches, and restrained forest-green / silver color tests. Use loose graphite construction lines with precise ink accents and light watercolor tests. Keep the character's face, proportions, costume motifs, and equipment language recognizable across studies, while clearly presenting alternatives as alternatives. The page should read as an art-director development sheet, not a final turnaround or unrelated sketch collage. Add annotations only when exact text is supplied.
+```
+
 ### Side-view character canonical frame
 
 Native:
@@ -163,11 +214,40 @@ desert traveler, stylized proportions, clean lineart, cel shading,
 limited palette, centered, transparent background
 ```
 
+### Static pixel-art vehicle collection
+
+```text
+Create one strict 10×10 static pixel-art sprite collection on a canvas sized for 100 equal cells.
+CONTENTS: one distinct original retro vehicle per cell, including varied sedans, sports cars, utility vehicles, taxis, service vehicles, convertibles, and hot rods. Cells are independent assets, not animation frames.
+LAYOUT: ten rows by ten columns, fixed row-major order, equal 64×64 native cells, one complete vehicle per cell, consistent occupied bounds, no gutters unless the contract supplies them, no merged or crossed cells.
+CONSISTENCY: one 3/4 top-down orthographic projection, matching scale, outline policy, upper-left light direction, and shared palette logic across all vehicles.
+RENDERING: crisp 16-bit-inspired pixel art, deliberate pixel clusters, no antialiasing or subpixel detail, approximately 16 colors or fewer per vehicle while preserving one coherent set-level palette.
+OUTPUT: true transparent background outside each vehicle; no visible grid, labels, cast-shadow plates, duplicate vehicles, cropped silhouettes, or franchise logos.
+```
+
+Inspect the complete grid, then slice it into independent assets and validate every cell for dimensions, alpha, clipping, padding, projection, scale, palette, and recognizability at native size. A generated high-resolution pixel-art look still requires deterministic reduction, palette control, and nearest-neighbor handling before it qualifies as production pixel art.
+
 ### Isometric building
 
 ```text
 Create one game-ready isometric building asset on a 768×768 square canvas: a compact fantasy alchemist shop, strict 2:1 isometric projection, front-left and front-right walls visible, base aligned to an isometric diamond. Readable landmarks: crooked copper chimney, round green-glass window, herb bundles, small awning, reinforced wooden door. Hand-painted strategy-game rendering, chunky shapes, warm plaster / dark timber / oxidized copper palette, upper-left daylight, shadows falling consistently down-right. Isolated with true transparency; no ground plane beyond the building footprint, no people, sign text, border, or cropped roof.
 ```
+
+### Isometric environment cluster
+
+```text
+Create one square isometric environment cluster showing a compact two-block market district. Use precise 30° screen axes and one fixed orthographic camera. Include a corner cafe, small bookstore, bakery stall, fountain plaza, bicycle, planters, food cart, and a few scale-reference pedestrians. Keep building footprints, doors, paths, roof heights, and props readable as a strategy-game environment block. Use clean geometric forms, consistent upper-left ambient light, shadows falling down-right, restrained terracotta / cream / sage / dusty-blue palette, and controlled ambient occlusion. Present the cluster on one unobtrusive background or ground footprint with no perspective drift, floating pieces, illegible signs, cropped buildings, or conflicting light directions.
+```
+
+Treat this as one environment cluster. Generate isolated buildings separately when the engine needs individually placeable assets.
+
+### Isometric grid map
+
+```text
+Create one square isometric fantasy-village map concept based on an explicit gameplay grid. Use fixed 3×3-meter world tiles, precise 30° screen axes, consistent elevation steps, and one orthographic camera. Include readable wooden houses, cobblestone paths, a central fountain, and one corner raised by a 2-meter grassy level connected with stairs. Preserve clear traversable routes, building footprints, tile boundaries, scale, texel density, upper-left sunlight, and down-right shadows. The result should read as a handcrafted strategy-game map, not a perspective illustration. Avoid hidden paths, impossible elevation joins, objects crossing intended boundaries, inconsistent building scale, and decorative clutter over playable areas.
+```
+
+The prompt defines the intended grid but cannot prove alignment, adjacency, or path validity. Verify those properties deterministically or rebuild the accepted concept in the level pipeline.
 
 ### Seamless ground tile
 
@@ -176,6 +256,14 @@ Create a seamless 128×128 top-down game texture tile of worn mossy flagstones. 
 ```
 
 Generate multiple variants, then test exact edge continuity deterministically. A prompt cannot prove seamlessness.
+
+### Equirectangular panorama or skybox source
+
+```text
+Create one strict 2:1 equirectangular game-environment panorama at 4096×2048 for spherical viewing. Scene: a dense prehistoric jungle with a level horizon, layered fern-covered trees, a winding river, distant large-animal silhouettes, canopy birds, warm late-afternoon shafts, and light atmospheric haze. Compose in full 360° space: the left and right edges must wrap continuously in geometry, value, color, lighting, and object continuation. Keep major landmarks away from the seam and poles, preserve navigable depth cues around the horizon, and avoid visible edge breaks, duplicated seam objects, pinched zenith/nadir details, flat wallpaper perspective, text, borders, or camera-frame artifacts.
+```
+
+Inspect the panorama in an equirectangular viewer and test the horizontal wrap. A prompt cannot guarantee a seamless spherical projection.
 
 ### VFX impact sequence
 
