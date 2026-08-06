@@ -55,7 +55,7 @@ First, run `scripts/inspect_asset.py` for basic structural evidence:
 - XML parses and the root element is `<svg>`;
 - a valid positive-size `viewBox` or explicit dimensions exist;
 - IDs are stable and references such as `<use>`, masks, filters, and clip paths resolve;
-- graphic elements exist and common numeric geometry attributes are finite;
+- graphic elements exist and common numeric geometry, path, and transform attributes have valid finite syntax;
 - external resources, scripts, `foreignObject`, or `role="img"` without an accessible name are reported as warnings.
 
 Use `--strict-svg` only when those warnings should fail the current asset contract. Otherwise, inspect the source to decide whether external images, fonts, scripts, naming, accessibility, and deliberately used SVG features are intentional and supported by the target runtime.

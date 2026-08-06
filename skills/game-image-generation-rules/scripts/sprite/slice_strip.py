@@ -394,13 +394,31 @@ def align_frames(
     threshold: int,
     Image: Any,
 ) -> tuple[list[Any], list[dict[str, Any]]]:
-    if mode == "none" and canvas_size is None and padding == 0:
-        return frames, [
-            {"source_bbox": list(alpha_bbox(frame, threshold)) if alpha_bbox(frame, threshold) else None,
-             "paste": [0, 0],
-             "output_size": list(frame.size)}
-            for frame in frames
-        ]
+    if mode == "none":
+        needed_width = max(frame.width for frame in frames) + padding * 2
+        needed_height = max(frame.height for frame in frames) + padding * 2
+        canvas = canvas_size or (needed_width, needed_height)
+        if canvas[0] < needed_width or canvas[1] < needed_height:
+            raise ValueError(
+                f"requested canvas {canvas[0]}x{canvas[1]} is smaller than "
+                f"required {needed_width}x{needed_height}"
+            )
+        outputs: list[Any] = []
+        placements: list[dict[str, Any]] = []
+        for frame in frames:
+            output = Image.new("RGBA", canvas, (0, 0, 0, 0))
+            output.alpha_composite(frame, (padding, padding))
+            outputs.append(output)
+            bbox = alpha_bbox(frame, threshold)
+            placements.append(
+                {
+                    "source_bbox": list(bbox) if bbox else None,
+                    "paste": [padding, padding],
+                    "output_size": list(canvas),
+                    "source_baseline_offset": None,
+                }
+            )
+        return outputs, placements
 
     cropped: list[Any] = []
     source_boxes: list[list[int] | None] = []
@@ -526,7 +544,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--width-weight", type=float, default=0.0015)
     parser.add_argument("--min-width-ratio", type=float, default=0.45)
-    parser.add_argument("--align", choices=("none", "center", "centroid", "baseline"), default="baseline")
+    parser.add_argument(
+        "--align",
+        choices=("none", "center", "centroid", "baseline"),
+        default="none",
+        help=(
+            "Frame placement policy. Default 'none' preserves source-cell coordinates "
+            "and intentional root motion; baseline/centroid normalize horizontal placement."
+        ),
+    )
     parser.add_argument("--cell-size", type=parse_size)
     parser.add_argument("--padding", type=int, default=0)
     parser.add_argument("--prefix", default="frame")

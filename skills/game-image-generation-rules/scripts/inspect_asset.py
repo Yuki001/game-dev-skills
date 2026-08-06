@@ -21,6 +21,13 @@ COLOR_TYPES = {
     4: ("grayscale_alpha", 2),
     6: ("rgba", 4),
 }
+PNG_ALLOWED_BIT_DEPTHS = {
+    0: {1, 2, 4, 8, 16},
+    2: {8, 16},
+    3: {1, 2, 4, 8},
+    4: {8, 16},
+    6: {8, 16},
+}
 SVG_GRAPHIC_TAGS = {
     "circle",
     "ellipse",
@@ -38,6 +45,13 @@ SVG_NONFINITE_RE = re.compile(
     r"(?:^|[\s,;(])(?:nan|[+-]?inf(?:inity)?)(?=$|[\s,;)])",
     re.IGNORECASE,
 )
+SVG_NUMBER_PATTERN = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
+SVG_NUMBER_RE = re.compile(rf"^{SVG_NUMBER_PATTERN}$")
+SVG_LENGTH_RE_ANY_SIGN = re.compile(
+    rf"^{SVG_NUMBER_PATTERN}(?:px|pt|pc|mm|cm|in|em|ex|ch|rem|vw|vh|vmin|vmax|%)?$"
+)
+SVG_PATH_TOKEN_RE = re.compile(rf"[AaCcHhLlMmQqSsTtVvZz]|{SVG_NUMBER_PATTERN}")
+SVG_TRANSFORM_RE = re.compile(r"([A-Za-z]+)\s*\(([^()]*)\)")
 SVG_NUMERIC_ATTRIBUTES = {
     "baseFrequency",
     "cx",
@@ -88,6 +102,11 @@ def _paeth(a: int, b: int, c: int) -> int:
 
 
 def _unfilter(raw: bytes, height: int, row_bytes: int, bpp: int) -> list[bytes]:
+    expected_size = height * (row_bytes + 1)
+    if len(raw) != expected_size:
+        raise ValueError(
+            f"PNG scanline data has {len(raw)} bytes; expected {expected_size}"
+        )
     rows: list[bytes] = []
     offset = 0
     prior = bytearray(row_bytes)
@@ -176,30 +195,79 @@ def _alpha_values(
     return output
 
 
+def _read_png_chunks(data: bytes) -> tuple[dict[str, list[bytes]], list[str]]:
+    chunks: dict[str, list[bytes]] = {}
+    sequence: list[str] = []
+    offset = len(PNG_SIGNATURE)
+    saw_iend = False
+    while offset < len(data):
+        if offset + 12 > len(data):
+            raise ValueError("truncated PNG chunk header")
+        length = struct.unpack(">I", data[offset : offset + 4])[0]
+        name_bytes = data[offset + 4 : offset + 8]
+        if not re.fullmatch(rb"[A-Za-z]{4}", name_bytes):
+            raise ValueError("invalid PNG chunk type")
+        name = name_bytes.decode("ascii")
+        payload_start = offset + 8
+        payload_end = payload_start + length
+        chunk_end = payload_end + 4
+        if chunk_end > len(data):
+            raise ValueError(f"truncated PNG {name} chunk")
+        payload = data[payload_start:payload_end]
+        expected_crc = struct.unpack(">I", data[payload_end:chunk_end])[0]
+        actual_crc = zlib.crc32(name_bytes + payload) & 0xFFFFFFFF
+        if actual_crc != expected_crc:
+            raise ValueError(f"PNG {name} chunk CRC mismatch")
+        if saw_iend:
+            raise ValueError("PNG contains data after IEND")
+        chunks.setdefault(name, []).append(payload)
+        sequence.append(name)
+        offset = chunk_end
+        if name == "IEND":
+            saw_iend = True
+
+    if not sequence or sequence[0] != "IHDR":
+        raise ValueError("PNG must begin with IHDR")
+    if len(chunks.get("IHDR", [])) != 1 or len(chunks["IHDR"][0]) != 13:
+        raise ValueError("PNG must contain exactly one 13-byte IHDR chunk")
+    if "IDAT" not in chunks:
+        raise ValueError("PNG has no IDAT chunk")
+    if len(chunks.get("IEND", [])) != 1 or chunks["IEND"][0]:
+        raise ValueError("PNG must end with one empty IEND chunk")
+    if sequence[-1] != "IEND":
+        raise ValueError("PNG IEND chunk must be last")
+    return chunks, sequence
+
+
 def inspect_png(path: Path) -> dict:
     data = path.read_bytes()
     if not data.startswith(PNG_SIGNATURE):
         raise ValueError("invalid PNG signature")
-    chunks: dict[str, list[bytes]] = {}
-    offset = len(PNG_SIGNATURE)
-    while offset + 12 <= len(data):
-        length = struct.unpack(">I", data[offset : offset + 4])[0]
-        name = data[offset + 4 : offset + 8].decode("ascii")
-        payload = data[offset + 8 : offset + 8 + length]
-        chunks.setdefault(name, []).append(payload)
-        offset += 12 + length
-        if name == "IEND":
-            break
-    if "IHDR" not in chunks:
-        raise ValueError("PNG has no IHDR chunk")
+    chunks, chunk_sequence = _read_png_chunks(data)
     width, height, bit_depth, color_type, compression, filtering, interlace = struct.unpack(
         ">IIBBBBB", chunks["IHDR"][0]
     )
+    if width < 1 or height < 1:
+        raise ValueError("PNG dimensions must be positive")
     if color_type not in COLOR_TYPES:
         raise ValueError(f"unsupported PNG color type {color_type}")
+    if bit_depth not in PNG_ALLOWED_BIT_DEPTHS[color_type]:
+        raise ValueError(
+            f"invalid PNG bit depth {bit_depth} for color type {color_type}"
+        )
+    if compression != 0 or filtering != 0 or interlace not in (0, 1):
+        raise ValueError("unsupported or invalid PNG IHDR encoding fields")
+    if color_type == 3 and "PLTE" not in chunks:
+        raise ValueError("indexed PNG has no PLTE chunk")
     color_name, channels = COLOR_TYPES[color_type]
     trns = chunks.get("tRNS", [None])[0]
     has_alpha = color_type in (4, 6) or trns is not None
+    decompressor = zlib.decompressobj()
+    raw = decompressor.decompress(b"".join(chunks["IDAT"])) + decompressor.flush()
+    if not decompressor.eof:
+        raise ValueError("truncated PNG IDAT zlib stream")
+    if decompressor.unused_data or decompressor.unconsumed_tail:
+        raise ValueError("PNG IDAT contains trailing compressed data")
     result = {
         "path": str(path.resolve()),
         "format": "png",
@@ -210,13 +278,17 @@ def inspect_png(path: Path) -> dict:
         "has_alpha_channel": has_alpha,
         "interlaced": bool(interlace),
         "chunks": sorted(chunks),
+        "chunk_sequence": chunk_sequence,
     }
-    if interlace or compression != 0 or filtering != 0 or "IDAT" not in chunks:
-        result["alpha_analysis"] = {"available": False, "reason": "unsupported PNG encoding"}
+    if interlace:
+        result["alpha_analysis"] = {
+            "available": False,
+            "reason": "interlaced PNG alpha decoding is unavailable",
+        }
         return result
     row_bytes = math.ceil(width * channels * bit_depth / 8)
     bpp = max(1, math.ceil(channels * bit_depth / 8))
-    rows = _unfilter(zlib.decompress(b"".join(chunks["IDAT"])), height, row_bytes, bpp)
+    rows = _unfilter(raw, height, row_bytes, bpp)
     alpha = _alpha_values(rows, width, color_type, bit_depth, trns)
     if alpha is None:
         result["alpha_analysis"] = {
@@ -294,6 +366,119 @@ def _valid_svg_view_box(value: str | None) -> bool:
     return all(math.isfinite(number) for number in numbers) and numbers[2] > 0 and numbers[3] > 0
 
 
+def _valid_svg_number_list(
+    value: str,
+    *,
+    allow_lengths: bool = False,
+    minimum_count: int = 1,
+    even_count: bool = False,
+) -> bool:
+    parts = [part for part in re.split(r"[\s,]+", value.strip()) if part]
+    if len(parts) < minimum_count or (even_count and len(parts) % 2):
+        return False
+    token_re = SVG_LENGTH_RE_ANY_SIGN if allow_lengths else SVG_NUMBER_RE
+    return all(token_re.fullmatch(part) for part in parts)
+
+
+def _valid_svg_path_data(value: str) -> bool:
+    tokens: list[str] = []
+    cursor = 0
+    previous_was_number = False
+    for match in SVG_PATH_TOKEN_RE.finditer(value):
+        gap = value[cursor : match.start()]
+        token = match.group(0)
+        current_is_number = not token.isalpha()
+        if gap and not re.fullmatch(r"[\s,]*", gap):
+            return False
+        if (
+            not gap
+            and previous_was_number
+            and current_is_number
+            and token[0] not in "+-"
+        ):
+            return False
+        tokens.append(token)
+        previous_was_number = current_is_number
+        cursor = match.end()
+    if value[cursor:].strip(" \t\r\n,") or not tokens or tokens[0] not in "Mm":
+        return False
+
+    arity = {
+        "A": 7,
+        "C": 6,
+        "H": 1,
+        "L": 2,
+        "M": 2,
+        "Q": 4,
+        "S": 4,
+        "T": 2,
+        "V": 1,
+        "Z": 0,
+    }
+    index = 0
+    while index < len(tokens):
+        command = tokens[index]
+        if not command.isalpha():
+            return False
+        index += 1
+        number_count = 0
+        while index < len(tokens) and not tokens[index].isalpha():
+            number_count += 1
+            index += 1
+        required = arity[command.upper()]
+        if required == 0:
+            if number_count:
+                return False
+        elif number_count < required or number_count % required:
+            return False
+    return True
+
+
+def _valid_svg_transform_list(value: str) -> bool:
+    arities = {
+        "matrix": {6},
+        "translate": {1, 2},
+        "scale": {1, 2},
+        "rotate": {1, 3},
+        "skewX": {1},
+        "skewY": {1},
+    }
+    cursor = 0
+    matched = False
+    for match in SVG_TRANSFORM_RE.finditer(value):
+        if value[cursor : match.start()].strip(" \t\r\n,"):
+            return False
+        name, arguments = match.groups()
+        parts = [part for part in re.split(r"[\s,]+", arguments.strip()) if part]
+        if name not in arities or len(parts) not in arities[name]:
+            return False
+        if not parts or not all(SVG_NUMBER_RE.fullmatch(part) for part in parts):
+            return False
+        matched = True
+        cursor = match.end()
+    return matched and not value[cursor:].strip(" \t\r\n,")
+
+
+def _valid_svg_numeric_attribute(name: str, value: str) -> bool:
+    if SVG_NONFINITE_RE.search(value):
+        return False
+    if name == "viewBox":
+        return _valid_svg_view_box(value)
+    if name == "d":
+        return _valid_svg_path_data(value)
+    if name == "points":
+        return _valid_svg_number_list(value, minimum_count=2, even_count=True)
+    if name == "transform":
+        if value.strip() == "none":
+            return True
+        return _valid_svg_transform_list(value)
+    if name == "stroke-dasharray" and value.strip() == "none":
+        return True
+    if value.strip() in {"inherit", "initial", "unset"}:
+        return True
+    return _valid_svg_number_list(value, allow_lengths=True)
+
+
 def _parse_size(value: str) -> tuple[int, int]:
     match = SIZE_RE.fullmatch(value)
     if not match:
@@ -325,7 +510,7 @@ def inspect_svg(path: Path) -> dict:
     duplicate_ids: set[str] = set()
     local_references: set[str] = set()
     external_references: list[str] = []
-    nonfinite_attributes: list[str] = []
+    invalid_numeric_attributes: list[str] = []
     graphic_element_count = 0
     script_count = 0
     foreign_object_count = 0
@@ -359,8 +544,10 @@ def inspect_svg(path: Path) -> dict:
                 elif value:
                     external_references.append(value)
             local_references.update(SVG_URL_REFERENCE_RE.findall(value))
-            if local_name in SVG_NUMERIC_ATTRIBUTES and SVG_NONFINITE_RE.search(value):
-                nonfinite_attributes.append(f"{tag}.{local_name}")
+            if local_name in SVG_NUMERIC_ATTRIBUTES and not _valid_svg_numeric_attribute(
+                local_name, value
+            ):
+                invalid_numeric_attributes.append(f"{tag}.{local_name}")
             if local_name in {"aria-labelledby", "aria-describedby"}:
                 local_references.update(value.split())
         if tag == "style" and element.text:
@@ -379,9 +566,10 @@ def inspect_svg(path: Path) -> dict:
     missing_references = sorted(reference for reference in local_references if reference not in ids)
     if missing_references:
         structural_failures.append(f"unresolved local references: {', '.join(missing_references)}")
-    if nonfinite_attributes:
+    if invalid_numeric_attributes:
         structural_failures.append(
-            f"non-finite numeric values in: {', '.join(sorted(set(nonfinite_attributes)))}"
+            "invalid or non-finite numeric geometry values in: "
+            f"{', '.join(sorted(set(invalid_numeric_attributes)))}"
         )
     if graphic_element_count == 0:
         structural_failures.append("SVG contains no graphic elements")
@@ -421,6 +609,7 @@ def inspect_svg(path: Path) -> dict:
         "unresolved_local_references": missing_references,
         "external_reference_count": len(external_references),
         "external_references": external_references,
+        "invalid_numeric_attributes": sorted(set(invalid_numeric_attributes)),
         "script_count": script_count,
         "foreign_object_count": foreign_object_count,
         "role": root.attrib.get("role"),

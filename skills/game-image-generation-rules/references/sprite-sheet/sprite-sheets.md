@@ -107,9 +107,9 @@ For both sheet-producing routes, `slice_strip.py` returns the single-frame image
 For generated sheets:
 
 1. Run `scripts/inspect_asset.py SHEET --cols C --rows R` to check size, alpha, borders, padding, and grid divisibility.
-2. Run `scripts/sprite/slice_strip.py`. Use `--method equal` when the backend produced a known exact grid; use the default `projection-dp` when transparent gutters or generated boundaries are not exact.
+2. Run `scripts/sprite/slice_strip.py`. Use `--method equal` when the backend produced a known exact grid; use the default `projection-dp` when transparent gutters or generated boundaries are not exact. When source-cell coordinates encode root motion, use the exact grid with `--align none`; content-aware variable-width segmentation cannot recover discarded cell-space offsets.
 3. For multi-row sheets, pass `--rows R --frames C`. Output is row-major and named `_r{row}_c{col}`.
-4. Use one shared cell canvas and a suitable alignment mode. Baseline alignment must preserve intentional vertical displacement such as a jump arc.
+4. Use one shared cell canvas and a suitable alignment mode. The default `none` preserves source-cell X/Y coordinates. `baseline` preserves relative vertical displacement but normalizes horizontal placement, so use it only for intentionally in-place animation.
 5. Reject a sheet when extraction would cut through a subject, merge phases, invent missing phases, or hide a crossed cell boundary. Producing the expected file count does not prove the sheet is valid.
 
 For video frames, preserve the backend's camera-space motion. Do not centroid-align or baseline-align the sequence merely to suppress visible movement; camera drift is a backend failure, while intentional subject displacement is part of the animation. For hard-edged pixel art, `normalize_pixel_sequence.py` applies one shared crop, scale, placement, and global palette to the complete sequence, so it preserves motion instead of recentering individual frames. Supply frames with usable alpha; remove a matte first when necessary.
@@ -120,7 +120,7 @@ Typical calls:
 
 ```text
 python scripts/inspect_asset.py sheet.png --cols 4 --rows 2 --expect-transparent
-python scripts/sprite/slice_strip.py sheet.png frames/ --rows 2 --frames 4 --align baseline --cell-size 256x256 --manifest slice.json
+python scripts/sprite/slice_strip.py sheet.png frames/ --rows 2 --frames 4 --method equal --align none --cell-size 256x256 --manifest slice.json
 python scripts/sprite/normalize_pixel_sequence.py video-frames/ pixel-frames/ --size 64x64 --colors 4 --anchor bottom-center
 python scripts/sprite/inspect_sequence.py frames/ --output sequence-report.json
 python scripts/sprite/pack_animation.py frames/ --output-prefix hero --names run,jump --fps 12 --trim
