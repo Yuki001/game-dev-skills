@@ -13,7 +13,8 @@ Use this skill to generate images with OpenRouter's dedicated Image API and save
 2. Pick a model from the user's request. If no model is specified, use `bytedance-seed/seedream-4.5` as a practical default and mention that the user can override it.
 3. Use the bundled script at `scripts/openrouter_image_generate.py` rather than constructing requests manually.
 4. Save generated images to a user-visible output directory, defaulting to the current working directory if the user did not specify one.
-5. Do not print API keys. Do not put API keys directly on the command line because shell history may capture them.
+5. Pass `--remove-background` only when local chroma-key removal is explicitly wanted. This flag always processes final PNG/WebP outputs; `--background transparent` alone does not trigger it.
+6. Do not print API keys. Do not put API keys directly on the command line because shell history may capture them.
 
 ## Bundled script
 
@@ -44,6 +45,7 @@ Pass only the options the user asks for or that are
 - `--quality auto|low|medium|high` controls provider quality where supported.
 - `--output-format png|jpeg|webp|svg` controls the saved file type when supported.
 - `--background auto|transparent|opaque` sets background where supported.
+- `--remove-background` always runs the bundled chroma-key remover on final PNG/WebP outputs. It is a local option and is not sent to OpenRouter.
 - `--output-compression 0..100` applies to jpeg/webp where supported.
 - `--seed INTEGER` requests deterministic generation where supported.
 - `--reference PATH_OR_URL` can be passed multiple times for image-to-image/reference inputs. Local files are converted to data URLs.
@@ -73,6 +75,8 @@ Use discovery before passing unusual parameters. OpenRouter image models differ 
 The script writes a single generated image as `<output-prefix>.<ext>` and multiple generated images as `<output-prefix>_001.<ext>`, `<output-prefix>_002.<ext>`, and so on. SVG outputs are decoded as text bytes and saved with `.svg`; raster outputs are decoded from base64 and saved with the requested or returned media type.
 
 The script also writes a JSON metadata file by default with the request payload minus secrets, OpenRouter `usage`, created timestamp, and generated file paths. Use `--no-metadata` to skip it.
+
+When `--remove-background` is present, every final PNG/WebP output is processed with the bundled `scripts/remove_chroma_key.py` copy, regardless of its existing alpha values. JPEG, SVG, and streaming partial previews are never processed. If Pillow is unavailable or the remover cannot run successfully, print a warning and return the original generated image normally. Without the flag, do not run local background removal.
 
 ## Streaming
 

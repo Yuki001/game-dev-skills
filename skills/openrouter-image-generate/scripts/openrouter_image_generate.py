@@ -8,7 +8,9 @@ import base64
 import json
 import mimetypes
 import os
+import subprocess
 import sys
+from tempfile import TemporaryDirectory
 import time
 import urllib.error
 import urllib.parse
@@ -18,6 +20,7 @@ from typing import Any
 
 API_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_MODEL = "bytedance-seed/seedream-4.5"
+BACKGROUND_REMOVAL_EXTENSIONS = {".png", ".webp"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -91,6 +94,11 @@ def parse_args() -> argparse.Namespace:
         "--background",
         choices=["auto", "transparent", "opaque"],
         help="Background handling.",
+    )
+    generate.add_argument(
+        "--remove-background",
+        action="store_true",
+        help="Always run the bundled chroma-key remover on final PNG/WebP outputs.",
     )
     generate.add_argument(
         "--output-compression", type=int, help="Compression 0-100 for jpeg/webp."
@@ -332,6 +340,88 @@ def save_image(
     return path
 
 
+def apply_chroma_key_fallback(path: Path) -> bool:
+    """Replace one PNG/WebP with the bundled chroma-key result."""
+    helper = Path(__file__).with_name("remove_chroma_key.py")
+    if not helper.is_file():
+        print(
+            f"Warning: background-removal helper not found: {helper}. "
+            f"The original image was kept: {path}",
+            file=sys.stderr,
+        )
+        return False
+
+    with TemporaryDirectory(
+        prefix="openrouter-remove-background-", dir=path.parent
+    ) as temp_dir:
+        processed = Path(temp_dir) / f"processed{path.suffix.lower()}"
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(helper),
+                    "--input",
+                    str(path),
+                    "--out",
+                    str(processed),
+                    "--auto-key",
+                    "border",
+                    "--soft-matte",
+                    "--transparent-threshold",
+                    "12",
+                    "--opaque-threshold",
+                    "220",
+                    "--despill",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except OSError as exc:
+            print(
+                f"Warning: could not start the chroma-key fallback for {path}: {exc}. "
+                "The original image was kept.",
+                file=sys.stderr,
+            )
+            return False
+        if result.returncode != 0:
+            if result.stdout:
+                print(result.stdout.rstrip(), file=sys.stderr)
+            if result.stderr:
+                print(result.stderr.rstrip(), file=sys.stderr)
+            print(
+                f"Warning: automatic chroma-key fallback failed for {path}; "
+                "the original image was kept.",
+                file=sys.stderr,
+            )
+            return False
+        if result.stderr:
+            print(result.stderr.rstrip(), file=sys.stderr)
+        try:
+            processed.replace(path)
+        except OSError as exc:
+            print(
+                f"Warning: could not replace {path} with the chroma-key result: {exc}. "
+                "The original image was kept.",
+                file=sys.stderr,
+            )
+            return False
+        return True
+
+
+def apply_requested_background_removal(
+    remove_background: bool, paths: list[Path]
+) -> None:
+    """Apply explicit background removal to final PNG/WebP files."""
+    if not remove_background:
+        return
+    for path in paths:
+        if path.suffix.lower() not in BACKGROUND_REMOVAL_EXTENSIONS:
+            continue
+        print(f"Applying requested chroma-key background removal: {path}")
+        apply_chroma_key_fallback(path)
+
+
 def write_metadata(
     args: argparse.Namespace,
     payload: dict[str, Any],
@@ -397,6 +487,7 @@ def handle_buffered_response(
         save_image(image, args.output_dir, args.output_prefix, index, args.output_format, len(images))
         for index, image in enumerate(images, start=1)
     ]
+    apply_requested_background_removal(args.remove_background, files)
     for path in files:
         print(f"Wrote image: {path}")
     if result.get("usage"):
@@ -420,6 +511,7 @@ def handle_streaming_response(
 ) -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     files: list[Path] = []
+    completed_files: list[Path] = []
     result: dict[str, Any] = {"data": [], "created": None, "usage": None}
     partial_count = 0
 
@@ -445,7 +537,15 @@ def handle_streaming_response(
             result["usage"] = event.get("usage")
             image = {"b64_json": event.get("b64_json"), "media_type": event.get("media_type")}
             result["data"].append(image)
-            files.append(save_image(image, args.output_dir, args.output_prefix, len(result["data"]), args.output_format))
+            completed_path = save_image(
+                image,
+                args.output_dir,
+                args.output_prefix,
+                len(result["data"]),
+                args.output_format,
+            )
+            completed_files.append(completed_path)
+            files.append(completed_path)
 
     if not result["data"]:
         raise SystemExit("Streaming finished without a completed image.")
@@ -455,6 +555,8 @@ def handle_streaming_response(
         renamed_path = args.output_dir / f"{args.output_prefix}.{extension}"
         original_path.replace(renamed_path)
         files[-1] = renamed_path
+        completed_files[-1] = renamed_path
+    apply_requested_background_removal(args.remove_background, completed_files)
     for path in files:
         print(f"Wrote image: {path}")
     if result.get("usage"):
