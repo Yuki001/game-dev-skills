@@ -35,11 +35,12 @@ When designing game architecture, read the relevant `references/` documents base
 |------|------|
 | Always (high-level structure) | `references/macro-design.md` |
 | Always (core principles) | `references/principles.md` |
-| Requirement analysis | `references/requirements.md` |
+| Requirement analysis | `references/requirements-analysis.md` |
 | Choosing DDD paradigm | `references/domain-driven-design.md` |
 | Choosing Data-Driven paradigm | `references/data-driven-design.md` |
 | Choosing Prototype paradigm | `references/prototype-design.md` |
 | Evolution & extensibility review | `references/evolution.md` |
+| Changing requirements in an existing implementation | `references/requirement-change-strategy.md` |
 | Performance optimization needed | `references/performance-optimization.md` |
 | Multiplayer support needed | `references/multiplayer-overview.md` |
 
