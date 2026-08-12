@@ -100,7 +100,7 @@ Use chroma-key removal for transparent assets. The only supported path is `--bac
 
 Default sequence:
 
-1. Choose a key color unlikely to appear in the subject: default to `#00ff00`, use `#ff00ff` for green subjects, and avoid blue for blue subjects.
+1. Choose a key color unlikely to appear in the subject: default `#00ff00`, use `#ff00ff` for green subjects, and avoid `#0000ff` for blue subjects.
 2. Append only the following execution constraints to the supplied prompt, replacing the key color when needed:
 
 ```text

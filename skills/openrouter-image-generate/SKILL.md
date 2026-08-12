@@ -13,8 +13,9 @@ Use this skill to generate images with OpenRouter's dedicated Image API and save
 2. Pick a model from the user's request. If no model is specified, use `bytedance-seed/seedream-4.5` as a practical default and mention that the user can override it.
 3. Use the bundled script at `scripts/openrouter_image_generate.py` rather than constructing requests manually.
 4. Save generated images to a user-visible output directory, defaulting to the current working directory if the user did not specify one.
-5. Pass `--remove-background` only when local chroma-key removal is explicitly wanted. This flag always processes final PNG/WebP outputs; `--background transparent` alone does not trigger it.
-6. Do not print API keys. Do not put API keys directly on the command line because shell history may capture them.
+5. When the user or agent requires transparency, prefer a model/endpoint that supports native transparent output and pass `--background transparent` without `--remove-background`.
+6. Use `--remove-background` only when the user or agent requires transparency and the selected model/endpoint does not support native transparent backgrounds. Follow the transparent-background workflow below; the flag assumes a chroma-key prompt and always processes final PNG/WebP outputs locally.
+7. Do not print API keys. Do not put API keys directly on the command line because shell history may capture them.
 
 ## Bundled script
 
@@ -85,6 +86,62 @@ Use `--stream` only when the selected endpoint supports streaming. The script sa
 ## Safety and cost
 
 Image generation can bill the user's OpenRouter account. Before running a real generation command, make sure the requested model, image count, and output options match the user's intent. Use `--dry-run` when uncertain.
+
+## Transparent-background workflow
+
+OpenRouter includes models that can produce true transparency. When the user or agent requires a transparent background, first check the selected model/endpoint with `endpoints` if its capability is unclear. If it supports native transparent output, prefer `--background transparent --output-format png` (or WebP) and do not pass `--remove-background`.
+
+Use the chroma-key fallback only when both conditions are true: the user or agent requires a transparent result, and the selected model/endpoint does not support native transparency. Do not use `--remove-background` merely because support is unknown; inspect the endpoint or choose a transparency-capable model first.
+
+Fallback sequence:
+
+1. Choose a key color unlikely to appear in the subject: default `#00ff00`, use `#ff00ff` for green subjects, and avoid `#0000ff` for blue subjects.
+2. Append only the following execution constraints to the supplied prompt, replacing the key color when needed:
+
+```text
+Create the requested subject on a perfectly flat solid #00ff00 chroma-key background for background removal.
+The background must be one uniform color with no shadows, gradients, texture, reflections, floor plane, or lighting variation.
+Keep the subject fully separated from the background with crisp edges and generous padding.
+Do not use #00ff00 anywhere in the subject.
+No cast shadow, no contact shadow, no reflection, no watermark, and no text unless explicitly requested.
+```
+
+3. Generate a PNG with `--background opaque --output-format png --remove-background`. The flag does not modify the prompt or decide whether chroma-key removal is appropriate; it only applies the bundled post-processor to every final PNG/WebP output after generation.
+4. The flag invokes the bundled helper with the workflow's calibrated defaults, equivalent to:
+
+```bash
+python scripts/remove_chroma_key.py \
+  --input generated.png \
+  --out transparent.png \
+  --auto-key border \
+  --soft-matte \
+  --transparent-threshold 12 \
+  --opaque-threshold 220 \
+  --despill
+```
+
+Use the helper directly only when post-processing an image that already exists. For a new generation, prefer `--remove-background` so generation and post-processing share one command. The flag requires Pillow and a final `.png` or `.webp` output; it preserves the original generated image if post-processing fails.
+
+5. Verify that an alpha channel exists, the corners are transparent, subject coverage is plausible, interior detail remains intact, and no obvious key-color fringe is present.
+6. If a thin fringe remains, retry the helper once with `--edge-contract 1`. Use `--edge-feather 0.25` only when the edge is visibly stair-stepped and the subject is not shiny or reflective.
+
+Write the final output as `.png` or `.webp` to preserve alpha. If the matte removes subject details or the subject contains the key color, regenerate with a contrasting key color instead of increasing tolerance aggressively.
+
+Chroma-key removal is unsuitable for hair, fur, feathers, smoke, glass, liquids, translucent materials, reflective objects, soft shadows, realistic product grounding, or subjects that conflict with every practical key color. If the fallback fails validation or the subject is unsuitable, report the limitation instead of presenting the result as valid transparency.
+
+### `remove_chroma_key.py` options
+
+| Option | Meaning |
+|---|---|
+| `--input PATH` | Required source image |
+| `--out PATH` | Required `.png` or `.webp` alpha output |
+| `--key-color HEX` | Exact key color; default `#00ff00` |
+| `--auto-key none\|corners\|border` | Sample the key color instead; prefer `border` for generated images |
+| `--tolerance 0..255` | Hard-key distance; default `12` |
+| `--soft-matte` + `--transparent-threshold` / `--opaque-threshold` | Enable a smooth alpha ramp; defaults `12` / `96`, while this workflow uses `12` / `220` |
+| `--despill`, `--spill-cleanup` | Equivalent flags that reduce key-color edge spill |
+| `--edge-contract 0..16`, `--edge-feather 0..64` | Shrink or soften the alpha edge |
+| `--force` | Overwrite an existing output |
 
 ## 40x troubleshooting notes
 
