@@ -2,7 +2,9 @@
 
 When requirements change on top of an existing implementation, do not redesign solely from the new requirements or patch the old code item by item. First contain the change scope, then route the change to in-domain evolution, related-domain migration, or rewrite.
 
-This reference focuses on large domain changes. When the old and new requirements remain in the same domain, use `evolution.md` for in-domain evolution. Use this reference primarily for migration between related domains and for rewrites between unrelated domains.
+This reference focuses on large domain changes. When the old and new requirements remain in the same domain, use [`evolution.md`](evolution.md) for in-domain evolution. Use this reference primarily for migration between related domains and for rewrites between unrelated domains.
+
+In ordinary software development, a domain model often remains relatively stable once established because it reflects real-world concepts and processes that already constrain the design. A game's core domain, however, is itself part of the product being designed and validated, so discoveries about playability, market response, player data, or production constraints may substantially change its concepts, rules, and boundaries. As a result, the domain migrations and rewrites covered by this reference tend to occur more often in game development than in ordinary software development.
 
 ## 1. Define the Change Scope
 
@@ -22,9 +24,11 @@ If one requirement affects multiple independently isolatable domain units, split
 
 Use in-domain evolution when the old and new requirements belong to the same domain. The domain may gain or modify concepts, rules, and framework capabilities while its existing structure continues to evolve.
 
-- **Add content or concepts**: If the implementation already provides an abstraction or extension point, add a new type. Otherwise, extract the necessary abstraction according to `evolution.md`, then add the new content.
+Before applying any in-domain evolution route above, you MUST read and follow [`evolution.md`](evolution.md).
+
+- **Add content or concepts**: If the implementation already provides an abstraction or extension point, add a new type. Otherwise, extract the necessary abstraction, then add the new content.
 - **Change framework behavior**: If new behavior completely replaces old behavior, change the implementation behind the existing concepts and interfaces. If both behaviors must coexist, first extract the varying part into a strategy, type, or other extension point, then keep separate implementations.
-- **Fix defects**: If the domain design is correct and only the implementation violates it, fix the implementation directly. If the defect comes from concepts, responsibilities, or rules but the corrected design remains in the same domain, refactor according to `evolution.md` before applying the correction.
+- **Fix defects**: If the domain design is correct and only the implementation violates it, fix the implementation directly. If the defect comes from concepts, responsibilities, or rules but the corrected design remains in the same domain, refactor before applying the correction.
 
 Use refactoring to establish a structure that can carry the change. Complete the abstraction or isolation before adding new behavior instead of changing structure and adding requirement logic in the same operation.
 
