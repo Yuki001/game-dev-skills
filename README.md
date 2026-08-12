@@ -13,6 +13,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [gpt-image](./skills/gpt-image/skill.md) | Image | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | Image | Generate images through OpenRouter's Image API with the bundled Python script. |
 | [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | Image | Comprehensive ImageMagick 7 command-line image processing for reproducible inspection, conversion, editing, composition, animation, and batch automation workflows. |
+| [lucida-remove-background](./skills/lucida-remove-background/SKILL.md) | Image | Remove image backgrounds locally with Lucida for soft transparency and effects, or BiRefNet-HR for high-resolution solid subjects. |
 | [3d-model-generator-by-threejs](./skills/3d-model-generator-by-threejs/SKILL.md) | 3D Models | Generate procedural 3D models from natural-language descriptions for use in game engines, using a Three.js-based pipeline to validate and export GLB, glTF, OBJ, or STL assets. |
 | [animation-shader](./skills/animation-shader/SKILL.md) | Render | Used for creating anime-style shaders. |
 | [openrouter-video-generate](./skills/openrouter-video-generate/SKILL.md) | Video | Generate, poll, resume, and download videos through OpenRouter's asynchronous Video API. |
@@ -33,6 +34,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [gpt-image](./skills/gpt-image/skill.md) | 画图 | 适用于 OpenAI 图像生成端点的简化画图 skill，改编自 [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill)。 |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | 画图 | 通过 OpenRouter Image API 生成图片，并使用内置 Python 脚本保存结果。 |
 | [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | 画图 | 全面的 ImageMagick 7 命令行图像处理 skill，适用于可复现的检查、转换、编辑、合成、动画及批量自动化工作流。 |
+| [lucida-remove-background](./skills/lucida-remove-background/SKILL.md) | 画图 | 使用本地 bgr 去除图片背景：Lucida 适合半透明与特效，BiRefNet-HR 适合高分辨率实体主体。 |
 | [3d-model-generator-by-threejs](./skills/3d-model-generator-by-threejs/SKILL.md) | 3D模型 | 根据自然语言描述生成可用于游戏引擎的程序化 3D 模型，并通过基于 Three.js 的流程完成验证及 GLB、glTF、OBJ、STL 资产导出。 |
 | [animation-shader](./skills/animation-shader/SKILL.md) | 渲染 | 用于二次元 shader 创建。 |
 | [openrouter-video-generate](./skills/openrouter-video-generate/SKILL.md) | 视频 | 通过 OpenRouter 异步 Video API 生成、轮询、续查并下载视频。 |

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lucida Background Removal"
+  short_description: "Remove backgrounds while preserving soft transparency"
+  default_prompt: "Use $lucida-remove-background to remove the background from this image while preserving soft transparency and effects."
