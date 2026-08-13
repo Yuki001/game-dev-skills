@@ -17,7 +17,7 @@ Use the `bgr` executable from `egeorcun/lucida`. Preserve the source image and c
    bgr --help
    ```
 
-   If the current environment is sandboxed, run all `bgr` commands in the user's normal terminal.
+   **Note:** If the current environment is sandboxed (for example: Codex sandbox), run all `bgr` commands in the user's normal terminal. Otherwise the `bgr --help` command process might be freezed or timeout.
 
 4. If `bgr` is missing, verify that `uv` is available and install the CLI:
 
