@@ -1,11 +1,11 @@
 # Social, Community, and Safety Review
 
-Use this reference for competitive and cooperative play, communication, trust, expression, spectators, matchmaking, cheating, griefing, moderation, and community incentives.
+Use this reference for competitive and cooperative play, communication, friendship formation, relationship maintenance, community continuity, trust, expression, spectators, matchmaking, cheating, griefing, moderation, and community incentives.
 
 ## Evidence to collect
 
 - Player roles, team dependencies, communication tools, visibility rules, rewards, rankings, matchmaking, reporting, and enforcement;
-- quit rates, rematches, reports, blocked users, role selection, communication patterns, and spectator behavior;
+- party formation, repeat-group rates, community-event participation, quit rates, rematches, reports, blocked users, role selection, communication patterns, and spectator behavior;
 - differences between playing with friends, strangers, mixed skill groups, and persistent communities;
 - ways players can affect another person's time, progress, identity, or ability to participate.
 
@@ -23,6 +23,13 @@ Use this reference for competitive and cooperative play, communication, trust, e
 - What information or resources make communication useful rather than mandatory busywork?
 - Can a team recover when one member is inexperienced, disconnected, or unwilling to communicate?
 
+### Friendship lifecycle
+
+- What low-risk interaction helps strangers acknowledge one another before coordination or conversation becomes demanding?
+- At what moment can repeated cooperation, generosity, humor, rivalry, or shared adversity become a recognizable relationship?
+- What reasons and tools let players find one another again, maintain context, and continue a relationship across sessions?
+- Can players control the pace and intimacy of social contact without losing access to necessary gameplay functions?
+
 ### Competition and trust
 
 - What evidence convinces players that rules, matchmaking, and outcomes are legitimate?
@@ -34,6 +41,13 @@ Use this reference for competitive and cooperative play, communication, trust, e
 - How can players show identity, mastery, generosity, creativity, or affiliation?
 - Which expression tools can be used to harass, imitate, deceive, or exclude?
 - What brings players back to one another beyond recurring rewards?
+
+### Community continuity
+
+- Why do players benefit from a persistent community rather than a sequence of interchangeable matches or anonymous groups?
+- Which recurring events, shared projects, rituals, records, or responsibilities give the group a history and future?
+- Can newcomers contribute without being permanently subordinate, and can experienced members gain status by helping rather than excluding them?
+- What happens when leaders leave, groups split, participation drops, or conflict cannot be resolved informally?
 
 ### Harm resistance
 
@@ -50,6 +64,10 @@ Use this reference for competitive and cooperative play, communication, trust, e
 
 - optimal personal progression conflicts with team success;
 - social features assume friendship but mostly match strangers;
+- strangers are asked for trust or coordination before any safe way to establish rapport;
+- players form relationships but lack reliable tools or reasons to continue them;
+- community events create attendance pressure without meaningful shared ownership;
+- a community depends on one leader or a constant influx of new players to survive;
 - reporting is available only after the harmed player loses access to evidence;
 - a losing player can prolong or sabotage a completed outcome;
 - rankings encourage avoidance of fair matches or exploitation of new players;
@@ -61,4 +79,6 @@ Use this reference for competitive and cooperative play, communication, trust, e
 - Run mixed-experience sessions and record who speaks, decides, waits, and recovers from errors.
 - Threat-model one social feature from the perspective of a motivated griefer and a targeted player.
 - Show recorded play without commentary to observers and test whether they can explain turning points.
-
+- Test a stranger-to-party flow and record the first reciprocal action, first voluntary communication, and reason to remain together.
+- Follow a small group across several sessions and identify where relationship context is lost or reconnection requires external tools.
+- Prototype one community event with a lasting shared consequence and compare participation quality with a reward-only event.

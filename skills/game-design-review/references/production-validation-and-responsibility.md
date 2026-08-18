@@ -1,6 +1,6 @@
 # Production, Validation, and Responsibility Review
 
-Use this reference for scope, prototypes, playtests, evidence quality, stakeholder alignment, documentation, team collaboration, technology choices, commercial sustainability, project purpose, and player welfare.
+Use this reference for scope, prototypes, playtests, evidence quality, stakeholder alignment, documentation, team collaboration, technology choices, market position, acquisition, distribution, commercial sustainability, project purpose, and player welfare.
 
 ## Evidence to collect
 
@@ -8,7 +8,8 @@ Use this reference for scope, prototypes, playtests, evidence quality, stakehold
 - the riskiest design assumptions, prototype history, test participants, observation methods, and decision records;
 - stakeholder requests, actual success criteria, pitch claims, document owners, decision rights, and unresolved disagreements;
 - technology constraints that directly enable or limit the intended experience;
-- acquisition, monetization, retention, moderation, privacy, rating, ongoing-support expectations, and intended positive player outcomes where relevant.
+- competing alternatives, audience discovery and acquisition channels, production, marketing, distribution, platform, support, and maintenance costs;
+- monetization, retention, moderation, privacy, rating, ongoing-support expectations, and intended positive player outcomes where relevant.
 
 ## Review prompts
 
@@ -60,6 +61,14 @@ Use this reference for scope, prototypes, playtests, evidence quality, stakehold
 - Which design commitments are difficult to reverse if that forecast is wrong?
 - Can the project preserve its central experience under a smaller budget, slower content cadence, lost dependency, or different platform condition?
 
+### Market and distribution fit
+
+- What existing games, entertainment, hobbies, or tools compete for the same audience need, time, attention, and spending?
+- Why would the intended audience discover, understand, trust, and choose this game over those alternatives?
+- Do production, marketing, localization, distribution, platform, customer-support, moderation, infrastructure, and maintenance costs fit the expected revenue and lifespan?
+- Which platform rules, storefront dynamics, hardware requirements, regional conditions, or discovery channels constrain the design and launch plan?
+- What is difficult for a competitor to reproduce: the mechanic, content pipeline, community, brand, expertise, technology, or accumulated player investment?
+
 ### Sustainability
 
 - Do price, monetization, retention, and content cadence expectations support the actual production and operating cost?
@@ -88,6 +97,10 @@ Use this reference for scope, prototypes, playtests, evidence quality, stakehold
 - unresolved team disagreements repeatedly reappear because no test or decision owner exists;
 - technology is selected for novelty without a player-facing dependency;
 - the plan assumes stable platforms, costs, tools, or content throughput without a fallback;
+- the audience is defined, but no credible path exists for reaching and convincing it;
+- projections omit marketing, distribution, support, moderation, infrastructure, or long-term maintenance costs;
+- differentiation depends on a feature competitors can reproduce before launch;
+- the design requires a platform, price, region, or acquisition channel whose constraints it has not validated;
 - the business model requires a cadence the team cannot sustain;
 - safety, moderation, accessibility, privacy, or shutdown planning is deferred until launch;
 - claimed positive impact has no connection to repeated player behavior.
@@ -104,3 +117,6 @@ Use this reference for scope, prototypes, playtests, evidence quality, stakehold
 - Convert one team disagreement into two observable predictions and run the cheapest test that separates them.
 - Run a reduced-budget or lost-dependency scenario and identify which parts of the player promise survive.
 - Define one intended positive player outcome and one plausible adverse outcome, then design observations for both.
+- Compare the game against the alternatives players currently choose, using the same audience need rather than genre labels alone.
+- Build a full-lifecycle cost model from development through discovery, distribution, support, operation, and shutdown; identify the assumption with the largest effect.
+- Test the pitch and acquisition path with representative players who are not already following the project.

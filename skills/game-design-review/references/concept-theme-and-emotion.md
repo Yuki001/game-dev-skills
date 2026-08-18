@@ -1,10 +1,10 @@
 # Concept, Theme, and Emotion Review
 
-Use this reference when the review concerns the identity of the game: its central promise, thematic point of view, emotional shape, expressive style, novelty, curiosity, or memorable qualities.
+Use this reference when the review concerns the identity of the game: its central promise, player fantasy, imaginative space, thematic point of view, emotional shape, expressive style, novelty, curiosity, or memorable qualities.
 
 ## Evidence to collect
 
-- The shortest current pitch, intended audience, player role, repeated actions, and target emotions;
+- The shortest current pitch, intended audience, player role, repeated actions, target emotions, and the fantasy of being or doing that the game offers;
 - visual, audio, motion, camera, writing, world, interface, and rules references actually guiding production;
 - prototype footage, player descriptions, remembered moments, comparisons to other games, and points of surprise or confusion;
 - style constraints, asset throughput, platform limits, and the cost of reproducing the intended presentation consistently.
@@ -16,6 +16,14 @@ Use this reference when the review concerns the identity of the game: its centra
 - Can the design state what the player repeatedly does, why it matters, and what makes that experience distinctive?
 - Which mechanic or interaction proves the promise instead of merely describing it?
 - If progression rewards and content volume were removed, what interesting activity would remain?
+
+### Fantasy and imaginative space
+
+- Who can players imagine themselves becoming here, and what can they do that is unavailable, difficult, or socially constrained elsewhere?
+- Which simplifications make the world easier to understand and act within without making it feel arbitrary or shallow?
+- What unusual capability creates freedom or wish fulfillment while leaving enough resistance for choices to matter?
+- Which details must be concrete for rules and atmosphere to work, and which are stronger when players complete them through imagination?
+- Does the game leave room for players to express a version of the fantasy that feels personally theirs?
 
 ### Thematic coherence
 
@@ -62,6 +70,9 @@ Use this reference when the review concerns the identity of the game: its centra
 ## Failure signals
 
 - the pitch describes setting and features but not a compelling repeated activity;
+- the advertised fantasy is visible in art and story but unavailable through player action;
+- power removes resistance so thoroughly that the fantasy stops producing decisions;
+- exhaustive explanation leaves no room for interpretation, while missing rule detail is mistaken for mystery;
 - theme exists in dialogue and art while rewards encourage the opposite behavior;
 - emotional goals have no identifiable rule, choice, or feedback cause;
 - the style is attractive in isolated assets but inconsistent in motion or actual gameplay;
@@ -78,3 +89,5 @@ Use this reference when the review concerns the identity of the game: its centra
 - Show one sequence with alternate sound, timing, or visual treatments and compare emotional interpretation and gameplay readability.
 - Test one location with presentation layers added in stages and identify when atmosphere improves, stops helping, or begins to hide information.
 - Ask players what question they most wanted answered, what surprised them, and which moment they would retell.
+- Ask players to complete “I am someone who can...” after playing, then compare their answers with the intended fantasy and actual mechanics.
+- Remove one explanatory detail and one mechanical detail separately; test which omission invites imagination and which only creates confusion.

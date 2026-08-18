@@ -32,16 +32,16 @@ For a whole-game audit, review one domain at a time, summarize its decisions, an
 | Review concern | Read | Focus |
 | --- | --- | --- |
 | Audience, intended experience, motivation, comprehension | `references/experience-and-audience.md` | Player promise, motivation chain, learning assumptions, experience gaps |
-| Core concept, theme, emotion, aesthetic identity, curiosity and novelty | `references/concept-theme-and-emotion.md` | Concept clarity, thematic coherence, emotional causes, expressive unity, memorable identity |
-| Actions, rules, information, agency, risk and strategy | `references/actions-rules-and-agency.md` | Decision quality, rule legibility, dominant behavior, uncertainty |
-| Challenge, rewards, progression, economy and replay depth | `references/challenge-progression-and-economy.md` | Difficulty shape, reward meaning, sources/sinks, viable paths |
+| Core concept, theme, emotion, fantasy, aesthetic identity, curiosity and novelty | `references/concept-theme-and-emotion.md` | Concept clarity, imaginative space, thematic coherence, emotional causes, expressive unity, memorable identity |
+| Actions, goals, rules, information, agency, complexity and strategy | `references/actions-rules-and-agency.md` | Goal hierarchy, decision quality, performance judgment, rule legibility, dominant behavior, systemic character |
+| Challenge, skill profile, risk, punishment, rewards, progression, economy and replay depth | `references/challenge-progression-and-economy.md` | Difficulty shape, skill demand, fairness, expected return, reward meaning, sources/sinks, viable paths |
 | Puzzles, deductions, hints, bottlenecks and visible progress | `references/puzzles-and-problem-solving.md` | Problem representation, reasoning chain, solution structure, recovery and hint escalation |
 | Level space, encounters, navigation and pacing | `references/space-level-and-pacing.md` | Route choice, readability, rhythm, recovery, spatial pressure |
 | Attention curve, memorable moments, indirect guidance and presence | `references/attention-guidance-and-presence.md` | Interest over time, voluntary guidance, freedom, interruption, projection and retelling |
 | Controls, UI, feedback and practical accessibility | `references/interface-feedback-and-accessibility.md` | Intention-to-action loop, information timing, error recovery, input and perception barriers |
 | Narrative, world, characters and player-authored stories | `references/narrative-world-and-characters.md` | Playable story delivery, world causality, role, agency and character function |
-| Competition, cooperation, community and harmful behavior | `references/social-community-and-safety.md` | Incentives between players, trust, expression, moderation and spectator clarity |
-| Scope, prototypes, playtests, technology, business and responsibility | `references/production-validation-and-responsibility.md` | Production fit, evidence quality, risk retirement, sustainability and player welfare |
+| Competition, cooperation, friendship, community and harmful behavior | `references/social-community-and-safety.md` | Incentives between players, trust, relationship continuity, expression, moderation and spectator clarity |
+| Scope, prototypes, playtests, technology, market, distribution, business and responsibility | `references/production-validation-and-responsibility.md` | Production fit, evidence quality, risk retirement, market viability, sustainability and player welfare |
 
 ## Review modes
 
