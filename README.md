@@ -1,3 +1,5 @@
+
+
 # Game Development Agent Skills
 
 [中文说明](#game-development-agent-skills-中文)
@@ -10,7 +12,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [oop-ddd-ai-coding-constraints](./skills/oop-ddd-ai-coding-constraints/SKILL.md) | Architecture | My preferred OOP + DDD programming-pattern skill. **Note:** Use with caution; it is opinionated and not suitable for everyone. For a broader range of patterns and alternatives, use [game-architect](./skills/game-architect/SKILL.md). |
 | [game-agent-toolkit](./gat/README.md) | Workflow | Game Agents Toolkit — a milestone-driven game design pre-production workflow. Downstream implementation can continue with OpenSpec or Superpowers. |
 | [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | Image | Game-focused, backend-agnostic production rules for planning, generating, inspecting, evaluating, refining, and packaging image assets. |
-| [gpt-image](./skills/gpt-image/skill.md) | Image | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
+| [gpt-image](./skills/gpt-image/SKILL.md) | Image | Simplified image generation skill for OpenAI image generation endpoints, adapted from [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill). |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | Image | Generate images through OpenRouter's Image API with the bundled Python script. |
 | [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | Image | Comprehensive ImageMagick 7 command-line image processing for reproducible inspection, conversion, editing, composition, animation, and batch automation workflows. |
 | [lucida-remove-background](./skills/lucida-remove-background/SKILL.md) | Image | Remove image backgrounds locally with Lucida for soft transparency and effects, or BiRefNet-HR for high-resolution solid subjects. |
@@ -31,7 +33,7 @@ This is my personal agent skill repository, primarily focused on game developmen
 | [oop-ddd-ai-coding-constraints](./skills/oop-ddd-ai-coding-constraints/SKILL.md) | 架构 | 个人偏好的 OOP + DDD 编程模式 skill。**备注：** 请谨慎使用，不适合所有人。更广泛的模式请使用 [game-architect](./skills/game-architect/SKILL.md)。 |
 | [game-agent-toolkit](./gat/README.md) | 工作流 | Game Agents Toolkit——里程碑驱动的游戏设计预制作工作流。后续工程实现可继续使用 OpenSpec 或 Superpowers。 |
 | [game-image-generation-rules](./skills/game-image-generation-rules/SKILL.md) | 画图 | 面向游戏开发、与生成后端无关的图像资产生产规则，涵盖规划、生成、检查、评估、迭代优化和交付。 |
-| [gpt-image](./skills/gpt-image/skill.md) | 画图 | 适用于 OpenAI 图像生成端点的简化画图 skill，改编自 [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill)。 |
+| [gpt-image](./skills/gpt-image/SKILL.md) | 画图 | 适用于 OpenAI 图像生成端点的简化画图 skill，改编自 [gpt_image_2_skill](https://github.com/wuyoscar/gpt_image_2_skill)。 |
 | [openrouter-image-generate](./skills/openrouter-image-generate/SKILL.md) | 画图 | 通过 OpenRouter Image API 生成图片，并使用内置 Python 脚本保存结果。 |
 | [imagemagick-cli](./skills/imagemagick-cli/SKILL.md) | 画图 | 全面的 ImageMagick 7 命令行图像处理 skill，适用于可复现的检查、转换、编辑、合成、动画及批量自动化工作流。 |
 | [lucida-remove-background](./skills/lucida-remove-background/SKILL.md) | 画图 | 使用本地 bgr 去除图片背景：Lucida 适合半透明与特效，BiRefNet-HR 适合高分辨率实体主体。 |
