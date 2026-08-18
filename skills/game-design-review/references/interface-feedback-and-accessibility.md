@@ -1,10 +1,10 @@
 # Interface, Feedback, and Accessibility Review
 
-Use this reference for controls, HUD, menus, information timing, feedback, error recovery, remapping, readability, sensory alternatives, and difficulty accommodations.
+Use this reference for controls, physical interaction context, HUD, menus, information timing, feedback, error recovery, remapping, readability, sensory alternatives, and difficulty accommodations.
 
 ## Evidence to collect
 
-- Input maps, interaction flows, HUD states, notification priorities, tutorials, error messages, and accessibility settings;
+- Venue, posture, viewing distance, input hardware, input maps, interaction flows, HUD states, notification priorities, tutorials, error messages, and accessibility settings;
 - recordings of input, game response, animation, sound, network acknowledgement, and visible state change;
 - misinputs, repeated inputs, missed signals, menu abandonment, remapping needs, and device-specific failures;
 - target display sizes, viewing distances, color and contrast constraints, text density, subtitle needs, and motion effects.
@@ -16,6 +16,18 @@ Use this reference for controls, HUD, menus, information timing, feedback, error
 - Can the player discover an available action when it becomes relevant?
 - Does the mapping remain predictable across modes and contexts?
 - Can the player cancel, correct, or safely retry an accidental action?
+
+### Physical context and mapping
+
+- How do venue, posture, reach, viewing distance, ambient noise, interruption, and session length affect interaction?
+- Does the physical action map naturally to the in-game action, especially for touch, motion, VR, arcade, or custom hardware?
+- Can repeated actions be performed comfortably and reliably across the intended session?
+
+### Interface model
+
+- What does the interface invite players to believe they are manipulating: an object, space, character, instrument, document, or command system?
+- Does that model predict how unfamiliar controls and states behave?
+- Where does the interface break its own model for convenience, and is the exception communicated before it causes an error?
 
 ### Information timing
 
@@ -48,6 +60,8 @@ Use this reference for controls, HUD, menus, information timing, feedback, error
 - a color-only, sound-only, or short-duration signal carries critical meaning;
 - remapping produces conflicts or leaves required actions unavailable;
 - interface modes reuse controls without clear transition feedback;
+- the physical setup makes a frequent action tiring, imprecise, inaccessible, or socially awkward;
+- interface symbols suggest one model while behavior follows another;
 - accessibility settings exist individually but combine into an unusable state.
 
 ## Small experiments
@@ -56,4 +70,5 @@ Use this reference for controls, HUD, menus, information timing, feedback, error
 - Test a critical encounter with one presentation channel removed and identify lost information.
 - Ask players to complete one flow using a different input device or remapped layout without coaching.
 - Compare comprehension using a simplified HUD against the current HUD at the intended viewing distance.
-
+- Test the same core interaction in its actual venue and posture rather than only at a development desk.
+- Introduce one unfamiliar action and ask players to predict its result from the existing interface model before trying it.

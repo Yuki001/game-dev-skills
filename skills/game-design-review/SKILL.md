@@ -1,6 +1,6 @@
 ---
 name: game-design-review
-description: Review, critique, compare, improve, or stress-test an existing game concept, GDD, mechanic, economy, level, interface, narrative, social feature, prototype, or playtest result. Use when the user asks what is weak, risky, unclear, unbalanced, contradictory, or worth validating next in a game design. Produce evidence-based findings, explicit tradeoffs, and the smallest useful prototype or playtest experiment.
+description: Review, critique, compare, improve, or stress-test an existing game concept, GDD, mechanic, puzzle, economy, level, theme, emotional arc, interface, narrative, social feature, prototype, pitch, or playtest result. Use when the user asks what is weak, risky, unclear, unbalanced, contradictory, insufficiently engaging, or worth validating next in a game design. Produce evidence-based findings, explicit tradeoffs, and the smallest useful prototype or playtest experiment.
 ---
 
 # Game Design Review
@@ -32,9 +32,12 @@ For a whole-game audit, review one domain at a time, summarize its decisions, an
 | Review concern | Read | Focus |
 | --- | --- | --- |
 | Audience, intended experience, motivation, comprehension | `references/experience-and-audience.md` | Player promise, motivation chain, learning assumptions, experience gaps |
+| Core concept, theme, emotion, aesthetic identity, curiosity and novelty | `references/concept-theme-and-emotion.md` | Concept clarity, thematic coherence, emotional causes, expressive unity, memorable identity |
 | Actions, rules, information, agency, risk and strategy | `references/actions-rules-and-agency.md` | Decision quality, rule legibility, dominant behavior, uncertainty |
 | Challenge, rewards, progression, economy and replay depth | `references/challenge-progression-and-economy.md` | Difficulty shape, reward meaning, sources/sinks, viable paths |
+| Puzzles, deductions, hints, bottlenecks and visible progress | `references/puzzles-and-problem-solving.md` | Problem representation, reasoning chain, solution structure, recovery and hint escalation |
 | Level space, encounters, navigation and pacing | `references/space-level-and-pacing.md` | Route choice, readability, rhythm, recovery, spatial pressure |
+| Attention curve, memorable moments, indirect guidance and presence | `references/attention-guidance-and-presence.md` | Interest over time, voluntary guidance, freedom, interruption, projection and retelling |
 | Controls, UI, feedback and practical accessibility | `references/interface-feedback-and-accessibility.md` | Intention-to-action loop, information timing, error recovery, input and perception barriers |
 | Narrative, world, characters and player-authored stories | `references/narrative-world-and-characters.md` | Playable story delivery, world causality, role, agency and character function |
 | Competition, cooperation, community and harmful behavior | `references/social-community-and-safety.md` | Incentives between players, trust, expression, moderation and spectator clarity |
@@ -43,9 +46,10 @@ For a whole-game audit, review one domain at a time, summarize its decisions, an
 ## Review modes
 
 - **Focused review:** inspect one decision with two or three references and return only the findings that could change it.
+- **Exploratory review:** when the design object is still immature, identify the player promise and central uncertainty, outline two or three coherent directions, and define a small test that can distinguish them. Stop before expanding into a full design document.
 - **Comparative review:** apply the same evidence and criteria to every option; do not let one option receive a stricter review.
 - **Post-playtest review:** begin with observed behavior, separate repeated patterns from anecdotes, and propose the next discriminating test.
-- **Whole-game audit:** stage the review across domains, then reconcile contradictions involving audience, scope, progression, interface, narrative, and production.
+- **Whole-game audit:** stage the review across domains, then reconcile contradictions involving audience, theme, emotion, mechanics, progression, attention, interface, narrative, scope, and production.
 
 ## Finding quality
 

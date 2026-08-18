@@ -35,13 +35,22 @@ Use this reference when the design problem concerns who the game is for, why the
 - What behavior or observation would be evidence of that feeling?
 - Which current rule, delay, interruption, or ambiguity is most likely to create a different feeling?
 
+### Sustained engagement
+
+- Does challenge grow in step with the understanding and skill the game has actually helped players build?
+- Which parts support competence, choice, belonging, discovery, expression, or relaxation for the intended audience?
+- Are external rewards reinforcing an enjoyable activity, or carrying an activity players would otherwise stop?
+- What repeatedly breaks concentration, and is that interruption necessary to the experience?
+
 ## Failure signals
 
 - Players describe the theme but cannot explain what they do repeatedly;
 - external rewards carry the experience after the core activity has stopped being interesting;
 - onboarding teaches controls without teaching the first real decision;
 - the intended audience depends on knowledge or dexterity that the design never establishes;
-- the pitch attracts one player expectation while the core loop serves another.
+- the pitch attracts one player expectation while the core loop serves another;
+- challenge rises faster than player understanding, or remains flat after mastery;
+- engagement depends on obligation, accumulation, or fear of loss after intrinsic interest has faded.
 
 ## Small experiments
 
@@ -49,4 +58,4 @@ Use this reference when the design problem concerns who the game is for, why the
 - Remove progression rewards from a short prototype and observe whether the activity remains engaging.
 - Test the first ten minutes without verbal coaching; record the first point where intention and action diverge.
 - Ask players to summarize the goal, available choices, and reason for continuing immediately after play.
-
+- Compare one segment before and after removing its largest interruption; measure comprehension, focus, and fatigue rather than completion time alone.
