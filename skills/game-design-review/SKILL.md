@@ -14,18 +14,60 @@ Review a design by tracing how rules and presentation are likely to shape player
 - When the user needs a new formal design document rather than a review, return the clarified direction, constraints, open questions, and validation criteria needed to author it.
 - Do not convert a design recommendation directly into code structure, engine APIs, or implementation tasks.
 
-## Workflow
+## Review modes
 
-1. **Name the review object.** Identify whether the review concerns the whole game, one loop, one mechanic, a content set, a level, an interface flow, a narrative beat, a social feature, or a production choice.
-2. **State the decision at stake.** Express the uncertainty as a choice or testable question. If no decision exists, identify the most consequential unresolved assumption.
-3. **Build an evidence baseline.** Gather the intended audience and experience, current rules, constraints, prototype behavior, telemetry, and playtest observations. Mark every material statement as `confirmed`, `assumed`, or `unknown`.
-4. **Route selectively.** Read two or three relevant references from the table below. Add another only when the first pass exposes a dependency that materially changes the decision.
-5. **Trace effects.** Connect each design choice to expected player information, decision, action, feedback, and longer-term consequence. Distinguish a visible symptom from its likely cause.
-6. **Prioritize findings.** Rank issues by player impact, likelihood, reversibility, and cost of learning. Do not give every observation equal weight.
-7. **Recommend the smallest intervention.** Prefer a reversible rule, content, pacing, information, or presentation change that directly addresses the cause.
-8. **Define validation.** End with the smallest prototype, simulation, or playtest that can distinguish the current design from the proposed alternative.
+Every review shares the same spine:
 
-For a whole-game audit, review one domain at a time, summarize its decisions, and then run a short cross-domain contradiction pass. Do not produce one giant undifferentiated checklist.
+1. **Name the review object.** The whole game, one loop, one mechanic, a level, an interface flow, a narrative beat, a social feature, or a production choice.
+2. **State the decision at stake.** A choice or testable question; if none exists, the most consequential unresolved assumption.
+3. **Build an evidence baseline.** Audience, rules, constraints, prototype behavior, and playtest observations, separating repeated patterns from anecdotes; mark each material statement as `confirmed`, `assumed`, or `unknown`.
+4. **Close the review.** Prioritized findings, the smallest useful intervention, and a validation experiment.
+
+The modes differ in how the examination between these ends is executed. Pick the narrowest mode that fits; when in doubt, use the comprehensive review.
+
+### Comprehensive review (default)
+
+Use when the direction is chosen, formal materials exist to examine (documents, prototypes, telemetry, or playtest records), and the goal is a full-coverage review for weaknesses, risks, and contradictions.
+
+1. **Exclude, then cover.** Exclude only the references the review object clearly makes irrelevant, keeping at least eight; record each exclusion and its reason, and state the unreviewed domains in the final report.
+2. **Batch and delegate.** Group the rest into batches of two to four related domains, one batch per read-only subagent as described in "Delegating a review to subagents" below; work through the batches sequentially yourself when subagents are unavailable.
+3. **Trace effects.** Each batch reader connects each design choice to player information, decision, action, feedback, and consequence, distinguishing symptom from cause.
+4. **Merge and reconcile.** Merge duplicates that share a root cause, normalize severity, and run a cross-domain contradiction pass, treating each contradiction as a finding of its own; do not emit one undifferentiated checklist.
+
+### Focused review
+
+Use when everything to be reviewed fits in the conversation: the design or the question is short, or exists only as notes or keywords in the user's message, with no formal documents to read.
+
+1. Read two or three relevant references from the routing table yourself.
+2. Trace effects as in the comprehensive review and return only the findings that could change the decision.
+
+### Exploratory review
+
+Use when no direction has been chosen yet: the design is too immature for fault-finding, and the goal is to outline candidate directions plus a test that can distinguish them.
+
+1. Identify the player promise and the central uncertainty.
+2. Outline two or three coherent directions.
+3. Define a small test that can distinguish them, and stop before expanding into a full design document.
+
+### Comparative review
+
+Use when the goal is to choose between two or more defined options, whatever their material volume.
+
+1. Apply the same evidence and criteria to every option; do not let one option receive a stricter review.
+2. When the comparison spans several domains, you may delegate one subagent per option, each applying the same reference set.
+3. Merge the per-option findings as in the comprehensive review.
+
+## Delegating a review to subagents
+
+Subagents do not share this conversation, so brief each one with everything it needs:
+
+- the review object and where to find the design materials;
+- the decision at stake and the evidence baseline, so it does not re-open settled facts;
+- its assigned reference paths, with instruction to read them fully before analyzing;
+- the finding-quality bar below, so findings carry enough substance to merge;
+- the boundary: return design findings and a recommended smallest intervention per batch, not implementation tasks.
+
+Subagent reports may take any form that carries that substance. Never let a subagent's severity or priority pass through unreviewed; merging is your job, not theirs.
 
 ## Reference routing
 
@@ -42,14 +84,6 @@ For a whole-game audit, review one domain at a time, summarize its decisions, an
 | Narrative, world, characters and player-authored stories | `references/narrative-world-and-characters.md` | Playable story delivery, story structure, world causality, role, agency, status and character function |
 | Competition, cooperation, friendship, community and harmful behavior | `references/social-community-and-safety.md` | Incentives between players, trust, relationship continuity, expression, moderation and spectator clarity |
 | Scope, prototypes, playtests, technology, market, distribution, business and responsibility | `references/production-validation-and-responsibility.md` | Production fit, evidence quality, risk retirement, market viability, sustainability and player welfare |
-
-## Review modes
-
-- **Focused review:** inspect one decision with two or three references and return only the findings that could change it.
-- **Exploratory review:** when the design object is still immature, identify the player promise and central uncertainty, outline two or three coherent directions, and define a small test that can distinguish them. Stop before expanding into a full design document.
-- **Comparative review:** apply the same evidence and criteria to every option; do not let one option receive a stricter review.
-- **Post-playtest review:** begin with observed behavior, separate repeated patterns from anecdotes, and propose the next discriminating test.
-- **Whole-game audit:** stage the review across domains, then reconcile contradictions involving audience, theme, emotion, mechanics, progression, attention, interface, narrative, scope, and production.
 
 ## Finding quality
 
