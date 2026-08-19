@@ -16,6 +16,14 @@ Use this reference for difficulty, player skill profiles, fairness, risk and exp
 - Which skill or understanding is each challenge testing?
 - Does the game increase complexity, execution demand, uncertainty, or punishment, and is that the intended dimension?
 - Where can players practice a requirement before it becomes a hard gate?
+- Does a culminating challenge integrate the skills the game has been training, and do players recognize it as the apex they were preparing for?
+
+### Time structure
+
+- What determines the length of a session, a round, and a single action cycle, and which of these can the player influence?
+- Where do clocks, countdowns, and deadlines add useful tension, and where do they merely punish players who want to deliberate?
+- Do nested time structures, such as turns within rounds within matches, give players a usable planning horizon at each level?
+- Does the activity end while players still want more, or continue after interest has flattened?
 
 ### Skill profile and fairness
 
@@ -60,6 +68,8 @@ Use this reference for difficulty, player skill profiles, fairness, risk and exp
 ## Failure signals
 
 - difficulty rises mainly by increasing health or reducing tolerance for error;
+- sessions end because content ran out rather than because a designed arc completed;
+- clocks and deadlines punish the deliberation that the rest of the design encourages;
 - a challenge quietly tests memory, device precision, or prior knowledge while claiming to test strategy;
 - novices and experts share the same nominal challenge but only one group receives meaningful decisions;
 - rewards are frequent but stop changing player decisions;
@@ -80,3 +90,4 @@ Use this reference for difficulty, player skill profiles, fairness, risk and exp
 - Profile one challenge by cognitive and physical demand, then offer an alternate route that changes the mix without changing the goal.
 - Calculate rough expected returns for safe, moderate, and risky options, then compare them with player perception and observed selection.
 - Replace one repeated-loss punishment with a recovery choice or foregone reward and compare learning, tension, and willingness to retry.
+- Run the same activity at two durations or two time pressures and compare engagement, decision quality, and desire to replay.

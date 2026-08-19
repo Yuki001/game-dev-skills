@@ -35,6 +35,7 @@ Use this reference for competitive and cooperative play, communication, friendsh
 - What evidence convinces players that rules, matchmaking, and outcomes are legitimate?
 - Does the game distinguish high skill from hidden information, equipment advantage, network conditions, or exploitation?
 - Are losses understandable enough to support learning and rematches?
+- Can a player gain an advantage through means others cannot observe or verify, and would the community notice?
 
 ### Expression and belonging
 

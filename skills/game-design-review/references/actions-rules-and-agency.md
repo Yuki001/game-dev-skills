@@ -56,6 +56,13 @@ Use this reference for core mechanics, goal structure, tactical or strategic dec
 - Do unusual edge cases create recognizable character and stories, or only inconsistency and maintenance cost?
 - Has simplification removed meaningful decisions, or only reduced explanation and bookkeeping?
 
+### Structure and state
+
+- If presentation were stripped away, what is the abstract space of play: discrete or continuous, how many dimensions, what boundaries, and how are its subspaces connected?
+- Does the abstract structure the rules actually create match the mental model players appear to use?
+- Which objects and attributes change state during play, what triggers each change, and which states are visible to which players?
+- Do distinct states of play, such as preparation, confrontation, and resolution, differ in available actions in ways players can recognize?
+
 ### Uncertainty
 
 - Does uncertainty create anticipation and adaptation, or obscure causality?
@@ -72,6 +79,8 @@ Use this reference for core mechanics, goal structure, tactical or strategic dec
 - exceptions outnumber the rules players can reason from;
 - complexity comes mainly from memorizing special cases rather than combining understandable rules;
 - every element has one narrow function, making the system larger without making it deeper;
+- players plan around a structure of space or state that the rules do not actually create;
+- players cannot tell which state of play they are in, so they apply strategies suited to a different situation;
 - randomness erases meaningful preparation or execution;
 - the game offers freedom but punishes deviation from an undisclosed intended path.
 
@@ -84,3 +93,4 @@ Use this reference for core mechanics, goal structure, tactical or strategic dec
 - Ask players at several moments to state their immediate and larger goals; locate where the hierarchy stops being understood.
 - Compare the game's ranking with direct observation of the ability it claims to measure; identify unrelated variables influencing the result.
 - Remove or merge one single-purpose rule and test whether decision variety, clarity, or systemic character is actually lost.
+- Ask players to sketch the game's map, state flow, or resource web from memory and compare it with the structure the rules actually create.

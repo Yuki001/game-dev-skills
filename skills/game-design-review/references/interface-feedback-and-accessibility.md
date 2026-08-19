@@ -41,6 +41,13 @@ Use this reference for controls, physical interaction context, HUD, menus, infor
 - Can players distinguish a rule restriction from input loss, latency, cooldown, or animation lock?
 - Are strong effects reserved for meaningful events so that emphasis remains legible?
 
+### Feedback richness
+
+- Does the core interaction produce continuous feedback during the action, not only at its resolution?
+- Does one player action create visible second-order effects, such as chain reactions or cascading motion, that amplify its felt impact?
+- Is the most repeated action satisfying to perform even when its outcome is routine?
+- Can players understand the core interaction from physical intuition before learning any symbols or rules?
+
 ### Mode and context
 
 - How does the player recognize a control or UI mode change before acting under the wrong assumption?
@@ -56,6 +63,7 @@ Use this reference for controls, physical interaction context, HUD, menus, infor
 ## Failure signals
 
 - players repeat an input because acknowledgement is late or ambiguous;
+- the most frequent action feels inert until its result appears, so repetition becomes tiring;
 - HUD density grows while decision-relevant information remains hard to find;
 - a color-only, sound-only, or short-duration signal carries critical meaning;
 - remapping produces conflicts or leaves required actions unavailable;
@@ -72,3 +80,4 @@ Use this reference for controls, physical interaction context, HUD, menus, infor
 - Compare comprehension using a simplified HUD against the current HUD at the intended viewing distance.
 - Test the same core interaction in its actual venue and posture rather than only at a development desk.
 - Introduce one unfamiliar action and ask players to predict its result from the existing interface model before trying it.
+- Remove one feedback layer, such as particles, animation, or sound, from a core action and measure how much slower players learn it or how much sooner they tire of it.

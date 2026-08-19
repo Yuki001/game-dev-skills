@@ -17,6 +17,13 @@ Use this reference for authored story, emergent stories, quests, dialogue, world
 - Does the story recognize actions the game repeatedly encourages?
 - Where is the player waiting for authored events instead of participating in them?
 
+### Story structure
+
+- What does the protagonist want, what stands in the way, and is there a comprehensible source of opposition behind the obstacles?
+- Do obstacles escalate, and does overcoming them require the protagonist or the player to change rather than merely persist?
+- Where do dramatic peaks sit relative to gameplay intensity: do they coincide, alternate, or compete?
+- Does the story knowingly use or subvert familiar archetypal structures, or is it accidentally derivative?
+
 ### Role and motivation
 
 - What does the player character want, and what does the player controlling them want?
@@ -40,12 +47,16 @@ Use this reference for authored story, emergent stories, quests, dialogue, world
 - What pressure, information, relationship, or change does each major character introduce?
 - Do characters demonstrate their traits through choices and behavior rather than description alone?
 - Can multiple characters be combined without losing a distinct dramatic or gameplay function?
+- How does each character's behavior serve the intended experience, such as making the player feel capable, clever, or consequential, while remaining consistent with that character's in-world motives?
+- Where do opponents provide expressive resistance that flatters good play instead of opposing with maximum efficiency?
 
 ### Relationship structure
 
 - How does each important relationship differ in trust, dependence, conflict, intimacy, obligation, or power?
 - Which relationships change because of player actions, and how is that change made visible?
 - Are there missing or duplicated relationship functions that make the cast feel narrow or redundant?
+- What is each major character's relative status, how is it enacted through behavior rather than declared, and where does it shift because of play?
+- Can the player express, raise, or risk their own status within the world?
 
 ### Character change
 
@@ -68,6 +79,9 @@ Use this reference for authored story, emergent stories, quests, dialogue, world
 - the player role promises self-expression while embodiment and dialogue force one unexplained identity;
 - relationships remain static despite events that should alter trust or power;
 - a character changes abruptly because the plot needs a new function;
+- opposition has no comprehensible source, so obstacles feel like authorial obstruction;
+- dramatic climaxes land on gameplay lulls, or difficulty spikes land during emotional resolutions;
+- characters declare status differences that their behavior never enacts;
 - required exposition arrives during high-attention gameplay;
 - branching multiplies content while producing nearly identical player experiences.
 
@@ -79,3 +93,5 @@ Use this reference for authored story, emergent stories, quests, dialogue, world
 - Map each major character to a unique pressure or function and test whether any role is redundant.
 - Draw a relationship map before and after a major beat; verify that intended changes appear in behavior, access, dialogue, or mechanics.
 - Prototype one important scene with two different degrees of avatar definition and compare role clarity with player projection.
+- Chart dramatic intensity and gameplay difficulty on one timeline and check where peaks reinforce or cancel each other.
+- Replay one encounter with an opponent tuned for expressive resistance instead of efficiency and compare how heroic players report feeling.

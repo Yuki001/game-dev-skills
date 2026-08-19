@@ -22,6 +22,7 @@ Use this reference when the design problem concerns who the game is for, why the
 - What immediate reason moves the player from one action to the next?
 - What medium-term objective makes a session feel consequential?
 - Which reward has value because of player goals, and which reward is merely accumulated?
+- Within the fiction, who benefits when the player succeeds, and is that benefit made visible and acknowledged?
 
 ### Learning assumptions
 
@@ -42,10 +43,18 @@ Use this reference when the design problem concerns who the game is for, why the
 - Are external rewards reinforcing an enjoyable activity, or carrying an activity players would otherwise stop?
 - What repeatedly breaks concentration, and is that interruption necessary to the experience?
 
+### Pleasure inventory
+
+- Which distinct pleasures does play actually produce: anticipation, accomplishment, sensation, humor, fellowship, rivalry, nurturing, collecting, triumph, or something less classifiable?
+- Which promised pleasure has no mechanic currently delivering it?
+- Which delivered pleasure is accidental, and could it be reinforced deliberately?
+- Does engagement collapse when one pleasure is interrupted, or do other pleasures carry the experience?
+
 ## Failure signals
 
 - Players describe the theme but cannot explain what they do repeatedly;
 - external rewards carry the experience after the core activity has stopped being interesting;
+- the experience supplies only one kind of pleasure, so engagement collapses whenever it pauses;
 - onboarding teaches controls without teaching the first real decision;
 - the intended audience depends on knowledge or dexterity that the design never establishes;
 - the pitch attracts one player expectation while the core loop serves another;
@@ -59,3 +68,4 @@ Use this reference when the design problem concerns who the game is for, why the
 - Test the first ten minutes without verbal coaching; record the first point where intention and action diverge.
 - Ask players to summarize the goal, available choices, and reason for continuing immediately after play.
 - Compare one segment before and after removing its largest interruption; measure comprehension, focus, and fatigue rather than completion time alone.
+- Ask players which moments felt good and classify the pleasures involved; compare the list with the pleasures the design claims to deliver.
