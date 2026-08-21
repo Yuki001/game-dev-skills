@@ -3,7 +3,7 @@
 Read this reference for currencies, inventory resources, production,
 consumption, prices, trading, gifting, auctions, inflation, resets, and
 long-lived progression economies. Pair it with one task playbook and the
-relevant calculation recipes.
+relevant [calculation recipes](calculation-recipes.md).
 
 ## Required inputs
 
@@ -40,7 +40,9 @@ Verify a short forecast by hand before running the full horizon.
 
 ## Procedure
 
-1. Build a source/sink table and a stock forecast for each important segment.
+1. Build a source/sink table and a stock forecast for each important segment
+   using the
+   [economy stock and affordability recipe](calculation-recipes.md#recipe-economy-stock-and-affordability).
    Use the same horizon for income and spending.
 2. Calculate affordability in time, attempts, or opportunity cost, not only
    nominal currency price.
@@ -57,6 +59,9 @@ Verify a short forecast by hand before running the full horizon.
    across the full horizon.
 7. Identify who gains and loses from the change; averages are insufficient when
    segments have materially different flows.
+8. For a deployed change, compare equivalent versions, segments, and exposure
+   using the
+   [before/after telemetry recipe](calculation-recipes.md#recipe-beforeafter-telemetry-comparison).
 
 ## Working tables
 

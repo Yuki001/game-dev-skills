@@ -2,7 +2,7 @@
 
 Read this reference for attacks, abilities, enemies, encounters, character
 power, XP, levels, rewards, difficulty, and PvE progression. Pair it with one
-task playbook and the relevant calculation recipes.
+task playbook and the relevant [calculation recipes](calculation-recipes.md).
 
 ## Required inputs
 
@@ -38,9 +38,10 @@ milestone result by hand before trusting the tool.
 
 ## Combat procedure
 
-1. Build one row per actor, weapon, or ability with raw parameters and derived
-   burst, sustained output, effective health, resource efficiency, and cycle
-   time.
+1. Build one row per actor, weapon, or ability using the
+   [combat output and TTK recipe](calculation-recipes.md#recipe-combat-output-and-ttk)
+   for raw parameters, burst, sustained output, effective health, resource
+   efficiency, and cycle time.
 2. Calculate discrete hits/actions and time to defeat for representative
    targets. Include reload, cooldown, downtime, miss rate, mitigation, healing,
    control, and invulnerable windows that occur in the real encounter.
@@ -49,8 +50,10 @@ milestone result by hand before trusting the tool.
 4. Compare the number of meaningful decision cycles, allowed mistakes, danger
    windows, recovery opportunities, and time spent after the outcome is already
    decided.
-5. Price non-damage value explicitly: mobility, range, control, information,
-   safety, area coverage, reliability, and setup cost.
+5. Price non-damage value explicitly with the
+   [option-comparison recipe](calculation-recipes.md#recipe-compare-options-and-situational-value):
+   mobility, range, control, information, safety, area coverage, reliability,
+   and setup cost.
 6. Propose exact values that move the calculated outcome into its target band.
    Use the simulator to sweep the tuning range and recalculate neighboring
    options and enemies affected by the change.
@@ -58,8 +61,11 @@ milestone result by hand before trusting the tool.
 ## Progression procedure
 
 1. Select milestone rows from start through endgame rather than inspecting
-   every level first.
-2. Calculate player power, enemy/challenge power, XP or reward requirement,
+   every level first. When choosing or changing the curve, use the
+   [progression-curve recipe](calculation-recipes.md#recipe-select-and-validate-a-progression-curve).
+2. Use the
+   [progression and time-to-milestone recipe](calculation-recipes.md#recipe-progression-and-time-to-milestone)
+   to calculate player power, enemy/challenge power, XP or reward requirement,
    earning rate, time/attempts to milestone, and unlocked decisions at each row.
 3. Compare per-step and cumulative values. Detect sudden changes caused by
    curve mismatch, reward gaps, enemy scaling, or a newly multiplicative stat.

@@ -2,7 +2,8 @@
 
 Read this reference for competitive options, characters, factions, sides,
 matchups, snowballing, comeback systems, match length, ratings, rankings, and
-metagame changes. Pair it with one task playbook and calculation recipes.
+metagame changes. Pair it with one task playbook and the relevant
+[calculation recipes](calculation-recipes.md).
 
 ## Required inputs
 
@@ -38,11 +39,14 @@ inside an overall average.
    balanced matchups, meaningful roles, or equal opportunity under similar
    skill.
 2. Build a matchup matrix using one consistent outcome and include sample count
-   or confidence limitation for each cell.
+   or confidence limitation for each cell, following the
+   [PvP matchup-matrix recipe](calculation-recipes.md#recipe-pvp-matchup-matrix).
 3. Segment by skill, map, side, build, and version until known asymmetries are
    visible. Compare both weighted population results and within-segment results.
 4. Remove strictly dominated choices from the assumed strategic set only after
-   real cost, availability, execution, and situational value are included.
+   real cost, availability, execution, and situational value are included using
+   the
+   [option-comparison recipe](calculation-recipes.md#recipe-compare-options-and-situational-value).
 5. Plot or tabulate lead state over time: power, income, territory, information,
    recovery probability, and meaningful decisions remaining for the trailing
    side.
@@ -53,6 +57,9 @@ inside an overall average.
 8. Propose exact power, cost, availability, matchup, comeback, or timing changes
    and use the tool to sweep and recalculate the affected matrix or lead
    trajectory.
+9. For a deployed patch, compare equivalent versions, segments, and exposure
+   using the
+   [before/after telemetry recipe](calculation-recipes.md#recipe-beforeafter-telemetry-comparison).
 
 ## Working tables
 

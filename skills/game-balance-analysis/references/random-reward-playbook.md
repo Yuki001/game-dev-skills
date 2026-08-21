@@ -2,8 +2,8 @@
 
 Read this reference for loot, card draws, dice, critical hits, procedural
 outcomes, weighted tables, streaks, pity systems, duplicate protection, and
-luck-versus-skill decisions. Pair it with one task playbook and calculation
-recipes.
+luck-versus-skill decisions. Pair it with one task playbook and the relevant
+[calculation recipes](calculation-recipes.md).
 
 ## Required inputs
 
@@ -41,12 +41,16 @@ accepted reward parameters and the distribution results used to justify them.
 1. Reconstruct the exact selection algorithm. Expand nested rarity, item,
    quantity, replacement, and guarantee stages instead of analyzing only the
    top-level percentage.
-2. Calculate the distribution: expected value, variance or spread, important
-   percentiles, probability of no success, attempts/time to first success, and
-   relevant streak lengths.
+2. Use the
+   [weighted rewards and streaks recipe](calculation-recipes.md#recipe-weighted-rewards-and-streaks)
+   to calculate expected value, variance or spread, important percentiles,
+   probability of no success, attempts/time to first success, and relevant
+   streak lengths.
 3. Use combinatorics for manageable finite pools, state transitions for pity or
-   repeated effects, and seeded simulation when exact enumeration is
-   impractical. Cross-check at least one analytic or hand-calculated case.
+   repeated effects, and the
+   [iterative or Monte Carlo simulation recipe](calculation-recipes.md#recipe-iterative-or-monte-carlo-simulation)
+   when exact enumeration is impractical. Cross-check at least one analytic or
+   hand-calculated case.
 4. Convert reward outcomes into economy, combat, collection, or progression
    value. Equal rarity does not imply equal player value.
 5. Evaluate ordinary-session outcomes rather than relying on the long-run
@@ -55,7 +59,9 @@ accepted reward parameters and the distribution results used to justify them.
    recovery, and whether skill can affect consequences.
 7. Propose exact weights, thresholds, guarantees, or protection rules and
    sweep credible ranges, then recalculate the full distribution and downstream
-   resource flow for accepted candidates.
+   resource flow for accepted candidates using the
+   [economy stock and affordability recipe](calculation-recipes.md#recipe-economy-stock-and-affordability)
+   when rewards enter an economy.
 8. Verify that displayed odds describe the effective conditional event players
    believe they are choosing.
 
