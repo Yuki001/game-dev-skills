@@ -81,8 +81,8 @@ Return:
 1. reconstructed current model;
 2. prioritized diagnosis with evidence status;
 3. exact proposed parameter changes and percentage/absolute deltas;
-4. temporary-script verification evidence and cleanup status, or the updated
-   persistent tool, parameters, reproduction command, and outputs;
+4. temporary-script verification evidence, or the updated persistent tool,
+   parameters, reproduction command, and outputs;
 5. before/after scenario and sweep results;
 6. affected neighboring systems and content;
 7. recommended option with reason;

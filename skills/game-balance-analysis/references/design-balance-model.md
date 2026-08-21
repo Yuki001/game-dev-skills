@@ -40,7 +40,7 @@ different models.
 6. **Implement the model.** For a numerical system intended for continued
    tuning, build and retain the domain simulator described in
    `simulation-and-tooling.md`. Use temporary scripts for isolated formula or
-   known-case checks and delete them after the model is judged. Confirm one
+   known-case checks. Confirm one
    known or hand-calculated case before using the persistent tool for design.
 7. **Validate model fidelity.** Compare intermediate and final results with
    confirmed rules and known cases. If the model or simulator is wrong, update
@@ -88,8 +88,7 @@ Use `within`, `below`, or `above` for status and explain material misses.
 - Rounding, caps, and breakpoints are explicit.
 - The model exposes a small set of predictable tuning knobs.
 - The retained simulator passes a known case, invariants, target checks, and
-  the required scenario set; model defects have regression cases, and temporary
-  verification scripts have been cleaned up after their evidence was captured.
+  the required scenario set; model defects have regression cases.
 
 ## Deliverable
 
@@ -97,7 +96,7 @@ Return:
 
 1. assumptions and fixed constraints;
 2. target, parameter, and scenario tables;
-3. equations and verification evidence from any deleted temporary scripts;
+3. equations and verification evidence from any temporary scripts used;
 4. persistent simulator, parameter/config files, reproduction command, and
    result files;
 5. recommended first-pass values, not merely example values;

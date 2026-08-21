@@ -7,9 +7,9 @@ repeated analysis.
 
 Implement selected recipes in a temporary verification script or a persistent
 simulation/tuning tool according to `simulation-and-tooling.md`. Temporary
-scripts prove the current calculation and are deleted after judgment;
-persistent tools retain parameter input, scenarios, seeds, sweeps, target
-checks, and result files for repeated use.
+scripts prove the current calculation; persistent tools retain parameter
+input, scenarios, seeds, sweeps, target checks, and result files for repeated
+use.
 
 ## Recipe index
 
@@ -24,8 +24,9 @@ checks, and result files for repeated use.
 - Stateful models: [iterative simulation](#recipe-iterative-or-monte-carlo-simulation)
   and [Markov analysis](#recipe-state-transition-and-markov-analysis)
 - Competitive systems: [power trajectory](#recipe-pvp-power-and-feedback-trajectory),
-  [matchup matrix](#recipe-pvp-matchup-matrix), and
-  [rating calibration](#recipe-rating-prediction-and-calibration)
+  [matchup matrix](#recipe-pvp-matchup-matrix),
+  [initial-condition advantage](#recipe-initial-condition-and-side-advantage),
+  and [rating calibration](#recipe-rating-prediction-and-calibration)
 - Observed evidence: [descriptive statistics](#recipe-descriptive-statistics-and-uncertainty)
   and [before/after telemetry](#recipe-beforeafter-telemetry-comparison)
 
@@ -167,9 +168,21 @@ TTK = first_hit_time + (hits_to_defeat - 1)*cycle_time
 ```
 
 The hit and TTK formulas are deterministic baselines. Do not take the ceiling
-of an expected damage value and call it expected TTK. Use exact enumeration or
-a short turn/time simulation when random damage, healing, phases, control,
-priorities, or resource state makes a closed formula misleading.
+of an expected damage value and call it expected TTK. When the only randomness
+is an independent hit probability `p` per attack and damage and cycle time are
+constant per attack, use the negative-binomial closed form from the
+[probability building-blocks recipe](#recipe-probability-building-blocks-and-common-distributions)
+instead of a simulation:
+
+```text
+expected_attacks_to_defeat = hits_to_defeat / p
+expected_TTK = first_attack_time + (expected_attacks_to_defeat - 1)*cycle_time
+```
+
+`first_attack_time` is the time of the first attack attempt, hit or miss. Use
+exact enumeration or a short turn/time simulation when random damage, healing,
+phases, control, priorities, or resource state makes a closed formula
+misleading.
 
 ### Check and output
 
@@ -234,8 +247,8 @@ instead of holding it constant.
 ### Inputs
 
 Starting stock, source and sink rates, conversions, transfers, cap/decay/reset,
-prices or representative price-index basket, activity rate, and segment
-horizon.
+prices or representative price-index basket, per-player stock distribution,
+active player counts, activity rate, and segment horizon.
 
 ### Compute
 
@@ -250,7 +263,19 @@ conversion_output = conversion_input * conversion_rate * (1 - fee_rate)
 conversion_cycle_multiplier = product(conversion_rate_i * (1 - fee_rate_i))
 payback_time = upgrade_cost / incremental_net_income_rate
 inflation_rate = price_index_t / price_index_(t-1) - 1
+top_share = sum(largest share_count stocks) / total_stock
+gini = (2*sum(i * stock_i_ascending)) / (player_count * total_stock)
+       - (player_count + 1)/player_count
+aggregate_net_creation = aggregate_created - aggregate_destroyed
+per_capita_net_creation = aggregate_net_creation / active_players
 ```
+
+`gini` requires every included stock to be non-negative and sorted ascending,
+with `i` from 1 to `player_count`. If debt is legitimate, report debt
+separately or use a documented debt-compatible inequality measure.
+`aggregate_created` and `aggregate_destroyed` are population totals in the
+target resource. Count conversions that create or destroy that resource, and
+exclude internal transfers that cancel across the population.
 
 Apply caps, floors, resets, and conditional purchases in the order used by the
 game. If net earning is zero or negative, report the purchase as unreachable
@@ -266,11 +291,21 @@ open market, find candidate equilibrium prices where
 `supply_quantity(price) = demand_quantity(price)` rather than inventing a
 universal price equation.
 
+For open or long-lived economies, monitor distribution health as well as
+totals: report top share and Gini per segment and horizon, and compare
+per-capita net currency creation with the price index over the same window.
+Treat a persistent gap between money growth and price/sink adjustment as an
+inflation warning to investigate, not proof of a defect; treat rising
+concentration alongside stagnant new-player stock as a guardrail failure only
+when it violates a documented concentration or new-player-access target.
+
 ### Check and output
 
 - Find first surplus, deficit, cap, blocked purchase, and runaway loop.
-- Reject invalid divisions, negative post-fee conversion rates, and price-index
-  comparisons with a non-positive baseline.
+- Reject invalid divisions, negative post-fee conversion rates, price-index
+  comparisons with a non-positive baseline, and concentration metrics with a
+  negative included stock or non-positive total stock. Report population size
+  and the top-share definition when comparing concentration across populations.
 - Run multiple player segments and the full economy horizon.
 - Output time row, opening stock, each source/sink, transfers, purchases,
   closing stock, and blocked/available decisions.
@@ -345,18 +380,25 @@ Var(binomial X) = n*p*(1-p)
 P(geometric T=t) = (1-p)^(t-1)*p
 E(geometric T) = 1/p
 Var(geometric T) = (1-p)/p^2
+P(negative_binomial T=t for the k-th success) = C(t-1, k-1)*p^k*(1-p)^(t-k)
+E(negative_binomial T) = k/p
+Var(negative_binomial T) = k*(1-p)/p^2
 P(final outcome) = sum_over_paths(product(conditional_probability_on_path))
 ```
 
 Use combinations when order does not matter and permutations when it does.
-The binomial and geometric formulas require independent trials with constant
-`p`; use a state model when pity, depletion, memory, or player actions change
-the probability.
+The binomial, geometric, and negative-binomial formulas require independent
+trials with constant `p`; use a state model when pity, depletion, memory, or
+player actions change the probability. The negative binomial gives a closed
+form for expected attempts to reach `k` successes, such as landing
+`hits_to_defeat` hits under a constant miss chance, before reaching for
+simulation.
 
 ### Check and output
 
 - Require integer `n >= 0`, valid `k`, `0 <= p <= 1`, and a non-zero Bayes
-  denominator. Require `p > 0` for geometric mean/variance. Define `0! = 1`.
+  denominator. Require `p > 0` for geometric mean/variance, and `p > 0` with
+  integer `k >= 1` for the negative binomial. Define `0! = 1`.
 - Confirm mutually exclusive outcomes sum to 1 and independently enumerate a
   small equivalent case.
 - Output event tree or paths, formula assumptions, exact probability, and the
@@ -384,7 +426,21 @@ For `K` desired cards in a deck of `N`, drawing `n` without replacement:
 
 ```text
 P(at_least_one) = 1 - C(N-K, n) / C(N, n)
+P(exactly_k_desired) = C(K, k)*C(N-K, n-k) / C(N, n)
+E(desired_count) = n*K / N
 ```
+
+For a uniform collection of `N` distinct rewards drawn with replacement:
+
+```text
+H_N = sum(1/i for i = 1..N)
+expected_draws_to_complete = N*H_N
+Var(draws_to_complete) = N^2*sum(1/i^2 for i = 1..N) - N*H_N
+```
+
+The coupon-collector formulas require equal draw probability for each
+remaining reward and independence between draws; simulate when weights are
+unequal, pity applies, or the pool is stateful.
 
 Define `C(n,k) = 0` for an impossible numerator combination inside an otherwise
 valid experiment. Reject invalid deck or draw inputs such as `n > N` instead
@@ -544,6 +600,53 @@ and a full-support solution is known to exist.
   sequential, general-sum, or multiple-equilibrium cases.
 - Output payoff and sample/assumption matrices together, plus equilibrium
   probabilities and exploitability only when the assumptions fit.
+
+## Recipe: Initial-condition and side advantage
+
+### Inputs
+
+Initial conditions to compare (first move, side, spawn, map, or starting
+stock), equivalent matched samples or swap experiments per condition,
+compensation candidates and their cost unit, target win rate, and other
+systems the compensation touches.
+
+### Compute
+
+For a two-condition symmetric game from equivalent samples:
+
+```text
+advantage = win_rate_condition_A - win_rate_condition_B
+```
+
+Prefer swap evidence: the same players, builds, or matchup with the initial
+condition exchanged, so skill and matchup confounds cancel. Estimate a
+compensation value (komi, bonus stock, or tempo credit) by measuring win rate
+at two or more compensation levels and interpolating to the target:
+
+```text
+slope = (win_rate_at_c1 - win_rate_at_c0) / (c1 - c0)
+compensation_estimate = c0 + (target_win_rate - win_rate_at_c0) / slope
+```
+
+Verify the estimate at the proposed value instead of trusting the
+interpolation; win-rate response to compensation is often nonlinear or
+stepped. For more than two conditions, compare every pair rather than only
+each condition against the average.
+
+### Check and output
+
+- Require equivalent segments, versions, and exposure definitions with adequate
+  sample sizes. Report per-condition counts and uncertainty; for swap or
+  matched designs require complete pairs. Do not pool conditions with
+  different matchup exposure.
+- Do not compensate past the target: check that the disadvantaged condition
+  does not become advantaged and that the compensation does not distort
+  economy, tempo, or decision value elsewhere.
+- When no observations exist, estimate with a simulator or a designed
+  experiment and label the result as modeled rather than measured.
+- Output condition pair, win rates, advantage, sample counts, compensation
+  candidates with measured or modeled response, the selected value, and the
+  target.
 
 ## Recipe: Rating prediction and calibration
 

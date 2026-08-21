@@ -22,7 +22,7 @@ accepts option, side, map, skill, and version segments and produces both
 payoff/win matrices and sample/assumption matrices. When game rules are
 available, add a seeded match or encounter simulator for candidate changes;
 when only telemetry is available, keep modeled and observed results separate.
-Use and delete a temporary script for a one-off matrix or patch judgment.
+Use a temporary script for a one-off matrix or patch judgment.
 
 For snowball and comeback questions, create a trajectory simulator or analyzer
 that records power, economy, territory, information, win likelihood, recovery
@@ -43,6 +43,9 @@ inside an overall average.
    [PvP matchup-matrix recipe](calculation-recipes.md#recipe-pvp-matchup-matrix).
 3. Segment by skill, map, side, build, and version until known asymmetries are
    visible. Compare both weighted population results and within-segment results.
+   Quantify first-move, side, spawn, or starting-stock advantage and any
+   compensation with the
+   [initial-condition advantage recipe](calculation-recipes.md#recipe-initial-condition-and-side-advantage).
 4. Remove strictly dominated choices from the assumed strategic set only after
    real cost, availability, execution, and situational value are included using
    the
@@ -95,5 +98,4 @@ fit the game.
 - Match duration includes cleanup time after the strategic result is clear.
 - A proposed patch does not merely rotate one dominant strategy into another.
 - Any retained analyzer preserves segment/sample context and the simulator's
-  candidate values pass matchup, lead, and match-length guardrails; temporary
-  checks are deleted after judgment.
+  candidate values pass matchup, lead, and match-length guardrails.

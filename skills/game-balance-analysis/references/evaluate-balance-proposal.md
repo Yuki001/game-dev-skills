@@ -28,9 +28,8 @@ clearly labeled reference case.
    against one absolute power curve.
 3. **Build an independent verifier.** By default, implement the relevant
    formulas and scenarios as a temporary verification script through
-   `simulation-and-tooling.md`; run it and delete it after the verdict and
-   evidence are captured. Use or create a persistent tool only when ongoing
-   evaluation is part of the request. Do not accept supplied spreadsheet
+   `simulation-and-tooling.md` and run it. Use or create a persistent tool
+   only when ongoing evaluation is part of the request. Do not accept supplied spreadsheet
    totals, simulator output, or percentages without checking formulas, units,
    ranges, rounding, and one known case.
 4. **Validate the model.** When a persistent simulator is used, compare it with
@@ -93,6 +92,6 @@ clearly labeled reference case.
 ## Deliverable
 
 Return the verdict first, followed by the independent verification evidence,
-temporary-script cleanup status or retained-tool path, verified calculations,
+the retained-tool path when one is kept, verified calculations,
 sweep results, failed or passed checks, tradeoffs, exact required revisions,
 and the smallest validation needed to finalize the decision.

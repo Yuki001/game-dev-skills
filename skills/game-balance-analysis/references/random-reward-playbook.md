@@ -20,8 +20,8 @@ luck-versus-skill decisions. Pair it with one task playbook and the relevant
 For a random-reward system that will receive continued content or tuning,
 create and retain an exact enumerator for tractable finite outcomes and a
 seeded simulator for large, nested, repeated, or stateful systems. For a
-one-off probability or proposal check, use a temporary script and delete it
-after preserving the evidence. A retained tool should:
+one-off probability or proposal check, use a temporary script instead.
+A retained tool should:
 
 - load weights, reward values, pool state, pity, guarantees, duplicate
   protection, replacement, and horizon from editable parameters;
@@ -117,5 +117,4 @@ or failure state.
 - Competitive or monetized randomness receives current engineering, security,
   disclosure, and legal review when required.
 - Any retained enumerator/simulator passes analytic known cases, probability
-  invariants, target distribution checks, and the complete stateful horizon;
-  temporary checks are deleted after judgment.
+  invariants, target distribution checks, and the complete stateful horizon.

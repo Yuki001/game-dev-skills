@@ -18,8 +18,8 @@ from practical expected performance.
 ## Persistent simulation tools
 
 When combat or progression will be tuned repeatedly, create and retain one or
-both tools. For a one-off formula or proposal check, use a temporary script
-with the same model rules and delete it after preserving the evidence.
+both tools. For a one-off formula or proposal check, use a temporary
+verification script with the same model rules.
 
 - **Combat simulator:** execute turns, ticks, or discrete events with the real
   update order, action policies/rotations, cooldowns, resources, mitigation,
@@ -110,4 +110,4 @@ table.
   without an explicit goal.
 - Any retained combat/growth tool passes known cases, records seeds when
   random, and shows that proposed values meet targets across required
-  scenarios; temporary checks are deleted after judgment.
+  scenarios.

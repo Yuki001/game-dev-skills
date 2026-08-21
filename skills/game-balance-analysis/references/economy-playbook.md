@@ -20,7 +20,7 @@ relevant [calculation recipes](calculation-recipes.md).
 When the economy will receive continued content or tuning, create and retain an
 economy simulator that advances the system by the meaningful time step: action,
 match, session, day, or season. For a one-off rate, affordability, or proposal
-check, use a temporary script and delete it after preserving the evidence. The
+check, use a temporary script instead. The
 persistent simulator should:
 
 - load sources, sinks, conversions, prices, caps, resets, and segment behavior
@@ -58,7 +58,10 @@ Verify a short forecast by hand before running the full horizon.
    supply, or reset rule. Sweep credible ranges and forecast each candidate
    across the full horizon.
 7. Identify who gains and loses from the change; averages are insufficient when
-   segments have materially different flows.
+   segments have materially different flows. For open or long-lived economies,
+   track top-share and Gini concentration from the
+   [economy stock and affordability recipe](calculation-recipes.md#recipe-economy-stock-and-affordability)
+   next to the segment flows.
 8. For a deployed change, compare equivalent versions, segments, and exposure
    using the
    [before/after telemetry recipe](calculation-recipes.md#recipe-beforeafter-telemetry-comparison).
@@ -87,6 +90,9 @@ Verify a short forecast by hand before running the full horizon.
 - Optimizing players cannot create an unintended self-sustaining surplus or
   conversion loop.
 - New or unlucky players cannot enter an unrecoverable poverty state.
+- Wealth concentration stays within intent across the horizon; rising top
+  share or Gini alongside stagnant new-player stock is flagged even when
+  segment averages pass.
 - Prices remain meaningful relative to income, substitutes, slots, risk, and
   future value.
 - Trading and gifting are modeled as transfers or new sources correctly.
@@ -94,5 +100,4 @@ Verify a short forecast by hand before running the full horizon.
 - Monetization-linked changes state their effects on time, skill, luck,
   competitive power, and player welfare; current legal questions are escalated.
 - Any retained simulator passes invariants and target checks for every required
-  segment and preserves the exact accepted parameter set; temporary checks are
-  deleted after judgment.
+  segment and preserves the exact accepted parameter set.

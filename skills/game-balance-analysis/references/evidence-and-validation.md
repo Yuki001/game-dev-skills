@@ -16,8 +16,7 @@ turns a model prediction into an evidence-backed decision.
 ## Required analysis tool
 
 Create a reproducible analysis script when raw or tabular evidence is supplied.
-Use a temporary script for a one-off judgment and delete it after preserving
-the metric tables, conclusion, and cleanup status. Retain it as a persistent
+Use a temporary script for a one-off judgment, and retain it as a persistent
 analysis tool only for recurring reports or repeated balance decisions. It
 should load the original data without modifying it, apply versioned filters and
 segment definitions, validate counts and missing values, and export the metric
