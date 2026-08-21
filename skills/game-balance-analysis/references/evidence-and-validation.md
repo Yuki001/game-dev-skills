@@ -29,6 +29,11 @@ When comparing a model with observed play, have the analysis tool join or align
 the same scenarios and metrics so model-runtime gaps are explicit. Save both
 the machine-readable result and the command/config that produced it.
 
+When comparing versions, cohorts, or experiment arms, build equivalent
+rate-and-delta tables through the
+[before/after telemetry recipe](calculation-recipes.md#recipe-beforeafter-telemetry-comparison)
+before applying inferential methods.
+
 ## Validate the evidence first
 
 1. Reproduce a small number of known sessions from raw events or direct
@@ -51,7 +56,9 @@ For every reported result include:
 
 - observation count and missing count;
 - numerator and denominator for rates;
-- mean and median when the distribution can be skewed;
+- mean, median, spread, and uncertainty through the
+  [descriptive-statistics recipe](calculation-recipes.md#recipe-descriptive-statistics-and-uncertainty)
+  when the distribution can be skewed;
 - relevant percentiles or tails;
 - time range, version, filters, and segment;
 - practical effect size and uncertainty.

@@ -38,16 +38,18 @@ accepted reward parameters and the distribution results used to justify them.
 
 ## Procedure
 
-1. Reconstruct the exact selection algorithm. Expand nested rarity, item,
-   quantity, replacement, and guarantee stages instead of analyzing only the
-   top-level percentage.
+1. Reconstruct the exact selection algorithm with the
+   [probability building-blocks recipe](calculation-recipes.md#recipe-probability-building-blocks-and-common-distributions).
+   Expand nested rarity, item, quantity, replacement, and guarantee stages
+   instead of analyzing only the top-level percentage.
 2. Use the
    [weighted rewards and streaks recipe](calculation-recipes.md#recipe-weighted-rewards-and-streaks)
    to calculate expected value, variance or spread, important percentiles,
    probability of no success, attempts/time to first success, and relevant
    streak lengths.
-3. Use combinatorics for manageable finite pools, state transitions for pity or
-   repeated effects, and the
+3. Use exact combinatorics for manageable finite pools, the
+   [state-transition and Markov recipe](calculation-recipes.md#recipe-state-transition-and-markov-analysis)
+   for tractable pity or repeated-state systems, and the
    [iterative or Monte Carlo simulation recipe](calculation-recipes.md#recipe-iterative-or-monte-carlo-simulation)
    when exact enumeration is impractical. Cross-check at least one analytic or
    hand-calculated case.

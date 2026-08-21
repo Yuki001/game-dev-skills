@@ -47,9 +47,10 @@ inside an overall average.
    real cost, availability, execution, and situational value are included using
    the
    [option-comparison recipe](calculation-recipes.md#recipe-compare-options-and-situational-value).
-5. Plot or tabulate lead state over time: power, income, territory, information,
-   recovery probability, and meaningful decisions remaining for the trailing
-   side.
+5. Plot or tabulate lead state over time with the
+   [PvP power and feedback trajectory recipe](calculation-recipes.md#recipe-pvp-power-and-feedback-trajectory):
+   power, income, territory, information, recovery probability, and meaningful
+   decisions remaining for the trailing side.
 6. Check turtling, stalling, sandbagging, leader targeting, kingmaking,
    elimination downtime, counter-picking, and pre-match outcome determination.
 7. Distinguish an underlying rule/object problem from a metagame response. Do
@@ -77,9 +78,11 @@ inside an overall average.
 
 When the task concerns ratings, define whether the value is for prediction,
 matchmaking, visible progression, or rewards. Evaluate out-of-sample outcome
-prediction and calibration. Do not prescribe Elo, Glicko, or a matrix solution
-without verifying that team, placement, asymmetry, opponent selection, and
-uncertainty assumptions fit the game.
+prediction and calibration through the
+[rating prediction and calibration recipe](calculation-recipes.md#recipe-rating-prediction-and-calibration).
+Do not prescribe Elo, Glicko, or a matrix solution without verifying that
+team, placement, asymmetry, opponent selection, and uncertainty assumptions
+fit the game.
 
 ## Acceptance checks
 

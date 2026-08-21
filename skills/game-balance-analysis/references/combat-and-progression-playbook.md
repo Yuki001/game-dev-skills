@@ -50,10 +50,12 @@ milestone result by hand before trusting the tool.
 4. Compare the number of meaningful decision cycles, allowed mistakes, danger
    windows, recovery opportunities, and time spent after the outcome is already
    decided.
-5. Price non-damage value explicitly with the
-   [option-comparison recipe](calculation-recipes.md#recipe-compare-options-and-situational-value):
-   mobility, range, control, information, safety, area coverage, reliability,
-   and setup cost.
+5. Price damage and non-damage attributes through the
+   [supporting-math and cost-curve recipe](calculation-recipes.md#recipe-build-supporting-math-and-a-cost-curve),
+   then use the
+   [option-comparison recipe](calculation-recipes.md#recipe-compare-options-and-situational-value)
+   for mobility, range, control, information, safety, area coverage,
+   reliability, setup, and situational value.
 6. Propose exact values that move the calculated outcome into its target band.
    Use the simulator to sweep the tuning range and recalculate neighboring
    options and enemies affected by the change.
