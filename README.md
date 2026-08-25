@@ -9,7 +9,6 @@ This is my personal agent skill repository, primarily focused on game developmen
 | Skill Name | Category | Description |
 | :--- | :--- | :--- |
 | [game-architect](./skills/game-architect/SKILL.md) | Architecture | Comprehensive guide for game project architecture, requirement analysis, and logic design. |
-| [oop-ddd-ai-coding-constraints](./skills/oop-ddd-ai-coding-constraints/SKILL.md) | Architecture | My preferred OOP + DDD programming-pattern skill. **Note:** Use with caution; it is opinionated and not suitable for everyone. For a broader range of patterns and alternatives, use [game-architect](./skills/game-architect/SKILL.md). |
 | [game-agent-toolkit](./gat/README.md) | Workflow | Game Agents Toolkit — a milestone-driven game design pre-production workflow. Downstream implementation can continue with OpenSpec or Superpowers. |
 | [game-design-review](./skills/game-design-review/SKILL.md) | Design | Self-contained, evidence-driven review framework for critiquing game concepts, mechanics, balance, levels, interfaces, narrative, social features, prototypes, and production decisions. |
 | [game-balance-analysis](./skills/game-balance-analysis/SKILL.md) | Design | Specialized in game numerical design, this skill designs first-pass game balance values, builds reusable simulation and tuning tools, diagnoses existing systems, and evaluates proposals through executable verification, parameter sweeps, playtests, and telemetry. |
@@ -32,7 +31,6 @@ This is my personal agent skill repository, primarily focused on game developmen
 | Skill Name | 分类 | Description |
 | :--- | :--- | :--- |
 | [game-architect](./skills/game-architect/SKILL.md) | 架构 | 全面的游戏项目架构指南，涵盖需求分析与逻辑设计。 |
-| [oop-ddd-ai-coding-constraints](./skills/oop-ddd-ai-coding-constraints/SKILL.md) | 架构 | 个人偏好的 OOP + DDD 编程模式 skill。**备注：** 请谨慎使用，不适合所有人。更广泛的模式请使用 [game-architect](./skills/game-architect/SKILL.md)。 |
 | [game-agent-toolkit](./gat/README.md) | 工作流 | Game Agents Toolkit——里程碑驱动的游戏设计预制作工作流。后续工程实现可继续使用 OpenSpec 或 Superpowers。 |
 | [game-design-review](./skills/game-design-review/SKILL.md) | 设计 | 独立、证据驱动的游戏设计评审框架，用于分析游戏概念、机制、平衡、关卡、界面、叙事、社交功能、原型与制作决策。 |
 | [game-balance-analysis](./skills/game-balance-analysis/SKILL.md) | 设计 | 专用于游戏数值设计，可设计首轮游戏数值、构建可复用的模拟与调参工具、诊断现有系统，并通过可执行验算、参数扫描、试玩和遥测评判调整方案。 |
