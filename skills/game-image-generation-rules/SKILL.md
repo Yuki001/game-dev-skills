@@ -40,8 +40,6 @@ Separate **hard gates** from **quality criteria**. Define both before generation
 - `references/game-hud-patterns.md` for complete gameplay-screen and HUD compositions;
 - `references/game-gallery-patterns.md` for multi-panel worldbuilding, mixed design, and character-roster boards.
 
-Ask only when a missing choice materially changes the deliverable. Otherwise record a reasonable assumption in the plan.
-
 ## 2. Route by artifact type
 
 Choose the simplest production path that preserves the requested properties:
@@ -84,9 +82,9 @@ Before aesthetic judging, apply deterministic checks:
 - no clipped pixels, edge halos, accidental borders, or unintended/excessive empty padding; preserve the contracted safe margin;
 - grid/cell geometry is divisible and consistent;
 - animation frames have stable canvas, pivot, scale, identity, and ordering;
-- SVG passes objective XML, reference, numeric geometry, path, and transform checks plus text-only shape review; production SVG additionally passes one render/view.
+- SVG passes objective XML, reference, numeric geometry, path, and transform checks plus text-only shape review; formal SVG additionally passes one render/view, individually or within a readable labeled atlas.
 
-Run `scripts/inspect_asset.py` for basic PNG/SVG metadata and any relevant optional size, color-type, alpha, border, padding, or sheet-grid checks. Treat its output as objective evidence for the checks it reports, not as proof of visual quality, semantic correctness, or target-runtime behavior. Read `references/raster-and-alpha.md` for alpha limitations and edge cleanup.
+Run `scripts/inspect_image.py` for basic PNG metadata and any relevant optional size, color-type, alpha, border, padding, or sheet-grid checks. Run `scripts/inspect_svg.py` for SVG structure, references, numeric geometry, path, transform, compatibility, and accessibility checks. Treat their output as objective evidence for the checks they report, not as proof of visual quality, semantic correctness, or target-runtime behavior. Read `references/raster-and-alpha.md` for alpha limitations and edge cleanup.
 
 For sprite sequences, use the optional Pillow-backed helpers under `scripts/sprite/` when pixel-frame normalization, sheet slicing/alignment, sequence metrics, or atlas/preview packaging are needed. Read `references/sprite-sheet/sprite-sheets.md` for routing, result contracts, script selection, and commands.
 
@@ -94,9 +92,9 @@ For sprite sequences, use the optional Pillow-backed helpers under `scripts/spri
 
 Evaluate each generated asset or variant against the criteria written during planning, not against improvised taste. Read `references/evaluation.md`.
 
-Skip vision for SVGs classified as placeholders by the SVG planning step. Render and evaluate them only when they become clearly production-bound.
+For prototype SVGs, skip vision evaluation.
 
-For each raster asset, production SVG, or variant that requires vision evaluation:
+For each raster asset, formal SVG, atlas entry, or variant that requires vision evaluation:
 
 1. apply hard gates first;
 2. view at intended in-game size and at inspection zoom;
@@ -123,7 +121,7 @@ Re-evaluate every edited output. Stop when all hard gates pass and the plan's th
 Deliver only accepted files plus useful production metadata:
 
 - deterministic filenames and version suffixes;
-- source SVG plus rendered preview for production vector assets; placeholders may omit the preview;
+- source SVG plus an approved rendered preview or atlas for formal vector assets; prototype SVGs may omit the preview;
 - PNG with the correct color/alpha mode, or a documented additive blend contract, when raster;
 - individual frames plus packed sheet and frame map when animated;
 - pivot/origin, cell size, padding/extrusion, frame duration, and loop mode;
@@ -142,7 +140,8 @@ Report assumptions, selected variant when applicable, evaluation result, post-pr
 - `references/raster-and-alpha.md` — PNG, alpha, matte removal, additive VFX, edge cleanup, and delivery checks.
 - `references/svg-workflow.md` — universal code/text shape checks and production render/view verification.
 - `references/sprite-sheet/sprite-sheets.md` — sprite workflow routing, shared result contracts, script usage, evaluation, packaging, and links to video, reference, direct, and animation-preset guidance.
-- `scripts/inspect_asset.py` — inspect PNG/SVG metadata and apply optional size, color-type, alpha, border, padding, grid, and strict-SVG checks.
+- `scripts/inspect_image.py` — inspect PNG metadata and apply optional size, color-type, alpha, border, padding, and grid checks.
+- `scripts/inspect_svg.py` — inspect SVG structure, references, numeric geometry, paths, transforms, compatibility, and accessibility warnings.
 - `scripts/sprite/normalize_pixel_sequence.py` — normalize transparent video-derived pixel-art frames with one shared crop, fixed native canvas and anchor, sequence-wide palette, binary alpha, and a JSON report; requires Pillow.
 - `scripts/sprite/inspect_sequence.py` — measure objective sequence drift and frame geometry; requires Pillow only when run.
 - `scripts/sprite/slice_strip.py` — slice a strip into frames, or a multi-row sheet into per-row strips then frames (`--rows`); align by center/centroid/baseline; requires Pillow only when run.

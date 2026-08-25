@@ -98,15 +98,15 @@ Use the bundled scripts according to the backend result. Pixel normalization is 
 
 ```text
 VIDEO:     appearance reference --> video generation --> source clip --> frame extraction --> ordered frames --> optional pixel normalization --> inspect_sequence.py --> vision review --> pack_animation.py
-REFERENCE: reference backend --> sheet --> inspect_asset.py --> slice_strip.py --> frames --> inspect_sequence.py --> vision review --> pack_animation.py
-DIRECT:    direct backend --> sheet --> inspect_asset.py --> slice_strip.py --> frames --> inspect_sequence.py --> vision review --> pack_animation.py
+REFERENCE: reference backend --> sheet --> inspect_image.py --> slice_strip.py --> frames --> inspect_sequence.py --> vision review --> pack_animation.py
+DIRECT:    direct backend --> sheet --> inspect_image.py --> slice_strip.py --> frames --> inspect_sequence.py --> vision review --> pack_animation.py
 ```
 
 For both sheet-producing routes, `slice_strip.py` returns the single-frame image collection consumed by `inspect_sequence.py`.
 
 For generated sheets:
 
-1. Run `scripts/inspect_asset.py SHEET --cols C --rows R` to check size, alpha, borders, padding, and grid divisibility.
+1. Run `scripts/inspect_image.py SHEET --cols C --rows R` to check size, alpha, borders, padding, and grid divisibility.
 2. Run `scripts/sprite/slice_strip.py`. Use `--method equal` when the backend produced a known exact grid; use the default `projection-dp` when transparent gutters or generated boundaries are not exact. When source-cell coordinates encode root motion, use the exact grid with `--align none`; content-aware variable-width segmentation cannot recover discarded cell-space offsets.
 3. For multi-row sheets, pass `--rows R --frames C`. Output is row-major and named `_r{row}_c{col}`.
 4. Use one shared cell canvas and a suitable alignment mode. The default `none` preserves source-cell X/Y coordinates. `baseline` preserves relative vertical displacement but normalizes horizontal placement, so use it only for intentionally in-place animation.
@@ -119,7 +119,7 @@ Then run `scripts/sprite/inspect_sequence.py` on the ordered frames. It reports 
 Typical calls:
 
 ```text
-python scripts/inspect_asset.py sheet.png --cols 4 --rows 2 --expect-transparent
+python scripts/inspect_image.py sheet.png --cols 4 --rows 2 --expect-transparent
 python scripts/sprite/slice_strip.py sheet.png frames/ --rows 2 --frames 4 --method equal --align none --cell-size 256x256 --manifest slice.json
 python scripts/sprite/normalize_pixel_sequence.py video-frames/ pixel-frames/ --size 64x64 --colors 4 --anchor bottom-center
 python scripts/sprite/inspect_sequence.py frames/ --output sequence-report.json

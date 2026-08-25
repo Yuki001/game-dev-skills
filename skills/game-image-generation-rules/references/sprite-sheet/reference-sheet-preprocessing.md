@@ -56,4 +56,4 @@ source sheet --> metadata analysis --> slice_strip.py --> ordered frames + mappi
              --> pack_animation.py with large padding --> canonical atlas + mapping manifest
 ```
 
-Do not run `inspect_asset.py` or `inspect_sequence.py` in this preprocessing workflow. It ends after packing the canonical sheet and metadata mapping; the caller may then use those outputs manually.
+Do not run `inspect_image.py` or `inspect_sequence.py` in this preprocessing workflow. It ends after packing the canonical sheet and metadata mapping; the caller may then use those outputs manually.
