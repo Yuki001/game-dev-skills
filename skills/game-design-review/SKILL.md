@@ -29,8 +29,8 @@ The modes differ in how the examination between these ends is executed. Pick the
 
 Use when the direction is chosen, formal materials exist to examine (documents, prototypes, telemetry, or playtest records), and the goal is a full-coverage review for weaknesses, risks, and contradictions.
 
-1. **Exclude, then cover.** Exclude only the references the review object clearly makes irrelevant, keeping at least eight; record each exclusion and its reason, and state the unreviewed domains in the final report.
-2. **Batch and delegate.** Group the rest into batches of two to four related domains, one batch per read-only subagent as described in "Delegating a review to subagents" below; work through the batches sequentially yourself when subagents are unavailable.
+1. **Exclude, then cover.** Exclude only the references the review object clearly makes irrelevant, keeping at least 6; record each exclusion and its reason, and state the unreviewed domains in the final report.
+2. **Batch and delegate.** Group the rest into batches of 2 to 4 related domains, one batch per read-only subagent as described in "Delegating a review to subagents" below; work through the batches sequentially yourself when subagents are unavailable.
 3. **Trace effects.** Each batch reader connects each design choice to player information, decision, action, feedback, and consequence, distinguishing symptom from cause.
 4. **Merge and reconcile.** Merge duplicates that share a root cause, normalize severity, and run a cross-domain contradiction pass, treating each contradiction as a finding of its own; do not emit one undifferentiated checklist.
 
@@ -38,7 +38,7 @@ Use when the direction is chosen, formal materials exist to examine (documents, 
 
 Use when everything to be reviewed fits in the conversation: the design or the question is short, or exists only as notes or keywords in the user's message, with no formal documents to read.
 
-1. Read two or three relevant references from the routing table yourself.
+1. Read 2 or 3 relevant references from the routing table yourself.
 2. Trace effects as in the comprehensive review and return only the findings that could change the decision.
 
 ### Exploratory review
@@ -46,12 +46,12 @@ Use when everything to be reviewed fits in the conversation: the design or the q
 Use when no direction has been chosen yet: the design is too immature for fault-finding, and the goal is to outline candidate directions plus a test that can distinguish them.
 
 1. Identify the player promise and the central uncertainty.
-2. Outline two or three coherent directions.
+2. Outline 2 or 3 coherent directions.
 3. Define a small test that can distinguish them, and stop before expanding into a full design document.
 
 ### Comparative review
 
-Use when the goal is to choose between two or more defined options, whatever their material volume.
+Use when the goal is to choose between 2 or more defined options, whatever their material volume.
 
 1. Apply the same evidence and criteria to every option; do not let one option receive a stricter review.
 2. When the comparison spans several domains, you may delegate one subagent per option, each applying the same reference set.
