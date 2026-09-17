@@ -1,0 +1,4 @@
+interface:
+  display_name: "GAT Brainstorm"
+  short_description: "Interview and create foundational game design docs"
+  default_prompt: "Use $gat-brainstorm to develop my game concept and create the foundational GAT documents."

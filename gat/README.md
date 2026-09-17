@@ -1,8 +1,10 @@
 # GAT — Game Agents Toolkit
 
-A minimal Claude Code workflow for game pre-production. Four roles, five skills,
-and a milestone-driven document pipeline that hands off to a downstream
-engineering workflow one milestone at a time.
+A minimal game pre-production workflow with four roles, five skills, and a
+milestone-driven document pipeline that hands off to a downstream engineering
+workflow one milestone at a time. The original Claude Code package lives in
+`.claude/`; a self-contained Codex-compatible copy lives in `.agents/` and can
+be copied directly into a project root for Codex use.
 
 ## Why
 

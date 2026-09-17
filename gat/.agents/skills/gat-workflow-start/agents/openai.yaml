@@ -1,0 +1,4 @@
+interface:
+  display_name: "GAT Workflow Start"
+  short_description: "Inspect GAT progress and route the next step"
+  default_prompt: "Use $gat-workflow-start to inspect this project's GAT status and recommend the next action."

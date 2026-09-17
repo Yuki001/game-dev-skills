@@ -1,0 +1,4 @@
+interface:
+  display_name: "GAT Milestone"
+  short_description: "Plan milestone slices and handoff briefs"
+  default_prompt: "Use $gat-milestone to plan this GAT project's milestone slices and create their briefs."

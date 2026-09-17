@@ -1,0 +1,4 @@
+interface:
+  display_name: "GAT Story"
+  short_description: "Interview and create coherent game narrative docs"
+  default_prompt: "Use $gat-story to develop this game's narrative and write the needed GAT story documents."

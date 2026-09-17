@@ -1,0 +1,4 @@
+interface:
+  display_name: "GAT Design"
+  short_description: "Design milestone-scoped game systems and art docs"
+  default_prompt: "Use $gat-design for a specific milestone and system, then update its GAT progress tracker."

@@ -1,0 +1,61 @@
+roles:
+  designer:
+    owns:
+      - gat/overview/game.md
+      - gat/overview/systems-index.md
+      - gat/milestone/m{N}-<name>/<system>/<system>-gdd-m{N}.md
+      - gat/milestone/m{N}-<name>/<system>/<system>-data-m{N}.md
+  writer:
+    owns:
+      - gat/narrative/*.md
+  artist:
+    owns:
+      - gat/overview/art-direction.md
+      - gat/milestone/m{N}-<name>/<system>/<system>-art-m{N}.md
+  planner:
+    owns:
+      - gat/milestone/milestone.md
+      - gat/milestone/m{N}-<name>/m{N}-brief.md
+
+workflows:
+  # The flow has two loops:
+  #   Loop A (refine globals):  $gat-brainstorm <-> $gat-story
+  #     - iterates on the SAME global files (gat/overview/* and gat/narrative/*),
+  #       refining them over multiple passes. May re-enter later when feedback
+  #       surfaces a change to overview or narrative.
+  #   Loop B (iterate milestones): $gat-design {M} -> engineering workflow
+  #     - each iteration delivers ONE new milestone (design it, hand it to
+  #       engineering, loop back for the next). Each milestone brief includes
+  #       detailed internal iterations for the downstream workflow to handle.
+  #       Multiple milestones may be in progress at different stages at the same time.
+  # $gat-milestone sits between the loops: consumes globals from Loop A and
+  # produces the milestone plan that Loop B iterates over.
+  steps:
+    - skill: $gat-brainstorm
+      args: "[hint] or discuss"
+      output:
+        - gat/overview/game.md
+        - gat/overview/systems-index.md
+        - gat/overview/art-direction.md
+    - skill: $gat-story
+      args: "[hint] or discuss"
+      output:
+        - gat/narrative/story.md
+        - gat/narrative/world.md
+        - gat/narrative/characters.md
+        - gat/narrative/quests.md
+        - gat/narrative/dialogue.md
+    - skill: $gat-milestone
+      args: "[optional planning focus]"
+      output:
+        - gat/milestone/milestone.md
+        - gat/milestone/m{N}-<name>/  (directory skeleton)
+        - gat/milestone/m{N}-<name>/m{N}-brief.md  (skeleton, all systems Pending)
+    - skill: $gat-design
+      args: "{milestone} {system | hint}  (milestone mandatory)"
+      output:
+        - gat/milestone/m{N}-<name>/<system>/<system>-gdd-m{N}.md
+        - gat/milestone/m{N}-<name>/<system>/<system>-data-m{N}.md
+        - gat/milestone/m{N}-<name>/<system>/<system>-art-m{N}.md
+        - gat/milestone/m{N}-<name>/m{N}-brief.md  (progress row updated)
+
