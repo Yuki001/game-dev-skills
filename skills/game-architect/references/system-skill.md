@@ -69,6 +69,8 @@ Handles the interactions between the skill system and the rest of the game.
     -   `OnTagAdded/Removed(Tag)`
 -   **Timing Triggers (Hooks)**: A system that fires events at specific, predefined moments in gameplay (e.g., `OnDamageDealt`, `OnTargetKilled`, `OnSpellCast`). Skills can subscribe to these hooks to implement reactive logic. 
     -   **Data-driven Hooks (Extension)**, Allowing for data-driven configuration of `Hook Type` and `Attribute Modifier` combinations instead of hardcoding them in the skill logic.
+    -   **Passive Object Triggers (Reactive Skill Logic)**: A primary use of gameplay hooks, encapsulating passive abilities as objects or callbacks with their own parameters and lifecycle, using parameter filters to execute effects reactively instead of polling every frame.
+        -   **Parameter Filters**: Before execution, event data is matched against filters such as event type, skill ID, target, or custom conditions.
 -   **Logic Triggers (Cues / Notifies)**: Events fired by the skill logic itself to signal key moments to other systems, primarily for presentation.
     -   **Cue**: A non-critical event for visual or audio effects (VFX, SFX).
     -   **Notify**: A critical event for gameplay logic (e.g., animation notifies that trigger a damage calculation).
@@ -125,6 +127,9 @@ A data-driven workflow is achieved by using templates to define various assets. 
 -   **Parallel State Template** (Buffs/Debuffs)
     -   **For `Tags + Effects`**: This is a Static Data Template defining the `Effect` to be applied.
     -   **For `Buff Object`**: This is configured similarly to a `Skill Template`, as a buff can have its own complex logic.
+-   **Reactive Skill Template** (Passive Trigger)
+    -   **Type**: Static Data Template or Data-Driven Logic Template.
+    -   **Content**: Defines the Hook Type, Parameter Filters, and Action or Effect to execute; may also specify ownership and lifecycle.
 -   **External Skill Definition**
     -   **Type**: Static Data Template.
     -   **Content**: Holds metadata about a skill for UI and other external systems, such as its name, description, icon, cooldown duration, and target selection parameters.
