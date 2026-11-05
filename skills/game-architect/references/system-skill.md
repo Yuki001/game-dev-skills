@@ -29,6 +29,7 @@ The foundation of the skill system, representing the state of all relevant entit
 -   **Skill Parameters**: Data required for a skill's execution. The storage strategy depends on the required scope and persistence:
     -   **Static Config**: Defined in data tables or assets; constant for all instances of a skill.
     -   **Skill Spec**: Carried by the skill instance itself, allowing for per-instance variations (e.g., a skill granted by an item).
+		-   **Skill Modifier (Extension)**: A data-driven patch that primarily modifies a Skill Spec, targeting the whole skill instance or a specific effect and defining how its parameters change.
     -   **Skill Blackboard**: Similar to an Attribute Set but specialized for skill-specific parameters and temporary variables. It attaches to an entity (or data) and facilitates parameter modification across different skills.
     -   **Attribute Set**: Storing skill parameters directly in the character's attributes, useful for values that need to be globally accessible or modified by other systems.
 
