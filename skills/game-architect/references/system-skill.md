@@ -59,6 +59,7 @@ Reusable, granular operations that are sequenced by the Skill Framework.
 ### Parallel States (Buffs & Debuffs)
 States that exist concurrently with the main skill logic.
 -   **Buff Object**: A comprehensive object, similar in structure to a skill, that manages its own lifecycle, periodic effects, and logic.
+    -   **Reactive Logic Control**: During its lifecycle, a Buff Object can attach and detach Hook subscriptions and Passive Object Triggers, controlling when reactive skill logic is active.
 -   **Tag + Effects**: A lightweight approach where a state is represented by one or more Tags, and its logic is implemented through the ongoing application of Effects.
 
 ## 4. Event & Communication Layer
